@@ -34,6 +34,7 @@
 | `obs` | 本仓自绘 | 指标 / 日志 / 链路 | 本仓 Apache-2.0 |
 | `cat` `dog` `animal` | 本仓自绘 | 动物 | 本仓 Apache-2.0 |
 | `chem` `circuit` `music` `food` | 本仓自绘 | 化学 / 电路 / 音乐 / 食物 | 本仓 Apache-2.0 |
+| `dev` | 本仓自绘 | 开发项目流程 —— 通用阶段 / 软件 / 硬件 | 本仓 Apache-2.0 |
 
 例:`aws:ec2`、`infra:disk-array`、`db:lock`、`org:openai`、`brand:kubernetes`、`bootstrap:alipay`。
 

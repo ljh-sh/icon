@@ -33,6 +33,7 @@ const CATS = {
   dog: { title: '狗', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '狗' },
   animal: { title: '动物', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '动物' },
   chem: { title: '化学', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '化学:实验器材 / 试剂 / 结构' },
+  dev: { title: '开发流程', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '开发项目流程 —— 通用阶段 / 软件 / 硬件' },
   circuit: { title: '电路', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '电子与电路' },
   music: { title: '音乐', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '音乐与音频' },
   food: { title: '食物', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '食物与饮品' },

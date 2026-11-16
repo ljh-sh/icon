@@ -265,3 +265,54 @@ brand:chatgpt	ChatGPT
 brand:grok	Grok(xAI)
 org/v0:chatgpt	ChatGPT(自绘抽象符号,非官方标识)
 org/v0:grok	Grok / xAI(自绘抽象符号,非官方标识)
+
+
+dev/v0:requirement	需求 / Requirement
+dev/v0:feasibility	可行性研究 / Feasibility Study
+dev/v0:planning	项目计划 / Planning
+dev/v0:design	设计 / Design
+dev/v0:prototype	原型 / Prototype
+dev/v0:development	开发实现 / Development
+dev/v0:review	评审 / Review
+dev/v0:test	测试 / Testing
+dev/v0:defect	缺陷 / Defect
+dev/v0:release	发布 / Release
+dev/v0:acceptance	验收 / Acceptance
+dev/v0:maintenance	运维维护 / Maintenance
+dev/v0:iteration	迭代 / Iteration
+dev/v0:milestone	里程碑 / Milestone
+dev/v0:roadmap	路线图 / Roadmap
+dev/v0:gantt	甘特图 / Gantt Chart
+dev/v0:risk	风险 / Risk
+dev/v0:change	变更 / Change Request
+dev/v0:retrospective	复盘 / Retrospective
+dev/v0:prd	需求文档 / PRD
+dev/v0:architecture	架构设计 / Architecture
+dev/v0:api-design	接口设计 / API Design
+dev/v0:code	编码 / Coding
+dev/v0:code-review	代码评审 / Code Review
+dev/v0:merge	合并请求 / Merge Request
+dev/v0:ci	持续集成 / Continuous Integration
+dev/v0:unit-test	单元测试 / Unit Test
+dev/v0:integration-test	集成测试 / Integration Test
+dev/v0:performance-test	性能测试 / Performance Test
+dev/v0:ci-cd	持续交付 / Continuous Delivery
+dev/v0:rollback	回滚 / Rollback
+dev/v0:canary	灰度发布 / Canary Release
+dev/v0:logging	日志监控 / Logging
+dev/v0:schematic	原理图 / Schematic
+dev/v0:pcb	PCB 布局 / PCB Layout
+dev/v0:routing	布线 / Routing
+dev/v0:fabrication	打样 / Fabrication
+dev/v0:smt	SMT 贴片 / SMT
+dev/v0:reflow	回流焊 / Reflow Soldering
+dev/v0:mechanical	结构设计 / Mechanical Design
+dev/v0:mold	模具 / Mold
+dev/v0:injection	注塑 / Injection Molding
+dev/v0:assembly	装配 / Assembly
+dev/v0:eol-test	出厂测试 / End-of-Line Test
+dev/v0:burn-in	老化测试 / Burn-in Test
+dev/v0:emc	EMC 测试 / EMC Test
+dev/v0:certification	认证 / Certification
+dev/v0:bom	物料清单 / BOM
+dev/v0:supply-chain	供应链 / Supply Chain
