@@ -7,7 +7,7 @@
 //   /manifest.json   → 图标清单(元数据,给页面用)
 //   /api/icons.json  → { id: data URI } 给 draw 那侧内嵌用
 //   /i/<cat>/<file>  → 图标原文件
-import { ICONS, CATS, BLOBS } from './gen.js';
+import { ICONS, CATS, BLOBS, BUILD } from './gen.js';
 import { PAGE } from './page.js';
 
 const MOUNT = '/icon';
@@ -57,7 +57,7 @@ export default {
 
     if (path === '/' || path === '/index.html') return html(PAGE, base);
 
-    if (path === '/manifest.json') return json({ cats: CATS, icons: ICONS });
+    if (path === '/manifest.json') return json({ cats: CATS, icons: ICONS, build: BUILD }, 60);
 
     if (path === '/api/icons.json') {
       const map: Record<string, string> = {};

@@ -84,7 +84,7 @@ const ROWS = [
   ['infra', 'envelope', '邮件与消息 / Envelope'],
   ['infra', 'firewall', '防火墙 / Firewall'],
   ['infra', 'gpu', '图形处理器 / GPU'],
-  ['infra', 'gui-app', '桌面应用 / GUI Application'],
+  ['infra', 'gui', '桌面应用 / GUI Application'],
   ['infra', 'laptop', '笔记本电脑 / Laptop'],
   ['infra', 'load-balancer', '负载均衡 / Load Balancer'],
   ['infra', 'monitor', '显示器 / Monitor'],

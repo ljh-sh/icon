@@ -1,6 +1,7 @@
 // 校验 catalog.tsv 与 icons/ 是否一一对应,生成 src/gen.ts(图标字节 + 元数据)。
 // 用法:node scripts/build.mjs
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -119,6 +120,12 @@ const cats = Object.entries(CATS).map(([cat, meta]) => ({
   count: metas.filter((m) => m.cat === cat).length,
 }));
 
+// 构建号:图标字节一变就变 —— 页面挂在图标 URL 后面,重新部署不会被边缘缓存顶住旧图
+const BUILD = createHash('sha1')
+  .update(Object.entries(blobs).map(([k, v]) => k + ':' + v).join('\n'))
+  .digest('hex')
+  .slice(0, 10);
+
 const body = `// 生成物,别手改 —— 由 scripts/build.mjs 从 catalog.tsv + icons/ 生成。
 // 图标字节以 base64 内嵌,Worker 直接吐文件,不依赖外链。
 
@@ -151,6 +158,9 @@ export const CATS: CatMeta[] = ${JSON.stringify(cats, null, 2)};
 
 /** 相对路径 → base64 内容 */
 export const BLOBS: Record<string, string> = ${JSON.stringify(blobs, null, 2)};
+
+/** 构建号:图标字节一变就变 —— 页面挂在图标 URL 后面,重新部署不会被边缘缓存顶住旧图 */
+export const BUILD = '${BUILD}';
 `;
 writeFileSync(OUT, body);
 console.log(`src/gen.ts: ${metas.length} icons, ${cats.length} categories, ${(readFileSync(OUT).length / 1024).toFixed(0)} KB`);
@@ -159,7 +169,7 @@ console.log(`src/gen.ts: ${metas.length} icons, ${cats.length} categories, ${(re
 const DIST = join(ROOT, 'dist');
 rmSync(DIST, { recursive: true, force: true });
 mkdirSync(join(DIST, 'i'), { recursive: true });
-writeFileSync(join(DIST, 'manifest.json'), JSON.stringify({ cats, icons: metas }, null, 2));
+writeFileSync(join(DIST, 'manifest.json'), JSON.stringify({ cats, icons: metas, build: BUILD }, null, 2));
 for (const m of metas) {
   const dest = join(DIST, 'i', m.cat, m.concept + '.' + m.file.split('.').pop());
   mkdirSync(join(DIST, 'i', m.cat), { recursive: true });

@@ -16,7 +16,9 @@ let DATA = { cats: [], icons: [] };
 let q = '';
 let hitId = null;
 
-const iconUrl = (m) => `${BASE}${m.path}`;
+// 图标 URL 带上构建号:重新部署后 URL 变了,边缘缓存不会顶着旧图
+let V = '';
+const iconUrl = (m) => `${BASE}${m.path}${V}`;
 const byId = new Map();
 
 function match(m) {
@@ -244,6 +246,7 @@ window.addEventListener('hashchange', locate);
   try {
     const res = await fetch(`${BASE}manifest.json`);
     DATA = await res.json();
+    V = DATA.build ? `?v=${DATA.build}` : '';
     for (const m of DATA.icons) byId.set(m.id, m);
     renderCats();
     syncFromUrl();
