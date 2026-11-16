@@ -113,6 +113,17 @@ db/v0:index	索引 / Index
 db/v0:migration	结构迁移 / Migration
 db/v0:transaction	事务 / Transaction
 db/v0:failover	故障切换 / Failover
+db/v1:check	一致性校验 / Consistency Check
+db/v1:lock	锁 / Lock
+db/v1:redis	内存键值库 / In-Memory KV
+db/v1:cluster	数据库集群 / Database Cluster
+db/v1:backup	备份 / Backup
+db/v1:replication	主从复制 / Replication
+db/v1:sharding	分片 / Sharding
+db/v1:index	索引 / Index
+db/v1:migration	结构迁移 / Migration
+db/v1:transaction	事务 / Transaction
+db/v1:failover	故障切换 / Failover
 ai/v0:llm	大模型 / Large Language Model
 ai/v0:agent	智能体 / Agent
 ai/v0:rag	检索增强生成 / RAG

@@ -1,0 +1,20 @@
+# 图标配方 —— 由基本符号组装,别手改 icons/ 下由它生成的图标。
+#
+# 格式:<cat>/<version>	<concept>	<part>	<part>…
+#   part 是 symbols/ 下的相对路径(不含 .svg),按顺序叠放。
+#   主体:symbols/db.svg(数据库圆柱)、symbols/db-b.svg(第二个库,给"两个 db"的概念用)
+#   角标底:symbols/badge.svg(右下角统一底)
+#   修饰符:symbols/mod/*.svg —— 全库共用,一个符号只画一次
+#
+# 键名天然就是会意结构:db:lock = 数据库 + 锁,db:backup = 数据库 + 时钟。
+db/v1	check	db	badge	mod/check
+db/v1	lock	db	badge	mod/lock
+db/v1	redis	db	badge	mod/bolt
+db/v1	cluster	db	badge	mod/branch
+db/v1	backup	db	badge	mod/clock
+db/v1	replication	db	db-b	badge	mod/sync
+db/v1	sharding	db	badge	mod/grid
+db/v1	index	db	badge	mod/index
+db/v1	migration	db	badge	mod/arrow
+db/v1	transaction	db	badge	mod/cycle
+db/v1	failover	db	db-b	badge	mod/switch
