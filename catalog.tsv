@@ -173,6 +173,63 @@ chem/v0:reaction	化学反应 / Reaction
 chem/v0:catalyst	催化剂 / Catalyst
 chem/v0:solvent	溶剂 / Solvent
 chem/v0:balance	天平 / Balance
+chem/v0:beaker	烧杯 / Beaker
+chem/v0:test-tube	试管 / Test Tube
+chem/v0:round-flask	圆底烧瓶 / Round-Bottom Flask
+chem/v0:evaporating-dish	蒸发皿 / Evaporating Dish
+chem/v0:crystallizing-dish	结晶皿 / Crystallizing Dish
+chem/v0:petri-dish	培养皿 / Petri Dish
+chem/v0:crucible	坩埚 / Crucible
+chem/v0:graduated-cylinder	量筒 / Graduated Cylinder
+chem/v0:measuring-cup	量杯 / Measuring Cup
+chem/v0:reagent-bottle	试剂瓶 / Reagent Bottle
+chem/v0:acid-bottle	酸容器 / Acid Bottle
+chem/v0:wash-bottle	洗瓶 / Wash Bottle
+chem/v0:pressure-bottle	气压瓶 / Pressure Bottle
+chem/v0:separatory-funnel	分液漏斗 / Separatory Funnel
+chem/v0:burette	滴定管 / Burette
+chem/v0:pipette	移液管 / Pipette
+chem/v0:micropipette	移液枪 / Micropipette
+chem/v0:dropper	滴管 / Dropper
+chem/v0:funnel	漏斗 / Funnel
+chem/v0:condenser	冷凝管 / Condenser
+chem/v0:glass-rod	玻璃棒 / Glass Rod
+chem/v0:thermometer	温度计 / Thermometer
+chem/v0:ph-paper	酸碱试纸 / pH Paper
+chem/v0:test-tube-brush	试管刷 / Test Tube Brush
+chem/v0:test-tube-rack	试管架 / Test Tube Rack
+chem/v0:bunsen-burner	本生灯 / Bunsen Burner
+chem/v0:spirit-lamp	酒精灯 / Spirit Lamp
+chem/v0:tripod	三脚架 / Tripod
+chem/v0:heating-kit	加热套装 / Heating Kit
+chem/v0:magnetic-stirrer	磁力搅拌器 / Magnetic Stirrer
+chem/v0:centrifuge	离心机 / Centrifuge
+chem/v0:separator	分离机 / Separator
+chem/v0:desiccator	干燥器 / Desiccator
+chem/v0:fume-hood	通风橱 / Fume Hood
+chem/v0:lab-oven	实验烘箱 / Lab Oven
+chem/v0:electronic-scale	电子秤 / Electronic Scale
+chem/v0:analytical-balance	分析天平 / Analytical Balance
+chem/v0:lab-jack	千斤顶 / Lab Jack
+chem/v0:mortar-pestle	研钵与杵 / Mortar and Pestle
+chem/v0:spatula	铲 / Spatula
+chem/v0:filtration	过滤 / Filtration
+chem/v0:evaporator	蒸发仪 / Evaporator
+chem/v0:round-dish	圆皿 / Round Dish
+chem/v0:weighing-paper	称量纸 / Weighing Paper
+chem/v0:weighing-boat	称量盘 / Weighing Boat
+chem/v0:lab-coat	实验服 / Lab Coat
+chem/v0:gloves	实验手套 / Gloves
+chem/v0:goggles	护目镜 / Goggles
+chem/v0:respirator	防毒面具 / Respirator
+chem/v0:flammable	易燃 / Flammable
+chem/v0:toxic	有毒试剂 / Toxic Reagent
+chem/v0:radioactive	放射性 / Radioactive
+chem/v0:atomic-structure	原子结构 / Atomic Structure
+chem/v0:molecular-structure	分子结构 / Molecular Structure
+chem/v0:crystal-structure	晶体结构 / Crystal Structure
+chem/v0:equation	化学反应式 / Chemical Equation
+chem/v0:molecular-model	分子模型 / Molecular Model
 circuit/v0:chip	芯片 / Chip
 circuit/v0:resistor	电阻 / Resistor
 circuit/v0:capacitor	电容 / Capacitor
