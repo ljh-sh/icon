@@ -101,11 +101,11 @@ const ROWS = [
 
 const header = [
   '# x-cmd/icon 图标索引 —— 改这里,别改生成物。',
-  '# 格式:<id>\\t<desc>   id = x-<cat>:<concept>',
+  '# 格式:<id>\\t<desc>   id = <cat>:<concept>',
   '# cat 的含义:aws/azure/gcp = 云厂商官方标识(来自 mingrammer/diagrams,Apache-2.0);',
   '#                infra = 本仓自绘的通用概念;org = 本仓自绘的公司抽象符号(不含任何商标图形)。',
 ].join('\n');
 
-const body = ROWS.map(([cat, concept, desc]) => `x-${cat}:${concept}\t${desc}`).join('\n');
+const body = ROWS.map(([cat, concept, desc]) => `${cat}:${concept}\t${desc}`).join('\n');
 writeFileSync('catalog.tsv', `${header}\n${body}\n`);
 console.log(`catalog.tsv: ${ROWS.length} rows`);

@@ -52,7 +52,7 @@ for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => 
       process.exit(1);
     }
     const concept = f.slice(0, -(ext.length + 1));
-    const id = `x-${catName}:${concept}`;
+    const id = `${catName}:${concept}`;
     if (found.has(id)) {
       console.error(`id 重复: ${id}`);
       process.exit(1);
@@ -91,7 +91,7 @@ for (const [id, file] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     console.error(`${file}: 不是 PNG`);
     process.exit(1);
   }
-  const cat = id.slice(2, id.indexOf(':'));
+  const cat = id.slice(0, id.indexOf(':'));
   const concept = id.slice(id.indexOf(':') + 1);
   const rel = file.replace(/^icons\//, '');
   blobs[file] = buf.toString('base64');

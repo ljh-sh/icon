@@ -14,20 +14,23 @@
 ## 键名规范
 
 ```
-x-<cat>:<concept>
+<cat>:<concept>
 ```
 
-`cat` 是分类,`concept` 是分类内的概念名。当前有五个分类:
+`cat` 是分类,`concept` 是分类内的概念名。分类分两类:**外来的**和**我们自己的**。
 
-| cat | 含义 | 数量 | 出处 |
+| cat | 哪来的 | 含义 | 数量 |
 | --- | --- | --- | --- |
-| `aws` | AWS 服务 | 49 | mingrammer/diagrams |
-| `azure` | Azure 服务 | 9 | mingrammer/diagrams |
-| `gcp` | GCP 服务 | 11 | mingrammer/diagrams |
-| `infra` | 通用基础设施概念 | 23 | 本仓自绘 |
-| `org` | 公司与机构 | 2 | 本仓自绘(抽象符号) |
+| `aws` | 外部 | AWS 服务 | 49 |
+| `azure` | 外部 | Azure 服务 | 9 |
+| `gcp` | 外部 | GCP 服务 | 11 |
+| `infra` | 自有 | 通用基础设施概念 | 23 |
+| `org` | 自有 | 公司与机构 | 2 |
 
-例:`x-aws:ec2`、`x-infra:disk-array`、`x-org:openai`。
+外部那三个分类来自 [mingrammer/diagrams](https://github.com/mingrammer/diagrams)(Apache-2.0),
+是云厂商的官方标识;自有那两个分类是本仓画的,不含任何厂商归属。
+
+例:`aws:ec2`、`infra:disk-array`、`org:openai`。
 
 > `org:` 那一族是**自绘的抽象符号**,不含任何公司的商标图形 —— 公开分发不能带别人的 mark。
 > 想要真正的 logo,得另找有授权的来源。
@@ -50,8 +53,8 @@ src/page.ts                    生成物:CSS/JS 内联后的页面
 每行一条,制表符分隔:`<id>\t<desc>`。`desc` 是给人看的说明(中英各一半)。
 
 ```
-x-infra:server	服务器 / Server
-x-infra:router	路由器 / Router
+infra:server	服务器 / Server
+infra:router	路由器 / Router
 ```
 
 `catalog.tsv` 是唯一事实源。`scripts/build.mjs` 会校验它跟 `icons/` 里的文件一一对应 ——
@@ -94,7 +97,7 @@ Worker 提供的接口:
 | `/icon` | 查询页(深链 `/icon/c/<cat>`、`/icon/c/<cat>#<id>` 也走这里) |
 | `/icon/manifest.json` | 图标清单(元数据) |
 | `/icon/i/<cat>/<file>` | 图标原文件 |
-| `/icon/api/icons.json` | `{ "x-infra:server": "data:image/svg+xml;base64,…" }` |
+| `/icon/api/icons.json` | `{ "infra:server": "data:image/svg+xml;base64,…" }` |
 
 ## 接入 draw
 
@@ -105,8 +108,10 @@ Worker 提供的接口:
 export const ICON_FIELD_RE = /^(?:aws|azure|gcp|org):[a-z0-9][a-z0-9-]*$/;
 ```
 
-要用本库的键名,把它改成 `x-(aws|azure|gcp|infra|org)` 之类即可;图标字节可以从
-`/icon/api/icons.json` 拿(内嵌成 data URI,SVG 和 PNG 输出都带着它)。
+本库的键名跟它是对齐的 —— `aws:`、`azure:`、`gcp:`、`org:` 四个前缀 draw 都已经认,
+只要把 `infra` 加进去(`/^(?:aws|azure|gcp|infra|org):[a-z0-9][a-z0-9-]*$/`)就能用上全部五个分类。
+
+图标字节可以从 `/icon/api/icons.json` 拿(内嵌成 data URI,SVG 和 PNG 输出都带着它)。
 
 ## 许可与出处
 

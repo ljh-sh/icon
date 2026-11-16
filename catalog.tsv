@@ -1,98 +1,98 @@
 # x-cmd/icon 图标索引 —— 改这里,别改生成物。
-# 格式:<id>\t<desc>   id = x-<cat>:<concept>
+# 格式:<id>\t<desc>   id = <cat>:<concept>
 # cat 的含义:aws/azure/gcp = 云厂商官方标识(来自 mingrammer/diagrams,Apache-2.0);
 #                infra = 本仓自绘的通用概念;org = 本仓自绘的公司抽象符号(不含任何商标图形)。
-x-aws:acm	证书管理 / Certificate Manager
-x-aws:alb	应用负载均衡 / Application Load Balancer
-x-aws:apigw	API 网关 / API Gateway
-x-aws:athena	交互式查询 / Athena
-x-aws:aurora	关系型数据库 / Aurora
-x-aws:batch	批处理作业 / Batch
-x-aws:cloudformation	基础设施即代码 / CloudFormation
-x-aws:cloudfront	内容分发 CDN / CloudFront
-x-aws:cloudtrail	审计日志 / CloudTrail
-x-aws:cloudwatch	监控与告警 / CloudWatch
-x-aws:codebuild	持续构建 / CodeBuild
-x-aws:codedeploy	持续部署 / CodeDeploy
-x-aws:codepipeline	交付流水线 / CodePipeline
-x-aws:cognito	用户身份 / Cognito
-x-aws:docdb	文档数据库 / DocumentDB
-x-aws:dynamodb	NoSQL 数据库 / DynamoDB
-x-aws:ebs	块存储 / Elastic Block Store
-x-aws:ec2	虚拟机 / EC2 实例
-x-aws:ecr	容器镜像仓库 / ECR
-x-aws:ecs	容器编排 / ECS
-x-aws:efs	文件存储 / EFS
-x-aws:eks	托管 Kubernetes / EKS
-x-aws:es	托管检索服务 / Elasticsearch Service
-x-aws:eventbridge	事件总线 / EventBridge
-x-aws:fargate	无服务器容器 / Fargate
-x-aws:glue	ETL 数据处理 / Glue
-x-aws:guardduty	威胁检测 / GuardDuty
-x-aws:iam	身份与访问管理 / IAM
-x-aws:igw	互联网网关 / Internet Gateway
-x-aws:kinesis	流式数据 / Kinesis
-x-aws:kms	密钥管理 / KMS
-x-aws:lambda	无服务器函数 / Lambda
-x-aws:nat	NAT 网关 / NAT Gateway
-x-aws:nlb	网络负载均衡 / Network Load Balancer
-x-aws:opensearch	托管检索 / OpenSearch
-x-aws:quicksight	BI 报表 / QuickSight
-x-aws:rds	关系型数据库 / RDS
-x-aws:redis	缓存 / ElastiCache for Redis
-x-aws:redshift	数据仓库 / Redshift
-x-aws:route53	DNS 解析 / Route 53
-x-aws:s3	对象存储 / S3
-x-aws:secrets	密钥托管 / Secrets Manager
-x-aws:sns	通知服务 / SNS
-x-aws:sqs	消息队列 / SQS
-x-aws:sso	单点登录 / SSO
-x-aws:stepfn	工作流编排 / Step Functions
-x-aws:sts	临时凭证 / STS
-x-aws:vpc	私有网络 / VPC
-x-aws:waf	Web 应用防火墙 / WAF
-x-azure:aci	容器实例 / Container Instances
-x-azure:ad	身份目录 / Entra ID
-x-azure:app	应用服务 / App Service
-x-azure:blob	对象存储 / Blob Storage
-x-azure:container	容器应用 / Container Apps
-x-azure:cosmos	数据库 / Cosmos DB
-x-azure:redis	缓存 / Cache for Redis
-x-azure:sql	关系型数据库 / SQL Database
-x-azure:vm	虚拟机 / Virtual Machine
-x-gcp:bigtable	NoSQL 数据库 / Bigtable
-x-gcp:disk	块存储 / Persistent Disk
-x-gcp:firestore	文档数据库 / Firestore
-x-gcp:func	无服务器函数 / Cloud Functions
-x-gcp:gce	虚拟机 / Compute Engine
-x-gcp:gcs	对象存储 / Cloud Storage
-x-gcp:gke	托管 Kubernetes / GKE
-x-gcp:redis	缓存 / Memorystore
-x-gcp:run	无服务器容器 / Cloud Run
-x-gcp:spanner	关系型数据库 / Spanner
-x-gcp:sql	关系型数据库 / Cloud SQL
-x-infra:api	接口 / API
-x-infra:browser	浏览器 / Browser
-x-infra:cloud	云 / Cloud
-x-infra:cluster	集群 / Cluster
-x-infra:container	容器 / Container
-x-infra:cpu	处理器 / CPU
-x-infra:database	数据库 / Database
-x-infra:desktop	台式机 / Desktop
-x-infra:disk-array	磁盘阵列 / Disk Array
-x-infra:envelope	邮件与消息 / Envelope
-x-infra:firewall	防火墙 / Firewall
-x-infra:gpu	图形处理器 / GPU
-x-infra:gui-app	桌面应用 / GUI Application
-x-infra:laptop	笔记本电脑 / Laptop
-x-infra:load-balancer	负载均衡 / Load Balancer
-x-infra:monitor	显示器 / Monitor
-x-infra:phone	手机 / Phone
-x-infra:router	路由器 / Router
-x-infra:server	服务器 / Server
-x-infra:storage	本地存储 / Storage
-x-infra:switch	交换机 / Switch
-x-infra:terminal	终端 / Terminal
-x-infra:user	用户 / User
-x-org:anthropic	Anthropic(自绘抽象符号,非官方标识)
-x-org:openai	OpenAI(自绘抽象符号,非官方标识)
+aws:acm	证书管理 / Certificate Manager
+aws:alb	应用负载均衡 / Application Load Balancer
+aws:apigw	API 网关 / API Gateway
+aws:athena	交互式查询 / Athena
+aws:aurora	关系型数据库 / Aurora
+aws:batch	批处理作业 / Batch
+aws:cloudformation	基础设施即代码 / CloudFormation
+aws:cloudfront	内容分发 CDN / CloudFront
+aws:cloudtrail	审计日志 / CloudTrail
+aws:cloudwatch	监控与告警 / CloudWatch
+aws:codebuild	持续构建 / CodeBuild
+aws:codedeploy	持续部署 / CodeDeploy
+aws:codepipeline	交付流水线 / CodePipeline
+aws:cognito	用户身份 / Cognito
+aws:docdb	文档数据库 / DocumentDB
+aws:dynamodb	NoSQL 数据库 / DynamoDB
+aws:ebs	块存储 / Elastic Block Store
+aws:ec2	虚拟机 / EC2 实例
+aws:ecr	容器镜像仓库 / ECR
+aws:ecs	容器编排 / ECS
+aws:efs	文件存储 / EFS
+aws:eks	托管 Kubernetes / EKS
+aws:es	托管检索服务 / Elasticsearch Service
+aws:eventbridge	事件总线 / EventBridge
+aws:fargate	无服务器容器 / Fargate
+aws:glue	ETL 数据处理 / Glue
+aws:guardduty	威胁检测 / GuardDuty
+aws:iam	身份与访问管理 / IAM
+aws:igw	互联网网关 / Internet Gateway
+aws:kinesis	流式数据 / Kinesis
+aws:kms	密钥管理 / KMS
+aws:lambda	无服务器函数 / Lambda
+aws:nat	NAT 网关 / NAT Gateway
+aws:nlb	网络负载均衡 / Network Load Balancer
+aws:opensearch	托管检索 / OpenSearch
+aws:quicksight	BI 报表 / QuickSight
+aws:rds	关系型数据库 / RDS
+aws:redis	缓存 / ElastiCache for Redis
+aws:redshift	数据仓库 / Redshift
+aws:route53	DNS 解析 / Route 53
+aws:s3	对象存储 / S3
+aws:secrets	密钥托管 / Secrets Manager
+aws:sns	通知服务 / SNS
+aws:sqs	消息队列 / SQS
+aws:sso	单点登录 / SSO
+aws:stepfn	工作流编排 / Step Functions
+aws:sts	临时凭证 / STS
+aws:vpc	私有网络 / VPC
+aws:waf	Web 应用防火墙 / WAF
+azure:aci	容器实例 / Container Instances
+azure:ad	身份目录 / Entra ID
+azure:app	应用服务 / App Service
+azure:blob	对象存储 / Blob Storage
+azure:container	容器应用 / Container Apps
+azure:cosmos	数据库 / Cosmos DB
+azure:redis	缓存 / Cache for Redis
+azure:sql	关系型数据库 / SQL Database
+azure:vm	虚拟机 / Virtual Machine
+gcp:bigtable	NoSQL 数据库 / Bigtable
+gcp:disk	块存储 / Persistent Disk
+gcp:firestore	文档数据库 / Firestore
+gcp:func	无服务器函数 / Cloud Functions
+gcp:gce	虚拟机 / Compute Engine
+gcp:gcs	对象存储 / Cloud Storage
+gcp:gke	托管 Kubernetes / GKE
+gcp:redis	缓存 / Memorystore
+gcp:run	无服务器容器 / Cloud Run
+gcp:spanner	关系型数据库 / Spanner
+gcp:sql	关系型数据库 / Cloud SQL
+infra:api	接口 / API
+infra:browser	浏览器 / Browser
+infra:cloud	云 / Cloud
+infra:cluster	集群 / Cluster
+infra:container	容器 / Container
+infra:cpu	处理器 / CPU
+infra:database	数据库 / Database
+infra:desktop	台式机 / Desktop
+infra:disk-array	磁盘阵列 / Disk Array
+infra:envelope	邮件与消息 / Envelope
+infra:firewall	防火墙 / Firewall
+infra:gpu	图形处理器 / GPU
+infra:gui-app	桌面应用 / GUI Application
+infra:laptop	笔记本电脑 / Laptop
+infra:load-balancer	负载均衡 / Load Balancer
+infra:monitor	显示器 / Monitor
+infra:phone	手机 / Phone
+infra:router	路由器 / Router
+infra:server	服务器 / Server
+infra:storage	本地存储 / Storage
+infra:switch	交换机 / Switch
+infra:terminal	终端 / Terminal
+infra:user	用户 / User
+org:anthropic	Anthropic(自绘抽象符号,非官方标识)
+org:openai	OpenAI(自绘抽象符号,非官方标识)
