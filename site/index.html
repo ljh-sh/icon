@@ -25,14 +25,14 @@
 </header>
 
 <main id="main">
-  <!-- 首页:分类卡片 + 全部图标 -->
+  <!-- 首页:分类卡片(每类先放 20 个左右)+ 搜索结果 -->
   <section id="home">
     <h1 class="page-title">架构图图标库</h1>
     <p class="page-sub">给 <code>x-cmd/draw</code> 画架构图用的图标。键名格式 <code>&lt;cat&gt;:&lt;concept&gt;</code>,点分类进去看整类,点图标定位到它。</p>
     <h2 class="sec-title">分类</h2>
     <div id="cats" class="cats"></div>
-    <h2 class="sec-title">全部图标 <span id="all-count" class="count"></span></h2>
-    <div id="all" class="grid"></div>
+    <h2 class="sec-title" id="all-title" hidden>搜索结果 <span id="all-count" class="count"></span></h2>
+    <div id="all" class="grid" hidden></div>
   </section>
 
   <!-- 分类页 -->

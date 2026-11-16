@@ -16,6 +16,7 @@ let DATA = { cats: [], icons: [] };
 let q = '';
 let ver = ''; // 版本化分类里当前看的版本;空 = 推荐版本
 let hitId = null;
+const PREVIEW = 20; // 首页每个分类先放这么多个图标
 
 // 图标 URL 带上构建号:重新部署后 URL 变了,边缘缓存不会顶着旧图
 let V = '';
@@ -61,7 +62,7 @@ function renderCats() {
     a.href = `${BASE}c/${cat.cat}`;
     a.append(el('h3', null, cat.title), el('div', 'n', `${cat.count} 个图标`));
     const pv = el('div', 'preview');
-    for (const m of DATA.icons.filter((x) => x.cat === cat.cat).slice(0, 8)) {
+    for (const m of previewIcons(cat.cat)) {
       const img = el('img');
       img.src = iconUrl(m);
       img.alt = m.id;
@@ -75,6 +76,16 @@ function renderCats() {
     });
     host.append(a);
   }
+}
+
+// 首页每个分类先放 20 个左右 —— 全库两千多个 svg 一次铺出来太重。
+// 均匀抽样,免得全是字母序开头的那几个;版本化分类取推荐版本。
+function previewIcons(cat) {
+  const list = DATA.icons.filter((x) => x.cat === cat && (!x.version || x.alias));
+  const n = Math.min(PREVIEW, list.length);
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(list[Math.floor((i * list.length) / n)]);
+  return out;
 }
 
 function catRoute() {
@@ -110,12 +121,19 @@ function render() {
     catp.hidden = true;
     home.hidden = false;
     $('#cat-vers').hidden = true;
-    // 首页默认只展示推荐版本;搜索时才把各版本都放出来
-    const list = q ? DATA.icons : DATA.icons.filter((m) => !m.version || m.alias);
-    const n = grid($('#all'), list);
-    $('#all-count').textContent = `${n} / ${DATA.icons.length}`;
-    $('#empty').hidden = n > 0;
-    $('#empty').textContent = '没有匹配的图标。';
+    // 首页按分类展示(每类先放 20 个左右);搜索时才出全库结果
+    const searching = !!q;
+    $('#cats').hidden = searching;
+    $('#all-title').hidden = !searching;
+    $('#all').hidden = !searching;
+    if (searching) {
+      const n = grid($('#all'), DATA.icons);
+      $('#all-count').textContent = `${n} / ${DATA.icons.length}`;
+      $('#empty').hidden = n > 0;
+      $('#empty').textContent = '没有匹配的图标。';
+    } else {
+      $('#empty').hidden = true;
+    }
   }
   locate();
 }
