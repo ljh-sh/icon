@@ -1,7 +1,8 @@
 # x-cmd/icon 图标索引 —— 改这里,别改生成物。
-# 格式:<id>\t<desc>   id = <cat>:<concept>
-# cat 的含义:aws/azure/gcp = 云厂商官方标识(来自 mingrammer/diagrams,Apache-2.0);
-#                infra = 本仓自绘的通用概念;org = 本仓自绘的公司抽象符号(不含任何商标图形)。
+# 格式:<id>\t<desc>
+# id = <cat>:<concept>          平铺分类(aws / azure / gcp / brand / bootstrap)
+#     = <cat>/v<n>:<concept>    版本化分类(自绘那批)—— 写具体版本
+# 别名(版本化分类里的 <cat>:<concept>)由构建按 versions.json 生成,不用写在这里。
 aws:acm	证书管理 / Certificate Manager
 aws:alb	应用负载均衡 / Application Load Balancer
 aws:apigw	API 网关 / API Gateway
@@ -76,132 +77,134 @@ bootstrap:github	GitHub
 bootstrap:wechat	微信 / WeChat
 brand:kubernetes	Kubernetes
 brand:prometheus	Prometheus
-infra:api	接口 / API
-infra:browser	浏览器 / Browser
-infra:cloud	云 / Cloud
-infra:cluster	集群 / Cluster
-infra:container	容器 / Container
-infra:cpu	处理器 / CPU
-infra:database	数据库 / Database
-infra:desktop	台式机 / Desktop
-infra:disk-array	磁盘阵列 / Disk Array
-infra:envelope	邮件与消息 / Envelope
-infra:firewall	防火墙 / Firewall
-infra:gpu	图形处理器 / GPU
-infra:gui	桌面应用 / GUI Application
-infra:laptop	笔记本电脑 / Laptop
-infra:load-balancer	负载均衡 / Load Balancer
-infra:monitor	显示器 / Monitor
-infra:phone	手机 / Phone
-infra:router	路由器 / Router
-infra:server	服务器 / Server
-infra:storage	本地存储 / Storage
-infra:switch	交换机 / Switch
-infra:terminal	终端 / Terminal
-infra:user	用户 / User
-org:anthropic	Anthropic(自绘抽象符号,非官方标识)
-org:openai	OpenAI(自绘抽象符号,非官方标识)
-db:check	一致性校验 / Consistency Check
-db:lock	锁 / Lock
-db:redis	内存键值库 / In-Memory KV
-db:cluster	数据库集群 / Database Cluster
-db:backup	备份 / Backup
-db:replication	主从复制 / Replication
-db:sharding	分片 / Sharding
-db:index	索引 / Index
-db:migration	结构迁移 / Migration
-db:transaction	事务 / Transaction
-db:failover	故障切换 / Failover
-ai:llm	大模型 / Large Language Model
-ai:agent	智能体 / Agent
-ai:rag	检索增强生成 / RAG
-ai:embedding	向量化 / Embedding
-ai:vector-db	向量数据库 / Vector Database
-ai:finetune	微调 / Fine-tuning
-ai:inference	推理 / Inference
-ai:prompt	提示词 / Prompt
-ai:tokenizer	分词 / Tokenizer
-ai:multimodal	多模态 / Multimodal
-k8s:pod	Pod
-k8s:deployment	Deployment
-k8s:service	Service
-k8s:ingress	Ingress
-k8s:configmap	ConfigMap
-k8s:job	Job
-k8s:statefulset	StatefulSet
-k8s:cronjob	CronJob
-sec:certificate	证书 / Certificate
-sec:key	密钥 / Key
-sec:audit	审计 / Audit
-sec:zero-trust	零信任 / Zero Trust
-sec:dlp	数据防泄漏 / DLP
-sec:vulnerability	漏洞 / Vulnerability
-sec:mfa	多因子认证 / MFA
-sec:encryption	加密 / Encryption
-obs:metrics	指标 / Metrics
-obs:logs	日志 / Logs
-obs:trace	链路追踪 / Trace
-obs:alert	告警 / Alert
-obs:dashboard	仪表盘 / Dashboard
-obs:slo	服务水平目标 / SLO
-obs:profiling	性能剖析 / Profiling
-obs:sampling	采样 / Sampling
-cat:cat	猫头 / Cat
-cat:kitten	小猫 / Kitten
-cat:sleeping	睡着的猫 / Sleeping Cat
-cat:paw	猫爪 / Paw
-cat:cat-face	猫脸 / Cat Face
-dog:dog	狗头 / Dog
-dog:puppy	小狗 / Puppy
-dog:bone	骨头 / Bone
-dog:paw	狗爪 / Paw
-dog:dog-face	狗脸 / Dog Face
-animal:bird	鸟 / Bird
-animal:fish	鱼 / Fish
-animal:horse	马 / Horse
-animal:elephant	大象 / Elephant
-animal:rabbit	兔子 / Rabbit
-animal:turtle	乌龟 / Turtle
-animal:bee	蜜蜂 / Bee
-animal:butterfly	蝴蝶 / Butterfly
-chem:molecule	分子 / Molecule
-chem:atom	原子 / Atom
-chem:flask	烧瓶 / Flask
-chem:bond	化学键 / Bond
-chem:reaction	化学反应 / Reaction
-chem:catalyst	催化剂 / Catalyst
-chem:solvent	溶剂 / Solvent
-chem:balance	天平 / Balance
-circuit:chip	芯片 / Chip
-circuit:resistor	电阻 / Resistor
-circuit:capacitor	电容 / Capacitor
-circuit:diode	二极管 / Diode
-circuit:transistor	三极管 / Transistor
-circuit:board	电路板 / Circuit Board
-circuit:wave	信号波形 / Waveform
-circuit:battery	电池 / Battery
-circuit:sensor	传感器 / Sensor
-music:note	音符 / Note
-music:beat	节拍 / Beat
-music:waveform	音频波形 / Waveform
-music:equalizer	均衡器 / Equalizer
-music:piano	钢琴 / Piano
-music:guitar	吉他 / Guitar
-music:mic	麦克风 / Microphone
-music:vinyl	黑胶唱片 / Vinyl
-food:coffee	咖啡 / Coffee
-food:tea	茶 / Tea
-food:bread	面包 / Bread
-food:apple	苹果 / Apple
-food:egg	鸡蛋 / Egg
-food:rice	米饭 / Rice
-food:noodle	面条 / Noodles
-food:fish	鱼(食材) / Fish
+infra/v0:api	接口 / API
+infra/v0:browser	浏览器 / Browser
+infra/v0:cloud	云 / Cloud
+infra/v0:cluster	集群 / Cluster
+infra/v0:container	容器 / Container
+infra/v0:cpu	处理器 / CPU
+infra/v0:database	数据库 / Database
+infra/v0:desktop	台式机 / Desktop
+infra/v0:disk-array	磁盘阵列 / Disk Array
+infra/v0:envelope	邮件与消息 / Envelope
+infra/v0:firewall	防火墙 / Firewall
+infra/v0:gpu	图形处理器 / GPU
+infra/v0:gui	桌面应用 / GUI Application
+infra/v0:laptop	笔记本电脑 / Laptop
+infra/v0:load-balancer	负载均衡 / Load Balancer
+infra/v0:monitor	显示器 / Monitor
+infra/v0:phone	手机 / Phone
+infra/v0:router	路由器 / Router
+infra/v0:server	服务器 / Server
+infra/v0:storage	本地存储 / Storage
+infra/v0:switch	交换机 / Switch
+infra/v0:terminal	终端 / Terminal
+infra/v0:user	用户 / User
+org/v0:anthropic	Anthropic(自绘抽象符号,非官方标识)
+org/v0:openai	OpenAI(自绘抽象符号,非官方标识)
+db/v0:check	一致性校验 / Consistency Check
+db/v0:lock	锁 / Lock
+db/v0:redis	内存键值库 / In-Memory KV
+db/v0:cluster	数据库集群 / Database Cluster
+db/v0:backup	备份 / Backup
+db/v0:replication	主从复制 / Replication
+db/v0:sharding	分片 / Sharding
+db/v0:index	索引 / Index
+db/v0:migration	结构迁移 / Migration
+db/v0:transaction	事务 / Transaction
+db/v0:failover	故障切换 / Failover
+ai/v0:llm	大模型 / Large Language Model
+ai/v0:agent	智能体 / Agent
+ai/v0:rag	检索增强生成 / RAG
+ai/v0:embedding	向量化 / Embedding
+ai/v0:vector-db	向量数据库 / Vector Database
+ai/v0:finetune	微调 / Fine-tuning
+ai/v0:inference	推理 / Inference
+ai/v0:prompt	提示词 / Prompt
+ai/v0:tokenizer	分词 / Tokenizer
+ai/v0:multimodal	多模态 / Multimodal
+k8s/v0:pod	Pod
+k8s/v0:deployment	Deployment
+k8s/v0:service	Service
+k8s/v0:ingress	Ingress
+k8s/v0:configmap	ConfigMap
+k8s/v0:job	Job
+k8s/v0:statefulset	StatefulSet
+k8s/v0:cronjob	CronJob
+sec/v0:certificate	证书 / Certificate
+sec/v0:key	密钥 / Key
+sec/v0:audit	审计 / Audit
+sec/v0:zero-trust	零信任 / Zero Trust
+sec/v0:dlp	数据防泄漏 / DLP
+sec/v0:vulnerability	漏洞 / Vulnerability
+sec/v0:mfa	多因子认证 / MFA
+sec/v0:encryption	加密 / Encryption
+obs/v0:metrics	指标 / Metrics
+obs/v0:logs	日志 / Logs
+obs/v0:trace	链路追踪 / Trace
+obs/v0:alert	告警 / Alert
+obs/v0:dashboard	仪表盘 / Dashboard
+obs/v0:slo	服务水平目标 / SLO
+obs/v0:profiling	性能剖析 / Profiling
+obs/v0:sampling	采样 / Sampling
+cat/v0:cat	猫头 / Cat
+cat/v0:kitten	小猫 / Kitten
+cat/v0:sleeping	睡着的猫 / Sleeping Cat
+cat/v0:paw	猫爪 / Paw
+cat/v0:cat-face	猫脸 / Cat Face
+dog/v0:dog	狗头 / Dog
+dog/v0:puppy	小狗 / Puppy
+dog/v0:bone	骨头 / Bone
+dog/v0:paw	狗爪 / Paw
+dog/v0:dog-face	狗脸 / Dog Face
+animal/v0:bird	鸟 / Bird
+animal/v0:fish	鱼 / Fish
+animal/v0:horse	马 / Horse
+animal/v0:elephant	大象 / Elephant
+animal/v0:rabbit	兔子 / Rabbit
+animal/v0:turtle	乌龟 / Turtle
+animal/v0:bee	蜜蜂 / Bee
+animal/v0:butterfly	蝴蝶 / Butterfly
+chem/v0:molecule	分子 / Molecule
+chem/v0:atom	原子 / Atom
+chem/v0:flask	烧瓶 / Flask
+chem/v0:bond	化学键 / Bond
+chem/v0:reaction	化学反应 / Reaction
+chem/v0:catalyst	催化剂 / Catalyst
+chem/v0:solvent	溶剂 / Solvent
+chem/v0:balance	天平 / Balance
+circuit/v0:chip	芯片 / Chip
+circuit/v0:resistor	电阻 / Resistor
+circuit/v0:capacitor	电容 / Capacitor
+circuit/v0:diode	二极管 / Diode
+circuit/v0:transistor	三极管 / Transistor
+circuit/v0:board	电路板 / Circuit Board
+circuit/v0:wave	信号波形 / Waveform
+circuit/v0:battery	电池 / Battery
+circuit/v0:sensor	传感器 / Sensor
+music/v0:note	音符 / Note
+music/v0:beat	节拍 / Beat
+music/v0:waveform	音频波形 / Waveform
+music/v0:equalizer	均衡器 / Equalizer
+music/v0:piano	钢琴 / Piano
+music/v0:guitar	吉他 / Guitar
+music/v0:mic	麦克风 / Microphone
+music/v0:vinyl	黑胶唱片 / Vinyl
+food/v0:coffee	咖啡 / Coffee
+food/v0:tea	茶 / Tea
+food/v0:bread	面包 / Bread
+food/v0:apple	苹果 / Apple
+food/v0:egg	鸡蛋 / Egg
+food/v0:rice	米饭 / Rice
+food/v0:noodle	面条 / Noodles
+food/v0:fish	鱼(食材) / Fish
 brand:openai	OpenAI
 brand:anthropic	Anthropic
 brand:claude	Claude
 brand:deepseek	DeepSeek
 brand:gemini	Google Gemini
 brand:mistral	Mistral AI
-org:chatgpt	ChatGPT(自绘抽象符号,非官方标识)
-org:grok	Grok / xAI(自绘抽象符号,非官方标识)
+brand:chatgpt	ChatGPT
+brand:grok	Grok(xAI)
+org/v0:chatgpt	ChatGPT(自绘抽象符号,非官方标识)
+org/v0:grok	Grok / xAI(自绘抽象符号,非官方标识)

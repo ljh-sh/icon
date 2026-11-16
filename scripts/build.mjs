@@ -22,8 +22,8 @@ const CATS = {
   infra: { title: '通用基础设施', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '通用概念,彩色填充' },
   org: { title: '公司与机构', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '自绘抽象符号,不含任何商标图形' },
   // 品牌图形:许可逐个分析,记在 brands/ 里 —— 分类只给个默认说法
-  brand: { title: '品牌标识', source: '官方渠道 / Simple Icons(CC0)', license: '按各品牌条款', note: '常用品牌图形 —— 官方优先,拿不到用 CC0 图标库;逐个按许可记录' },
-  bootstrap: { title: '第三方图标库', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '整库搬入;画了品牌的那几十个另见许可记录', bulk: true },
+  brand: { title: '品牌标识', source: '官方渠道 / Simple Icons(CC0) / Wikimedia Commons', license: '按各品牌条款', note: '常用品牌图形 —— 官方优先,拿不到用 CC0 图标库;逐个按许可记录', mono: true },
+  bootstrap: { title: '第三方图标库', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '整库搬入;画了品牌的那几十个另见许可记录', bulk: true, mono: true },
   db: { title: '数据库', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '数据库的概念与形态' },
   ai: { title: 'AI', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'AI 架构里的通用概念' },
   k8s: { title: 'Kubernetes', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'K8s 组件概念(非官方标识)' },
@@ -45,9 +45,31 @@ const NEEDS_RECORD = new Set(['brand', 'bootstrap']);
 
 // 名字像品牌的 —— 兜底:这类图标必须在 brands/trademarks.tsv 里登记
 const BRANDISH =
-  /^(alipay|amazon|android|anthropic|apple|behance|bing|bootstrap|discord|dribbble|dropbox|facebook|github|gitlab|google|instagram|javascript|linkedin|markdown|meta|microsoft|openai|paypal|pinterest|reddit|sina-weibo|slack|snapchat|spotify|stack-overflow|stripe|telegram|tencent|tiktok|trello|twitter|typescript|unity|vimeo|wechat|whatsapp|wikipedia|windows|wordpress|youtube)/;
+  /^(alipay|amazon|android|anthropic|apple|behance|bing|bootstrap|chatgpt|discord|dribbble|dropbox|facebook|github|gitlab|google|grok|instagram|javascript|linkedin|markdown|meta|microsoft|openai|paypal|pinterest|reddit|sina-weibo|slack|snapchat|spotify|stack-overflow|stripe|telegram|tencent|tiktok|trello|twitter|typescript|unity|vimeo|wechat|whatsapp|wikipedia|windows|wordpress|youtube)/;
 
 const MIME = { svg: 'image/svg+xml', png: 'image/png' };
+
+// 版本号比较:v2 比 v10 小
+const verCmp = (a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10);
+
+// 品牌图形的闸门:有记录按记录走(withheld 不发布),名字像品牌的必须登记
+function brandGate(id, concept, records, trademarks) {
+  const rec = records.get(id);
+  const tm = trademarks.get(id);
+  if (rec && rec.meta.verdict === 'withheld') {
+    console.log(`跳过 ${id}(记录结论:withheld —— 不发布)`);
+    return false;
+  }
+  if (rec && tm && tm.status !== 'reviewed') {
+    console.error(`${id} 有许可记录,但 trademarks.tsv 里状态是 ${tm.status} —— 改成 reviewed`);
+    process.exit(1);
+  }
+  if (!tm && BRANDISH.test(concept)) {
+    console.error(`${id} 名字像品牌图标 —— 在 brands/trademarks.tsv 里登记(商标权人 + 状态)`);
+    process.exit(1);
+  }
+  return true;
+}
 
 // ---- 读 brands/*.md 的头部(许可记录) ----
 // 头部是 key: value,正文是分析 —— 构建只取头部,页面把正文带出去显示
@@ -112,6 +134,25 @@ if (existsSync(TM_FILE)) {
   });
 }
 
+// ---- 读 versions.json:每个分类当前推荐哪个版本 ----
+// 这是人的决定,不自动取最高版本 —— 新画一版进来,别名先不动;
+// 等这版真更好了,再改这一行。别名跟着走,老图也还在。
+const VERSIONS_FILE = join(ROOT, 'versions.json');
+let versions = {};
+if (existsSync(VERSIONS_FILE)) {
+  versions = JSON.parse(readFileSync(VERSIONS_FILE, 'utf8'));
+  for (const [cat, ver] of Object.entries(versions)) {
+    if (!/^v\d+$/.test(ver)) {
+      console.error(`versions.json: ${cat} 的版本 "${ver}" 格式不对(应为 v<n>,如 v0)`);
+      process.exit(1);
+    }
+    if (!CATS[cat]) {
+      console.error(`versions.json: ${cat} 是不存在的分类`);
+      process.exit(1);
+    }
+  }
+}
+
 // ---- 读 catalog.tsv ----
 const catalog = new Map();
 const lines = readFileSync(CATALOG, 'utf8').split('\n');
@@ -131,60 +172,113 @@ lines.forEach((line, i) => {
 });
 
 // ---- 扫 icons/ ----
-const found = new Map(); // id → 相对路径
+// 分类有两种形态:平铺(icons/<cat>/<concept>.svg)或版本化(icons/<cat>/v<n>/<concept>.svg)。
+// 版本化的分类,构建会额外生成别名条目 <cat>:<concept> —— 指向当前推荐的版本。
+const found = new Map(); // 具体键 → { file, cat, version, concept }
+const catVersions = new Map(); // cat → 版本列表(数字序)
+
 for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => d.isDirectory())) {
   const catName = cat.name;
   if (!CATS[catName]) {
     console.error(`icons/${catName}/ 是不认识的分类 —— 先在 scripts/build.mjs 的 CATS 里登记`);
     process.exit(1);
   }
-  for (const f of readdirSync(join(ICONS_DIR, catName)).sort()) {
-    const ext = f.split('.').pop();
-    if (!MIME[ext]) {
-      console.error(`icons/${catName}/${f}: 不支持的格式 .${ext}`);
-      process.exit(1);
-    }
-    const concept = f.slice(0, -(ext.length + 1));
-    const id = `${catName}:${concept}`;
-    if (found.has(id)) {
-      console.error(`id 重复: ${id}`);
-      process.exit(1);
-    }
-    // 品牌图形:清单(trademarks.tsv)为准 —— 清单外的按通用图形处理;
-    // 名字像品牌的必须登记,防止漏网。
-    if (NEEDS_RECORD.has(catName)) {
-      const rec = records.get(id);
-      const tm = trademarks.get(id);
-      if (rec && rec.meta.verdict === 'withheld') {
-        console.log(`跳过 ${id}(记录结论:withheld —— 不发布)`);
-        continue;
+  const dir = join(ICONS_DIR, catName);
+  const entries = readdirSync(dir);
+  const vdirs = entries.filter((e) => /^v\d+$/.test(e)).sort(verCmp);
+  const flat = entries.filter((e) => !/^v\d+$/.test(e)).sort();
+
+  if (vdirs.length && flat.length) {
+    console.error(`icons/${catName}/ 里版本目录与平铺文件混在一起 —— 一个分类要么全版本化,要么全平铺`);
+    process.exit(1);
+  }
+
+  if (vdirs.length) {
+    catVersions.set(catName, vdirs);
+    for (const vd of vdirs) {
+      for (const f of readdirSync(join(dir, vd)).sort()) {
+        const ext = f.split('.').pop();
+        if (!MIME[ext]) {
+          console.error(`icons/${catName}/${vd}/${f}: 不支持的格式 .${ext}`);
+          process.exit(1);
+        }
+        const concept = f.slice(0, -(ext.length + 1));
+        const id = `${catName}/${vd}:${concept}`;
+        if (found.has(id)) {
+          console.error(`id 重复: ${id}`);
+          process.exit(1);
+        }
+        if (NEEDS_RECORD.has(catName) && !brandGate(id, concept, records, trademarks)) continue;
+        found.set(id, { file: `icons/${catName}/${vd}/${f}`, cat: catName, version: vd, concept });
       }
-      if (rec && tm && tm.status !== 'reviewed') {
-        console.error(`${id} 有许可记录,但 trademarks.tsv 里状态是 ${tm.status} —— 改成 reviewed`);
+    }
+  } else {
+    for (const f of flat) {
+      const ext = f.split('.').pop();
+      if (!MIME[ext]) {
+        console.error(`icons/${catName}/${f}: 不支持的格式 .${ext}`);
         process.exit(1);
       }
-      if (!tm && BRANDISH.test(concept)) {
-        console.error(`${id} 名字像品牌图标 —— 在 brands/trademarks.tsv 里登记(商标权人 + 状态)`);
+      const concept = f.slice(0, -(ext.length + 1));
+      const id = `${catName}:${concept}`;
+      if (found.has(id)) {
+        console.error(`id 重复: ${id}`);
         process.exit(1);
       }
+      if (NEEDS_RECORD.has(catName) && !brandGate(id, concept, records, trademarks)) continue;
+      found.set(id, { file: `icons/${catName}/${f}`, cat: catName, version: null, concept });
     }
-    found.set(id, `icons/${catName}/${f}`);
+  }
+}
+
+// ---- 别名:版本化分类里,概念键 <cat>:<concept> 指向当前推荐的版本 ----
+// 推荐版本在 versions.json 里定 —— 是人的决定,新画一版进来别名先不动。
+// 推荐版本里没有的概念,退到拥有它的最高版本。
+const alias = new Map(); // 别名键 → 具体键
+for (const [catName, vers] of catVersions) {
+  const rec = versions[catName];
+  if (!rec) {
+    console.error(`icons/${catName}/ 是版本化分类,versions.json 里没有登记 —— 补一行 "${catName}": "v0"`);
+    process.exit(1);
+  }
+  if (!vers.includes(rec)) {
+    console.error(`versions.json: ${catName} 推荐 ${rec},但 icons/${catName}/${rec}/ 不存在`);
+    process.exit(1);
+  }
+  for (const [id, info] of found) {
+    if (info.cat !== catName) continue;
+    let target = rec;
+    if (!found.has(`${catName}/${target}:${info.concept}`)) {
+      target = [...vers].sort((a, b) => verCmp(b, a)).find((v) => found.has(`${catName}/${v}:${info.concept}`));
+      if (target == null) continue;
+    }
+    alias.set(`${catName}:${info.concept}`, `${catName}/${target}:${info.concept}`);
   }
 }
 
 // ---- 校验 ----
 let bad = 0;
-for (const id of found.keys()) {
+for (const [id, info] of found) {
   if (catalog.has(id)) continue;
-  if (BULK.has(id.slice(0, id.indexOf(':')))) continue; // 整库搬入的:描述自动生成
+  if (BULK.has(info.cat)) continue; // 整库搬入的:描述自动生成
   console.error(`catalog.tsv 缺一行: ${id}\t(自己补一行描述)`);
   bad++;
 }
 for (const id of catalog.keys()) {
+  if (alias.has(id)) {
+    console.error(`catalog.tsv 里的 ${id} 是别名 —— 别名由构建生成,只写具体版本的键 ${alias.get(id)}`);
+    bad++;
+    continue;
+  }
   if (!found.has(id)) {
     console.error(`catalog.tsv 里的 ${id} 没有对应文件`);
     bad++;
   }
+}
+for (const cat of Object.keys(versions)) {
+  if (catVersions.has(cat)) continue;
+  console.error(`versions.json 里登记了 ${cat},但 icons/${cat}/ 下没有版本目录`);
+  bad++;
 }
 for (const [id, rec] of records) {
   if (rec.meta.verdict === 'withheld') continue;
@@ -207,24 +301,25 @@ if (bad) process.exit(1);
 
 // ---- 生成元数据 ----
 const metas = [];
-for (const [id, file] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
-  const ext = file.split('.').pop();
-  const cat = id.slice(0, id.indexOf(':'));
-  const concept = id.slice(id.indexOf(':') + 1);
+const metaById = new Map();
+for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+  const ext = info.file.split('.').pop();
   const rec = records.get(id);
   const tm = trademarks.get(id);
-  metas.push({
+  const m = {
     id,
-    cat,
-    concept,
-    desc: catalog.get(id) || `${CATS[cat].source} · ${concept.replace(/-/g, ' ')}`,
-    file,
-    path: `i/${file.replace(/^icons\//, '')}`,
+    cat: info.cat,
+    concept: info.concept,
+    version: info.version || undefined, // 版本化分类才有
+    desc: catalog.get(id) || `${CATS[info.cat].source} · ${info.concept.replace(/-/g, ' ')}`,
+    file: info.file,
+    path: `i/${info.file.replace(/^icons\//, '')}`,
     mime: MIME[ext],
-    bytes: readFileSync(join(ROOT, file)).length,
-    source: rec?.meta.source || CATS[cat].source,
-    license: rec?.meta.license || CATS[cat].license,
-    note: rec?.meta.note || CATS[cat].note,
+    bytes: readFileSync(join(ROOT, info.file)).length,
+    source: rec?.meta.source || CATS[info.cat].source,
+    license: rec?.meta.license || CATS[info.cat].license,
+    note: rec?.meta.note || CATS[info.cat].note,
+    mono: !!CATS[info.cat].mono,
     ...(rec
       ? {
           verdict: rec.meta.verdict,
@@ -238,7 +333,16 @@ for (const [id, file] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
       : tm
         ? { verdict: 'pending', trademark: tm.owner, restrictions: tm.note, notes: '' }
         : {}),
-  });
+  };
+  metas.push(m);
+  metaById.set(id, m);
+}
+
+// 别名条目:概念键指向推荐版本的具体键
+for (const [aid, cid] of [...alias].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+  const c = metaById.get(cid);
+  metas.push({ ...c, id: aid, alias: true, aliasOf: cid });
+  c.aliasFor = aid;
 }
 
 const cats = Object.entries(CATS).map(([cat, meta]) => ({
@@ -247,7 +351,10 @@ const cats = Object.entries(CATS).map(([cat, meta]) => ({
   source: meta.source,
   license: meta.license,
   note: meta.note,
-  count: metas.filter((m) => m.cat === cat).length,
+  count: new Set([...found.values()].filter((i) => i.cat === cat).map((i) => i.concept)).size,
+  versioned: catVersions.has(cat),
+  versions: catVersions.get(cat) || [],
+  recommended: versions[cat] || '',
 }));
 
 const BUILD = createHash('sha1')
@@ -278,6 +385,14 @@ export interface IconMeta {
   id: string;
   cat: string;
   concept: string;
+  /** 具体版本(v0 / v1)—— 版本化分类才有 */
+  version?: string;
+  /** 别名条目:概念键指向推荐版本 */
+  alias?: boolean;
+  /** 别名指向的具体键 */
+  aliasOf?: string;
+  /** 指向本条的具体键的别名(只有推荐版本有) */
+  aliasFor?: string;
   desc: string;
   file: string;
   path: string;
@@ -286,6 +401,8 @@ export interface IconMeta {
   source: string;
   license: string;
   note: string;
+  /** 单色图形(深色主题下垫白底) */
+  mono?: boolean;
   /** 许可结论:ok / caution / pending / withheld */
   verdict?: string;
   trademark?: string;
@@ -303,6 +420,12 @@ export interface CatMeta {
   license: string;
   note: string;
   count: number;
+  /** 有版本目录 */
+  versioned: boolean;
+  /** 版本列表(数字序) */
+  versions: string[];
+  /** 当前推荐的版本 */
+  recommended: string;
 }
 
 export const CATS: CatMeta[] = ${JSON.stringify(cats, null, 2)};

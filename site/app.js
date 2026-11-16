@@ -14,6 +14,7 @@ const el = (tag, cls, text) => {
 
 let DATA = { cats: [], icons: [] };
 let q = '';
+let ver = ''; // 版本化分类里当前看的版本;空 = 推荐版本
 let hitId = null;
 
 // 图标 URL 带上构建号:重新部署后 URL 变了,边缘缓存不会顶着旧图
@@ -35,7 +36,9 @@ function cell(m) {
   img.src = iconUrl(m);
   img.alt = m.id;
   img.loading = 'lazy';
+  if (m.mono) img.classList.add('mono'); // 单色图形:深色主题下垫白底
   c.append(img, el('div', 'id', m.id));
+  if (m.version && !m.alias) c.append(el('span', 'vbadge', m.version));
   if (m.verdict === 'caution') c.append(el('span', 'vflag caution', '谨慎'));
   if (m.verdict === 'pending') c.append(el('span', 'vflag pending', '未审'));
   c.append(el('div', 'desc', m.desc));
@@ -94,19 +97,52 @@ function render() {
     $('#cat-note').textContent = meta
       ? `${meta.count} 个图标 · 出处 ${meta.source} · 许可 ${meta.license} · ${meta.note}`
       : '';
-    const list = DATA.icons.filter((m) => m.cat === cat);
+    const vers = meta?.versions || [];
+    renderVersions(vers);
+    // 「推荐」看别名条目(概念键),具体版本看该版本的条目
+    const list = vers.length
+      ? DATA.icons.filter((m) => m.cat === cat && (ver ? m.version === ver && !m.alias : m.alias))
+      : DATA.icons.filter((m) => m.cat === cat);
     const n = grid($('#cat-grid'), list);
     $('#empty').hidden = n > 0;
     $('#empty').textContent = list.length ? '没有匹配的图标。' : '这个分类还没有图标。';
   } else {
     catp.hidden = true;
     home.hidden = false;
-    const n = grid($('#all'), DATA.icons);
+    $('#cat-vers').hidden = true;
+    // 首页默认只展示推荐版本;搜索时才把各版本都放出来
+    const list = q ? DATA.icons : DATA.icons.filter((m) => !m.version || m.alias);
+    const n = grid($('#all'), list);
     $('#all-count').textContent = `${n} / ${DATA.icons.length}`;
     $('#empty').hidden = n > 0;
     $('#empty').textContent = '没有匹配的图标。';
   }
   locate();
+}
+
+// 版本切换:推荐 / v0 / v1 …
+function renderVersions(vers) {
+  const host = $('#cat-vers');
+  host.textContent = '';
+  host.hidden = !vers.length;
+  if (!vers.length) return;
+  const mk = (label, value) => {
+    const b = el('button', 'vbtn' + (ver === value ? ' on' : ''), label);
+    b.type = 'button';
+    b.addEventListener('click', () => setVersion(value));
+    host.append(b);
+  };
+  mk('推荐', '');
+  for (const v of vers) mk(v, v);
+}
+
+function setVersion(v) {
+  ver = v;
+  const url = new URL(location.href);
+  if (v) url.searchParams.set('v', v);
+  else url.searchParams.delete('v');
+  history.pushState({}, '', url.pathname + url.search + url.hash);
+  render();
 }
 
 function locate() {
@@ -127,6 +163,7 @@ function navigate(url) {
   const u = new URL(url, location.origin);
   if (q) u.searchParams.set('q', q);
   history.pushState({}, '', u);
+  ver = u.searchParams.get('v') || '';
   render();
   window.scrollTo({ top: 0 });
 }
@@ -135,6 +172,7 @@ function onCell(m) {
   const u = new URL(`${BASE}c/${m.cat}`, location.origin);
   u.hash = encodeURIComponent(m.id);
   if (q) u.searchParams.set('q', q);
+  if (ver) u.searchParams.set('v', ver);
   const url = u.pathname + u.search + u.hash;
   if (catRoute() === m.cat) {
     history.pushState({}, '', url);
@@ -167,6 +205,14 @@ async function openDetail(m) {
   $('#dlg-desc').textContent = m.desc;
   $('#dlg-cat').textContent = (DATA.cats.find((c) => c.cat === m.cat) || {}).title || m.cat;
   $('#dlg-source').textContent = m.source;
+  // 版本:别名条目指向推荐版本的具体键,具体版本标出指向它的别名
+  if (m.alias) {
+    row('#dlg-version', `别名 → ${m.aliasOf}`);
+  } else if (m.version) {
+    row('#dlg-version', m.aliasFor ? `${m.version} —— 别名 ${m.aliasFor} 指向这里` : m.version);
+  } else {
+    row('#dlg-version', '');
+  }
   row('#dlg-license', m.license);
   row('#dlg-trademark', m.trademark);
   row('#dlg-restrictions', (m.restrictions || '').replace(/;/g, '; '));
@@ -287,14 +333,24 @@ try {
 
 /* ---------- 启动 ---------- */
 function syncFromUrl() {
-  const v = new URL(location.href).searchParams.get('q') || '';
+  const p = new URL(location.href).searchParams;
+  const v = p.get('q') || '';
   q = v.trim().toLowerCase();
   qEl.value = v;
   $('#clear').hidden = !q;
+  ver = p.get('v') || '';
   render();
 }
 window.addEventListener('popstate', syncFromUrl);
 window.addEventListener('hashchange', locate);
+
+// 页内链接(面包屑)走前端路由,别整页刷新
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('[data-nav]');
+  if (!a) return;
+  e.preventDefault();
+  navigate(a.getAttribute('href'));
+});
 
 (async () => {
   try {

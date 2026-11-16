@@ -128,6 +128,26 @@ main { max-width: 1180px; margin: 0 auto; padding: 30px 20px 60px; }
 }
 .cat-card .src { color: var(--muted); font-size: 11.5px; border-top: 1px solid var(--line); padding-top: 8px; }
 
+/* ---------- 版本切换 ---------- */
+.vers { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 16px; }
+.vbtn {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.vbtn:hover { color: var(--ink); border-color: var(--accent); }
+.vbtn.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* ---------- 图标网格 ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
 .cell {
@@ -142,6 +162,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 30px 20px 60px; }
 }
 .cell:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
 .cell img { width: 38px; height: 38px; object-fit: contain; display: block; margin: 0 auto 6px; }
+/* 单色图形(brand / bootstrap)是黑白的 —— 深色主题下垫一块白底,不然等于隐形 */
+html[data-theme="dark"] .cell img.mono { background: #fff; border-radius: 8px; }
 .cell .id { font-size: 11.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
 .cell .desc { font-size: 11px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell.hit { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
@@ -194,6 +216,16 @@ html[data-theme="dark"] .verdict.pending { background: #1f2d44; color: #8fa3bd; 
   border-radius: 999px;
   background: #fef3c7;
   color: #b45309;
+  font-size: 10.5px;
+  line-height: 16px;
+}
+.vbadge {
+  display: inline-block;
+  margin: 3px 0 1px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
   font-size: 10.5px;
   line-height: 16px;
 }
