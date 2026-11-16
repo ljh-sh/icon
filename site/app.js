@@ -36,7 +36,8 @@ function cell(m) {
   img.alt = m.id;
   img.loading = 'lazy';
   c.append(img, el('div', 'id', m.id));
-  if (m.verdict === 'caution') c.append(el('span', 'vflag', '谨慎'));
+  if (m.verdict === 'caution') c.append(el('span', 'vflag caution', '谨慎'));
+  if (m.verdict === 'pending') c.append(el('span', 'vflag pending', '未审'));
   c.append(el('div', 'desc', m.desc));
   c.addEventListener('click', () => onCell(m));
   return c;
@@ -146,7 +147,7 @@ function onCell(m) {
 
 /* ---------- 详情 ---------- */
 const dlg = $('#detail');
-const VERDICT_TEXT = { ok: '可用', caution: '谨慎 —— 限指示性引用' };
+const VERDICT_TEXT = { ok: '可用', caution: '谨慎 —— 限指示性引用', pending: '未审 —— 商标条款未逐条核对' };
 
 function row(sel, value) {
   const n = $(sel);

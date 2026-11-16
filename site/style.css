@@ -183,8 +183,10 @@ dialog::backdrop { background: rgba(2, 6, 23, .45); }
 }
 .verdict.ok { background: #dcfce7; color: #15803d; }
 .verdict.caution { background: #fef3c7; color: #b45309; }
+.verdict.pending { background: #e2e8f0; color: #475569; }
 html[data-theme="dark"] .verdict.ok { background: #14342a; color: #4ade80; }
 html[data-theme="dark"] .verdict.caution { background: #3b2d0c; color: #fbbf24; }
+html[data-theme="dark"] .verdict.pending { background: #1f2d44; color: #8fa3bd; }
 .vflag {
   display: inline-block;
   margin: 3px 0 1px;
@@ -195,7 +197,9 @@ html[data-theme="dark"] .verdict.caution { background: #3b2d0c; color: #fbbf24; 
   font-size: 10.5px;
   line-height: 16px;
 }
+.vflag.pending { background: #e2e8f0; color: #475569; }
 html[data-theme="dark"] .vflag { background: #3b2d0c; color: #fbbf24; }
+html[data-theme="dark"] .vflag.pending { background: #1f2d44; color: #8fa3bd; }
 .notes {
   white-space: pre-wrap;
   font-size: 12.5px;

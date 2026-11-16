@@ -10,6 +10,12 @@
     "enabled": true,
     "head_sampling_rate": 1
   },
+  // 静态资源:图标文件与清单。目录结构是 public/icon/**,
+  // 路由是 po6.sh/icon*,所以 /icon/i/… 与 /icon/manifest.json 由边缘直接发。
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
   // 挂在 po6.sh/icon 下;改域名只改这一行
   "routes": [
     { "pattern": "po6.sh/icon*", "zone_name": "po6.sh" }

@@ -1,4 +1,8 @@
-// 校验 catalog.tsv 与 icons/ 是否一一对应,生成 src/gen.ts(图标字节 + 元数据)。
+// 校验 catalog.tsv 与 icons/ 是否一一对应,生成:
+//   src/gen.ts            —— Worker 需要的精简元数据(id → 文件、许可结论)
+//   public/icon/          —— 静态资源(图标文件 + manifest.json),边缘直接发
+//   dist/                 —— 本地预览用的静态站
+//
 // 用法:node scripts/build.mjs
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -8,6 +12,7 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const CATALOG = join(ROOT, 'catalog.tsv');
 const ICONS_DIR = join(ROOT, 'icons');
 const OUT = join(ROOT, 'src/gen.ts');
+const PUBLIC = join(ROOT, 'public/icon');
 
 // 每个分类的出处与许可 —— 图标库的"血缘",页面上要显示
 const CATS = {
@@ -16,13 +21,31 @@ const CATS = {
   gcp: { title: 'GCP', source: 'mingrammer/diagrams', license: 'Apache-2.0', note: '云厂商官方标识' },
   infra: { title: '通用基础设施', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '通用概念,彩色填充' },
   org: { title: '公司与机构', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '自绘抽象符号,不含任何商标图形' },
-  // 品牌图形:许可逐个分析,记在 brands/<cat>-<concept>.md 里 —— 分类只给个默认说法
+  // 品牌图形:许可逐个分析,记在 brands/ 里 —— 分类只给个默认说法
   brand: { title: '品牌标识', source: '各品牌官方渠道', license: '按各品牌条款', note: '官方 mark —— 逐个按许可记录' },
-  bootstrap: { title: '第三方图标库', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '第三方画的品牌图标,商标为夹带' },
+  bootstrap: { title: '第三方图标库', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '整库搬入;画了品牌的那几十个另见许可记录', bulk: true },
+  db: { title: '数据库', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '数据库的概念与形态' },
+  ai: { title: 'AI', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'AI 架构里的通用概念' },
+  k8s: { title: 'Kubernetes', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'K8s 组件概念(非官方标识)' },
+  sec: { title: '安全', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '安全概念' },
+  obs: { title: '可观测性', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '指标 / 日志 / 链路' },
+  cat: { title: '猫', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '猫' },
+  dog: { title: '狗', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '狗' },
+  animal: { title: '动物', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '动物' },
+  chem: { title: '化学', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '化学与分子' },
+  circuit: { title: '电路', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '电子与电路' },
+  music: { title: '音乐', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '音乐与音频' },
+  food: { title: '食物', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '食物与饮品' },
 };
 
-// 品牌图形必须逐个有许可记录
+// 整库搬入的分类:catalog.tsv 不强制一行一个(几千个图标不可能手写描述)
+const BULK = new Set(Object.entries(CATS).filter(([, m]) => m.bulk).map(([c]) => c));
+// 品牌图形:逐个要有许可记录或"待审"登记
 const NEEDS_RECORD = new Set(['brand', 'bootstrap']);
+
+// 名字像品牌的 —— 兜底:这类图标必须在 brands/trademarks.tsv 里登记
+const BRANDISH =
+  /^(alipay|amazon|android|anthropic|apple|behance|bing|bootstrap|discord|dribbble|dropbox|facebook|github|gitlab|google|instagram|javascript|linkedin|markdown|meta|microsoft|openai|paypal|pinterest|reddit|sina-weibo|slack|snapchat|spotify|stack-overflow|stripe|telegram|tencent|tiktok|trello|twitter|typescript|unity|vimeo|wechat|whatsapp|wikipedia|windows|wordpress|youtube)/;
 
 const MIME = { svg: 'image/svg+xml', png: 'image/png' };
 
@@ -68,6 +91,27 @@ if (existsSync(BRANDS_DIR)) {
   }
 }
 
+// ---- 读 brands/trademarks.tsv:画了商标的图标清单 ----
+// id \t 商标权人 \t 状态(reviewed|pending) \t 备注
+const trademarks = new Map(); // id → { owner, status, note }
+const TM_FILE = join(BRANDS_DIR, 'trademarks.tsv');
+if (existsSync(TM_FILE)) {
+  readFileSync(TM_FILE, 'utf8').split('\n').forEach((line, i) => {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) return;
+    const [id, owner, status, ...rest] = t.split('\t');
+    if (!id || !status) {
+      console.error(`brands/trademarks.tsv:${i + 1} 格式不对(应为 <id>\\t<商标权人>\\t<reviewed|pending>[\\t备注])`);
+      process.exit(1);
+    }
+    if (status !== 'reviewed' && status !== 'pending') {
+      console.error(`brands/trademarks.tsv:${i + 1} 状态只能是 reviewed / pending`);
+      process.exit(1);
+    }
+    trademarks.set(id, { owner: owner || '', status, note: rest.join('\t') || '' });
+  });
+}
+
 // ---- 读 catalog.tsv ----
 const catalog = new Map();
 const lines = readFileSync(CATALOG, 'utf8').split('\n');
@@ -106,29 +150,35 @@ for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => 
       console.error(`id 重复: ${id}`);
       process.exit(1);
     }
-    // 品牌图形:必须有许可记录;verdict=withheld 的不发布(分析留档,图标不发)
+    // 品牌图形:清单(trademarks.tsv)为准 —— 清单外的按通用图形处理;
+    // 名字像品牌的必须登记,防止漏网。
     if (NEEDS_RECORD.has(catName)) {
       const rec = records.get(id);
-      if (!rec) {
-        console.error(`${id} 缺许可记录 —— 在 brands/ 里补一个 ${catName}-${concept}.md`);
-        process.exit(1);
-      }
-      if (rec.meta.verdict === 'withheld') {
+      const tm = trademarks.get(id);
+      if (rec && rec.meta.verdict === 'withheld') {
         console.log(`跳过 ${id}(记录结论:withheld —— 不发布)`);
         continue;
+      }
+      if (rec && tm && tm.status !== 'reviewed') {
+        console.error(`${id} 有许可记录,但 trademarks.tsv 里状态是 ${tm.status} —— 改成 reviewed`);
+        process.exit(1);
+      }
+      if (!tm && BRANDISH.test(concept)) {
+        console.error(`${id} 名字像品牌图标 —— 在 brands/trademarks.tsv 里登记(商标权人 + 状态)`);
+        process.exit(1);
       }
     }
     found.set(id, `icons/${catName}/${f}`);
   }
 }
 
-// ---- 双向校验 ----
+// ---- 校验 ----
 let bad = 0;
 for (const id of found.keys()) {
-  if (!catalog.has(id)) {
-    console.error(`catalog.tsv 缺一行: ${id}\t(自己补一行描述)`);
-    bad++;
-  }
+  if (catalog.has(id)) continue;
+  if (BULK.has(id.slice(0, id.indexOf(':')))) continue; // 整库搬入的:描述自动生成
+  console.error(`catalog.tsv 缺一行: ${id}\t(自己补一行描述)`);
+  bad++;
 }
 for (const id of catalog.keys()) {
   if (!found.has(id)) {
@@ -136,58 +186,58 @@ for (const id of catalog.keys()) {
     bad++;
   }
 }
-// 反向:许可记录里的 id 必须真有图标(除非它自己标了 withheld)
 for (const [id, rec] of records) {
   if (rec.meta.verdict === 'withheld') continue;
   if (!found.has(id)) {
     console.error(`brands/ 里的 ${id} 没有对应图标文件`);
     bad++;
   }
+  if (!trademarks.has(id)) {
+    console.error(`brands/ 里的 ${id} 没在 brands/trademarks.tsv 登记`);
+    bad++;
+  }
+}
+for (const id of trademarks.keys()) {
+  if (!found.has(id)) {
+    console.error(`brands/trademarks.tsv 里的 ${id} 没有对应图标文件`);
+    bad++;
+  }
 }
 if (bad) process.exit(1);
 
-// ---- 生成 src/gen.ts ----
+// ---- 生成元数据 ----
 const metas = [];
-const blobs = {};
 for (const [id, file] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
-  const buf = readFileSync(join(ROOT, file));
   const ext = file.split('.').pop();
-  if (ext === 'svg' && !/<svg[\s>]/.test(buf.toString('utf8'))) {
-    console.error(`${file}: 不是 SVG`);
-    process.exit(1);
-  }
-  if (ext === 'png' && buf[0] !== 0x89) {
-    console.error(`${file}: 不是 PNG`);
-    process.exit(1);
-  }
   const cat = id.slice(0, id.indexOf(':'));
   const concept = id.slice(id.indexOf(':') + 1);
-  const rel = file.replace(/^icons\//, '');
-  blobs[file] = buf.toString('base64');
   const rec = records.get(id);
+  const tm = trademarks.get(id);
   metas.push({
     id,
     cat,
     concept,
-    desc: catalog.get(id),
+    desc: catalog.get(id) || `${CATS[cat].source} · ${concept.replace(/-/g, ' ')}`,
     file,
-    path: `i/${rel}`,
+    path: `i/${file.replace(/^icons\//, '')}`,
     mime: MIME[ext],
-    bytes: buf.length,
+    bytes: readFileSync(join(ROOT, file)).length,
     source: rec?.meta.source || CATS[cat].source,
     license: rec?.meta.license || CATS[cat].license,
     note: rec?.meta.note || CATS[cat].note,
     ...(rec
       ? {
           verdict: rec.meta.verdict,
-          trademark: rec.meta.trademarkOwner || '',
+          trademark: rec.meta.trademarkOwner || tm?.owner || '',
           trademarkPolicy: rec.meta.trademarkPolicy || '',
           licenseUrl: rec.meta.licenseUrl || '',
           restrictions: rec.meta.restrictions || '',
           reviewed: rec.meta.reviewed || '',
           notes: rec.body,
         }
-      : {}),
+      : tm
+        ? { verdict: 'pending', trademark: tm.owner, restrictions: tm.note, notes: '' }
+        : {}),
   });
 }
 
@@ -200,14 +250,29 @@ const cats = Object.entries(CATS).map(([cat, meta]) => ({
   count: metas.filter((m) => m.cat === cat).length,
 }));
 
-// 构建号:图标字节一变就变 —— 页面挂在图标 URL 后面,重新部署不会被边缘缓存顶住旧图
 const BUILD = createHash('sha1')
-  .update(Object.entries(blobs).map(([k, v]) => k + ':' + v).join('\n'))
+  .update(metas.map((m) => `${m.id}:${m.bytes}`).join('\n'))
   .digest('hex')
   .slice(0, 10);
 
-const body = `// 生成物,别手改 —— 由 scripts/build.mjs 从 catalog.tsv + icons/ 生成。
-// 图标字节以 base64 内嵌,Worker 直接吐文件,不依赖外链。
+const manifest = { build: BUILD, cats, icons: metas };
+
+// ---- src/gen.ts:Worker 用的精简数据(不嵌字节,图标走静态资源) ----
+const id2file = {};
+for (const m of metas) id2file[m.id] = m.path;
+const licMeta = {};
+for (const m of metas) {
+  if (!m.verdict) continue;
+  licMeta[m.id] = {
+    verdict: m.verdict,
+    trademark: m.trademark || '',
+    license: m.license,
+    source: m.source,
+  };
+}
+
+const body = `// 生成物,别手改 —— 由 scripts/build.mjs 生成。
+// 图标文件不走这里:静态资源(public/icon/i/**)由边缘直接发,Worker 只管清单与接口。
 
 export interface IconMeta {
   id: string;
@@ -221,17 +286,13 @@ export interface IconMeta {
   source: string;
   license: string;
   note: string;
-  /** 许可结论:ok / caution(品牌图形才有) */
+  /** 许可结论:ok / caution / pending / withheld */
   verdict?: string;
-  /** 商标权人 */
   trademark?: string;
-  /** 官方商标政策地址 */
   trademarkPolicy?: string;
   licenseUrl?: string;
-  /** 使用限制(分号分隔) */
   restrictions?: string;
   reviewed?: string;
-  /** 许可分析正文(markdown) */
   notes?: string;
 }
 
@@ -244,27 +305,44 @@ export interface CatMeta {
   count: number;
 }
 
-export const ICONS: IconMeta[] = ${JSON.stringify(metas, null, 2)};
-
 export const CATS: CatMeta[] = ${JSON.stringify(cats, null, 2)};
 
-/** 相对路径 → base64 内容 */
-export const BLOBS: Record<string, string> = ${JSON.stringify(blobs, null, 2)};
+/** id → 静态资源路径 */
+export const ID2FILE: Record<string, string> = ${JSON.stringify(id2file, null, 2)};
 
-/** 构建号:图标字节一变就变 —— 页面挂在图标 URL 后面,重新部署不会被边缘缓存顶住旧图 */
+/** 有许可结论的图标(其余是通用图形) */
+export const LICENSE: Record<string, { verdict: string; trademark: string; license: string; source: string }> = ${JSON.stringify(licMeta, null, 2)};
+
+/** 构建号:内容一变就变 */
 export const BUILD = '${BUILD}';
 `;
 writeFileSync(OUT, body);
-console.log(`src/gen.ts: ${metas.length} icons, ${cats.length} categories, ${(readFileSync(OUT).length / 1024).toFixed(0)} KB`);
+console.log(`src/gen.ts: ${metas.length} icons, ${cats.length} categories`);
 
-// ---- 静态站(dist/):本地预览 / 静态托管用 ----
+// ---- public/icon/ 静态资源:图标文件 + manifest(边缘直接发) ----
+rmSync(PUBLIC, { recursive: true, force: true });
+mkdirSync(PUBLIC, { recursive: true });
+for (const m of metas) {
+  const dest = join(PUBLIC, m.path);
+  mkdirSync(join(dest, '..'), { recursive: true });
+  copyFileSync(join(ROOT, m.file), dest);
+}
+writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
+// 缓存策略:图标文件长缓存(URL 上带构建号,重新部署即失效),清单短缓存
+writeFileSync(
+  join(ROOT, 'public/_headers'),
+  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/manifest.json\n  Cache-Control: public, max-age=300\n`,
+);
+console.log(`public/icon/: ${metas.length} 个文件 + manifest.json`);
+
+// ---- dist/:本地预览用的静态站 ----
 const DIST = join(ROOT, 'dist');
 rmSync(DIST, { recursive: true, force: true });
 mkdirSync(join(DIST, 'i'), { recursive: true });
-writeFileSync(join(DIST, 'manifest.json'), JSON.stringify({ cats, icons: metas, build: BUILD }, null, 2));
+writeFileSync(join(DIST, 'manifest.json'), JSON.stringify(manifest, null, 2));
 for (const m of metas) {
-  const dest = join(DIST, 'i', m.cat, m.concept + '.' + m.file.split('.').pop());
-  mkdirSync(join(DIST, 'i', m.cat), { recursive: true });
+  const dest = join(DIST, m.path);
+  mkdirSync(join(dest, '..'), { recursive: true });
   copyFileSync(join(ROOT, m.file), dest);
 }
 for (const f of ['style.css', 'app.js']) copyFileSync(join(ROOT, 'site', f), join(DIST, f));
@@ -274,7 +352,7 @@ writeFileSync(
 );
 console.log(`dist/: 静态站(本地预览用)`);
 
-// ---- Worker 用的页面:把 CSS/JS 内联成一个字符串(src/page.ts) ----
+// ---- Worker 用的页面:CSS/JS 内联成字符串(src/page.ts) ----
 // 内联是为了绕开 wrangler 的 Text 模块规则(.js 默认按 ESModule 处理)。
 const css = readFileSync(join(ROOT, 'site/style.css'), 'utf8');
 const js = readFileSync(join(ROOT, 'site/app.js'), 'utf8');
@@ -288,4 +366,3 @@ writeFileSync(
   `// 生成物,别手改 —— 由 scripts/build.mjs 生成:CSS/JS 内联后的页面。\nexport const PAGE = ${JSON.stringify(page)};\n`,
 );
 console.log(`src/page.ts: ${(page.length / 1024).toFixed(0)} KB`);
-

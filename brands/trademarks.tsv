@@ -1,0 +1,58 @@
+# 画了商标的图标清单(整库搬入的第三方库里也有几十个)。
+# id <TAB> 商标权人 <TAB> 状态(reviewed|pending) <TAB> 备注
+# reviewed = 有 brands/<cat>-<concept>.md 的逐条分析;pending = 还没逐条核,页面上标「未审」
+bootstrap:alipay	蚂蚁集团(Ant Group Co., Ltd.)	reviewed	见 brands/bootstrap-alipay.md
+bootstrap:github	GitHub, Inc.	reviewed	见 brands/bootstrap-github.md
+bootstrap:wechat	腾讯科技(深圳)有限公司	reviewed	见 brands/bootstrap-wechat.md
+bootstrap:amazon	Amazon.com, Inc.	pending	第三方库版本,未核
+bootstrap:android	Google LLC	pending	第三方库版本,未核
+bootstrap:android2	Google LLC	pending	第三方库版本,未核
+bootstrap:anthropic	Anthropic, PBC	pending	第三方库版本,未核
+bootstrap:apple	Apple Inc.	pending	第三方库版本,未核
+bootstrap:apple-music	Apple Inc.	pending	第三方库版本,未核
+bootstrap:behance	Adobe Inc.	pending	第三方库版本,未核
+bootstrap:bing	Microsoft Corporation	pending	第三方库版本,未核
+bootstrap:bootstrap	The Bootstrap Authors	pending	第三方库版本,未核
+bootstrap:discord	Discord Inc.	pending	第三方库版本,未核
+bootstrap:dribbble	Dribbble Inc.	pending	第三方库版本,未核
+bootstrap:dropbox	Dropbox, Inc.	pending	第三方库版本,未核
+bootstrap:facebook	Meta Platforms, Inc.	pending	第三方库版本,未核
+bootstrap:gitlab	GitLab Inc.	pending	第三方库版本,未核
+bootstrap:google	Google LLC	pending	第三方库版本,未核
+bootstrap:google-play	Google LLC	pending	第三方库版本,未核
+bootstrap:instagram	Meta Platforms, Inc.	pending	第三方库版本,未核
+bootstrap:javascript	OpenJS Foundation	pending	第三方库版本,未核
+bootstrap:linkedin	Microsoft Corporation	pending	第三方库版本,未核
+bootstrap:markdown	The Markdown Project	pending	第三方库版本,未核
+bootstrap:meta	Meta Platforms, Inc.	pending	第三方库版本,未核
+bootstrap:microsoft	Microsoft Corporation	pending	第三方库版本,未核
+bootstrap:microsoft-teams	Microsoft Corporation	pending	第三方库版本,未核
+bootstrap:openai	OpenAI	pending	第三方库版本,未核
+bootstrap:paypal	PayPal, LLC	pending	第三方库版本,未核
+bootstrap:pinterest	Pinterest, Inc.	pending	第三方库版本,未核
+bootstrap:reddit	Reddit, Inc.	pending	第三方库版本,未核
+bootstrap:sina-weibo	新浪(Sina)	pending	第三方库版本,未核
+bootstrap:slack	Slack Technologies, Inc.	pending	第三方库版本,未核
+bootstrap:snapchat	Snap Inc.	pending	第三方库版本,未核
+bootstrap:spotify	Spotify AB	pending	第三方库版本,未核
+bootstrap:stack-overflow	Stack Overflow Inc.	pending	第三方库版本,未核
+bootstrap:stripe	Stripe, Inc.	pending	第三方库版本,未核
+bootstrap:telegram	Telegram FZ-LLC	pending	第三方库版本,未核
+bootstrap:tencent-qq	腾讯科技(深圳)有限公司	pending	第三方库版本,未核
+bootstrap:tiktok	ByteDance Ltd.	pending	第三方库版本,未核
+bootstrap:trello	Atlassian	pending	第三方库版本,未核
+bootstrap:twitter	X Corp.	pending	第三方库版本,未核
+bootstrap:twitter-x	X Corp.	pending	第三方库版本,未核
+bootstrap:typescript	Microsoft Corporation	pending	第三方库版本,未核
+bootstrap:unity	Unity Technologies	pending	第三方库版本,未核
+bootstrap:vimeo	Vimeo LLC	pending	第三方库版本,未核
+bootstrap:whatsapp	Meta Platforms, Inc.	pending	第三方库版本,未核
+bootstrap:wikipedia	Wikimedia Foundation	pending	第三方库版本,未核
+bootstrap:windows	Microsoft Corporation	pending	第三方库版本,未核
+bootstrap:wordpress	Automattic Inc.	pending	第三方库版本,未核
+bootstrap:youtube	Google LLC	pending	第三方库版本,未核
+bootstrap:bootstrap-fill	The Bootstrap Authors	pending	第三方库版本,未核
+bootstrap:bootstrap-reboot	The Bootstrap Authors	pending	第三方库版本,未核
+bootstrap:markdown-fill	The Markdown Project	pending	第三方库版本,未核
+brand:kubernetes	The Linux Foundation(CNCF)	reviewed	见 brands/brand-kubernetes.md
+brand:prometheus	The Linux Foundation(CNCF)	reviewed	见 brands/brand-prometheus.md
