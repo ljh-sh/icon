@@ -101,3 +101,107 @@ infra:terminal	终端 / Terminal
 infra:user	用户 / User
 org:anthropic	Anthropic(自绘抽象符号,非官方标识)
 org:openai	OpenAI(自绘抽象符号,非官方标识)
+db:check	一致性校验 / Consistency Check
+db:lock	锁 / Lock
+db:redis	内存键值库 / In-Memory KV
+db:cluster	数据库集群 / Database Cluster
+db:backup	备份 / Backup
+db:replication	主从复制 / Replication
+db:sharding	分片 / Sharding
+db:index	索引 / Index
+db:migration	结构迁移 / Migration
+db:transaction	事务 / Transaction
+db:failover	故障切换 / Failover
+ai:llm	大模型 / Large Language Model
+ai:agent	智能体 / Agent
+ai:rag	检索增强生成 / RAG
+ai:embedding	向量化 / Embedding
+ai:vector-db	向量数据库 / Vector Database
+ai:finetune	微调 / Fine-tuning
+ai:inference	推理 / Inference
+ai:prompt	提示词 / Prompt
+ai:tokenizer	分词 / Tokenizer
+ai:multimodal	多模态 / Multimodal
+k8s:pod	Pod
+k8s:deployment	Deployment
+k8s:service	Service
+k8s:ingress	Ingress
+k8s:configmap	ConfigMap
+k8s:job	Job
+k8s:statefulset	StatefulSet
+k8s:cronjob	CronJob
+sec:certificate	证书 / Certificate
+sec:key	密钥 / Key
+sec:audit	审计 / Audit
+sec:zero-trust	零信任 / Zero Trust
+sec:dlp	数据防泄漏 / DLP
+sec:vulnerability	漏洞 / Vulnerability
+sec:mfa	多因子认证 / MFA
+sec:encryption	加密 / Encryption
+obs:metrics	指标 / Metrics
+obs:logs	日志 / Logs
+obs:trace	链路追踪 / Trace
+obs:alert	告警 / Alert
+obs:dashboard	仪表盘 / Dashboard
+obs:slo	服务水平目标 / SLO
+obs:profiling	性能剖析 / Profiling
+obs:sampling	采样 / Sampling
+cat:cat	猫头 / Cat
+cat:kitten	小猫 / Kitten
+cat:sleeping	睡着的猫 / Sleeping Cat
+cat:paw	猫爪 / Paw
+cat:cat-face	猫脸 / Cat Face
+dog:dog	狗头 / Dog
+dog:puppy	小狗 / Puppy
+dog:bone	骨头 / Bone
+dog:paw	狗爪 / Paw
+dog:dog-face	狗脸 / Dog Face
+animal:bird	鸟 / Bird
+animal:fish	鱼 / Fish
+animal:horse	马 / Horse
+animal:elephant	大象 / Elephant
+animal:rabbit	兔子 / Rabbit
+animal:turtle	乌龟 / Turtle
+animal:bee	蜜蜂 / Bee
+animal:butterfly	蝴蝶 / Butterfly
+chem:molecule	分子 / Molecule
+chem:atom	原子 / Atom
+chem:flask	烧瓶 / Flask
+chem:bond	化学键 / Bond
+chem:reaction	化学反应 / Reaction
+chem:catalyst	催化剂 / Catalyst
+chem:solvent	溶剂 / Solvent
+chem:balance	天平 / Balance
+circuit:chip	芯片 / Chip
+circuit:resistor	电阻 / Resistor
+circuit:capacitor	电容 / Capacitor
+circuit:diode	二极管 / Diode
+circuit:transistor	三极管 / Transistor
+circuit:board	电路板 / Circuit Board
+circuit:wave	信号波形 / Waveform
+circuit:battery	电池 / Battery
+circuit:sensor	传感器 / Sensor
+music:note	音符 / Note
+music:beat	节拍 / Beat
+music:waveform	音频波形 / Waveform
+music:equalizer	均衡器 / Equalizer
+music:piano	钢琴 / Piano
+music:guitar	吉他 / Guitar
+music:mic	麦克风 / Microphone
+music:vinyl	黑胶唱片 / Vinyl
+food:coffee	咖啡 / Coffee
+food:tea	茶 / Tea
+food:bread	面包 / Bread
+food:apple	苹果 / Apple
+food:egg	鸡蛋 / Egg
+food:rice	米饭 / Rice
+food:noodle	面条 / Noodles
+food:fish	鱼(食材) / Fish
+brand:openai	OpenAI
+brand:anthropic	Anthropic
+brand:claude	Claude
+brand:deepseek	DeepSeek
+brand:gemini	Google Gemini
+brand:mistral	Mistral AI
+org:chatgpt	ChatGPT(自绘抽象符号,非官方标识)
+org:grok	Grok / xAI(自绘抽象符号,非官方标识)

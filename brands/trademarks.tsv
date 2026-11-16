@@ -56,3 +56,9 @@ bootstrap:bootstrap-reboot	The Bootstrap Authors	pending	第三方库版本,未�
 bootstrap:markdown-fill	The Markdown Project	pending	第三方库版本,未核
 brand:kubernetes	The Linux Foundation(CNCF)	reviewed	见 brands/brand-kubernetes.md
 brand:prometheus	The Linux Foundation(CNCF)	reviewed	见 brands/brand-prometheus.md
+brand:openai	OpenAI, L.P.	reviewed	见 brands/brand-openai.md
+brand:anthropic	Anthropic, PBC	reviewed	见 brands/brand-anthropic.md
+brand:claude	Anthropic, PBC	reviewed	见 brands/brand-claude.md
+brand:deepseek	DeepSeek(杭州深度求索)	reviewed	见 brands/brand-deepseek.md
+brand:gemini	Google LLC	reviewed	见 brands/brand-gemini.md
+brand:mistral	Mistral AI SAS	reviewed	见 brands/brand-mistral.md

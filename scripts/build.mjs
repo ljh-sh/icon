@@ -22,7 +22,7 @@ const CATS = {
   infra: { title: '通用基础设施', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '通用概念,彩色填充' },
   org: { title: '公司与机构', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '自绘抽象符号,不含任何商标图形' },
   // 品牌图形:许可逐个分析,记在 brands/ 里 —— 分类只给个默认说法
-  brand: { title: '品牌标识', source: '各品牌官方渠道', license: '按各品牌条款', note: '官方 mark —— 逐个按许可记录' },
+  brand: { title: '品牌标识', source: '官方渠道 / Simple Icons(CC0)', license: '按各品牌条款', note: '常用品牌图形 —— 官方优先,拿不到用 CC0 图标库;逐个按许可记录' },
   bootstrap: { title: '第三方图标库', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '整库搬入;画了品牌的那几十个另见许可记录', bulk: true },
   db: { title: '数据库', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '数据库的概念与形态' },
   ai: { title: 'AI', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'AI 架构里的通用概念' },
@@ -331,7 +331,7 @@ writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
 // 缓存策略:图标文件长缓存(URL 上带构建号,重新部署即失效),清单短缓存
 writeFileSync(
   join(ROOT, 'public/_headers'),
-  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/manifest.json\n  Cache-Control: public, max-age=300\n`,
+  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/manifest.json\n  Cache-Control: public, max-age=0, must-revalidate\n`,
 );
 console.log(`public/icon/: ${metas.length} 个文件 + manifest.json`);
 

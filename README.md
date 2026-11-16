@@ -24,13 +24,20 @@
 | `aws` `azure` `gcp` | 云厂商官方架构图标包 | 云服务 | Apache-2.0 素材(官方发布的图标包,明确用于画图) |
 | `infra` | 本仓自绘 | 通用基础设施概念 | 本仓 Apache-2.0 |
 | `org` | 本仓自绘 | 公司与机构的**抽象符号** | 本仓 Apache-2.0,不含任何商标图形 |
-| `brand` | 品牌方官方渠道 | 官方 mark | **逐个按该品牌的条款分析**,记在 `brands/` 里 |
-| `bootstrap` | 第三方图标库(Bootstrap Icons) | 第三方画的品牌图标 | 著作权 MIT;商标是"夹带"的,只能指示性引用 |
+| `brand` | 官方渠道 / Simple Icons(CC0) | 常用品牌图形 | **逐个按该品牌的条款分析**,记在 `brands/` 里 |
+| `bootstrap` | Bootstrap Icons(整库) | 第三方图标库的全部图标 | 著作权 MIT;画了品牌的那五十来个另有登记 |
+| `db` | 本仓自绘 | 数据库的概念与形态 | 本仓 Apache-2.0 |
+| `ai` | 本仓自绘 | AI 架构里的通用概念 | 本仓 Apache-2.0 |
+| `k8s` | 本仓自绘 | K8s 组件概念(非官方标识) | 本仓 Apache-2.0 |
+| `sec` | 本仓自绘 | 安全概念 | 本仓 Apache-2.0 |
+| `obs` | 本仓自绘 | 指标 / 日志 / 链路 | 本仓 Apache-2.0 |
+| `cat` `dog` `animal` | 本仓自绘 | 动物 | 本仓 Apache-2.0 |
+| `chem` `circuit` `music` `food` | 本仓自绘 | 化学 / 电路 / 音乐 / 食物 | 本仓 Apache-2.0 |
 
-例:`aws:ec2`、`infra:disk-array`、`org:openai`、`brand:kubernetes`、`bootstrap:alipay`。
+例:`aws:ec2`、`infra:disk-array`、`db:lock`、`org:openai`、`brand:kubernetes`、`bootstrap:alipay`。
 
 > `org:` 那一族是**自绘的抽象符号**,不含任何公司的商标图形 —— 公开分发不能带别人的 mark。
-> 想要真正的 logo,走 `brand:`(官方渠道)或 `bootstrap:`(第三方库),两者都要有许可记录。
+> 想要真正的 logo,走 `brand:`(官方优先,拿不到用 CC0 图标库)或 `bootstrap:`(第三方库),两者都要有许可记录。
 
 ## 目录
 
@@ -130,9 +137,12 @@ Worker 提供的接口:
 | 路径 | 内容 |
 | --- | --- |
 | `/icon` | 查询页(深链 `/icon/c/<cat>`、`/icon/c/<cat>#<id>` 也走这里) |
-| `/icon/manifest.json` | 图标清单(元数据) |
-| `/icon/i/<cat>/<file>` | 图标原文件 |
-| `/icon/api/icons.json` | `{ "infra:server": "data:image/svg+xml;base64,…" }` |
+| `/icon/manifest.json` | 图标清单(元数据)—— 静态资源,边缘直发 |
+| `/icon/i/<cat>/<file>` | 图标原文件 —— 静态资源,边缘直发 |
+| `/icon/api/icons.json?ids=a,b` | `{ "infra:server": "data:image/svg+xml;base64,…" }` |
+
+> 整库两千多个图标,base64 内嵌会超 Worker 体积限制,所以图标文件和清单走静态资源,
+> Worker 只负责页面与按 id 取 data URI 的接口。
 
 ## 接入 draw
 
