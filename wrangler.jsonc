@@ -2,8 +2,8 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "icon-po6",
   "main": "src/index.ts",
-  // 拥有 po6.sh 这个 zone 的 Cloudflare 账号;换账号改这里
-  "account_id": "9b91040f4823535bef6af07dcc3f1e58",
+  // 拥有 po6.sh 这个 zone 的 Cloudflare 账号(Edwin.jh.lee@gmail.com's Account)
+  "account_id": "d8caf3f6df38f81423fd3ed39534f753",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
