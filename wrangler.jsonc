@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "icon-po6",
+  "main": "src/index.ts",
+  // 拥有 po6.sh 这个 zone 的 Cloudflare 账号;换账号改这里
+  "account_id": "9b91040f4823535bef6af07dcc3f1e58",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  // 挂在 po6.sh/icon 下;改域名只改这一行
+  "routes": [
+    { "pattern": "po6.sh/icon*", "zone_name": "po6.sh" }
+  ],
+  "workers_dev": true,
+  "preview_urls": false
+}

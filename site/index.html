@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x-cmd/icon —— 架构图图标库</title>
+<meta name="description" content="x-cmd 架构图图标库:云厂商官方标识 + 通用基础设施概念 + 公司抽象符号。按 x-<cat>:<concept> 索引,可搜索、可过滤。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='3' y='3' width='8' height='8' rx='2' fill='%232dd4bf'/><rect x='13' y='3' width='8' height='8' rx='2' fill='%230d9488'/><rect x='8' y='13' width='8' height='8' rx='2' fill='%230f766e'/></svg>">
+<base href="__ICON_BASE__/">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="./">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2" fill="#2dd4bf"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#0d9488"/><rect x="8" y="13" width="8" height="8" rx="2" fill="#0f766e"/></svg>
+      <span>x-cmd<em>/</em>icon</span>
+    </a>
+    <div class="search-wrap">
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="搜索图标:id / 名称 / 分类   (按 / 聚焦)">
+      <button id="clear" type="button" hidden aria-label="清空搜索">×</button>
+    </div>
+    <button id="theme" type="button" class="ghost" aria-label="切换深浅色">◐</button>
+  </div>
+</header>
+
+<main id="main">
+  <!-- 首页:分类卡片 + 全部图标 -->
+  <section id="home">
+    <h1 class="page-title">架构图图标库</h1>
+    <p class="page-sub">给 <code>x-cmd/draw</code> 画架构图用的图标。键名格式 <code>x-&lt;cat&gt;:&lt;concept&gt;</code>,点分类进去看整类,点图标定位到它。</p>
+    <h2 class="sec-title">分类</h2>
+    <div id="cats" class="cats"></div>
+    <h2 class="sec-title">全部图标 <span id="all-count" class="count"></span></h2>
+    <div id="all" class="grid"></div>
+  </section>
+
+  <!-- 分类页 -->
+  <section id="cat" hidden>
+    <nav class="crumbs"><a href="./" data-nav>← 全部图标</a></nav>
+    <h1 class="page-title" id="cat-title"></h1>
+    <p class="page-sub" id="cat-note"></p>
+    <div id="cat-grid" class="grid"></div>
+  </section>
+
+  <p id="empty" class="empty" hidden>没有匹配的图标。</p>
+</main>
+
+<dialog id="detail">
+  <button class="dlg-close" type="button" aria-label="关闭">×</button>
+  <div class="dlg-body">
+    <div class="dlg-preview"><img id="dlg-img" alt=""></div>
+    <dl class="dlg-meta">
+      <dt>id</dt><dd><code id="dlg-id"></code> <button class="copy" type="button" data-copy="id">复制</button></dd>
+      <dt>说明</dt><dd id="dlg-desc"></dd>
+      <dt>分类</dt><dd id="dlg-cat"></dd>
+      <dt>出处</dt><dd id="dlg-source"></dd>
+      <dt>许可</dt><dd id="dlg-license"></dd>
+      <dt>文件</dt><dd><a id="dlg-file" href="#" download>下载</a></dd>
+    </dl>
+    <details id="dlg-src-wrap"><summary>SVG 源码</summary><pre id="dlg-src"></pre></details>
+  </div>
+</dialog>
+
+<footer class="foot">
+  <p>图标版权归各自权利人所有;云厂商标识来自 <a href="https://github.com/mingrammer/diagrams" target="_blank" rel="noopener">mingrammer/diagrams</a>(Apache-2.0),通用概念与公司符号为本仓自绘(不含任何商标图形)。</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

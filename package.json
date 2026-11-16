@@ -1,0 +1,21 @@
+{
+  "name": "@x-cmd/icon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "x-cmd 架构图图标库 —— 云厂商标识 + 通用概念 + 公司抽象符号,按 x-<cat>:<concept> 索引",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "check": "tsc --noEmit",
+    "preview": "npm run build && node scripts/serve.mjs",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261116.1",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.155.0"
+  }
+}

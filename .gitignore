@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.wrangler/
+
+# 生成物:npm run build 产出,不进版本库
+src/gen.ts
+src/page.ts
