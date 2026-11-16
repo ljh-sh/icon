@@ -71,6 +71,11 @@ gcp:redis	缓存 / Memorystore
 gcp:run	无服务器容器 / Cloud Run
 gcp:spanner	关系型数据库 / Spanner
 gcp:sql	关系型数据库 / Cloud SQL
+bootstrap:alipay	支付宝 / Alipay
+bootstrap:github	GitHub
+bootstrap:wechat	微信 / WeChat
+brand:kubernetes	Kubernetes
+brand:prometheus	Prometheus
 infra:api	接口 / API
 infra:browser	浏览器 / Browser
 infra:cloud	云 / Cloud

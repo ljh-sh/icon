@@ -16,9 +16,57 @@ const CATS = {
   gcp: { title: 'GCP', source: 'mingrammer/diagrams', license: 'Apache-2.0', note: '云厂商官方标识' },
   infra: { title: '通用基础设施', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '通用概念,彩色填充' },
   org: { title: '公司与机构', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '自绘抽象符号,不含任何商标图形' },
+  // 品牌图形:许可逐个分析,记在 brands/<cat>-<concept>.md 里 —— 分类只给个默认说法
+  brand: { title: '品牌标识', source: '各品牌官方渠道', license: '按各品牌条款', note: '官方 mark —— 逐个按许可记录' },
+  bootstrap: { title: '第三方图标库', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '第三方画的品牌图标,商标为夹带' },
 };
 
+// 品牌图形必须逐个有许可记录
+const NEEDS_RECORD = new Set(['brand', 'bootstrap']);
+
 const MIME = { svg: 'image/svg+xml', png: 'image/png' };
+
+// ---- 读 brands/*.md 的头部(许可记录) ----
+// 头部是 key: value,正文是分析 —— 构建只取头部,页面把正文带出去显示
+function parseRecord(file) {
+  const text = readFileSync(file, 'utf8');
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (!m) {
+    console.error(`${file}: 缺头部(--- 开始,--- 结束)`);
+    process.exit(1);
+  }
+  const meta = {};
+  for (const line of m[1].split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const i = t.indexOf(':');
+    if (i < 0) continue;
+    meta[t.slice(0, i).trim()] = t.slice(i + 1).trim();
+  }
+  if (!meta.id || !meta.verdict) {
+    console.error(`${file}: 头部缺 id 或 verdict`);
+    process.exit(1);
+  }
+  if (!['ok', 'caution', 'withheld'].includes(meta.verdict)) {
+    console.error(`${file}: verdict 只能是 ok / caution / withheld,现在是 ${meta.verdict}`);
+    process.exit(1);
+  }
+  return { meta, body: text.slice(m[0].length).trim() };
+}
+
+const records = new Map(); // id → record
+const BRANDS_DIR = join(ROOT, 'brands');
+if (existsSync(BRANDS_DIR)) {
+  for (const f of readdirSync(BRANDS_DIR).sort()) {
+    if (!f.endsWith('.md')) continue;
+    const r = parseRecord(join(BRANDS_DIR, f));
+    if (records.has(r.meta.id)) {
+      console.error(`brands/: id 重复: ${r.meta.id}`);
+      process.exit(1);
+    }
+    records.set(r.meta.id, r);
+  }
+}
 
 // ---- 读 catalog.tsv ----
 const catalog = new Map();
@@ -58,6 +106,18 @@ for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => 
       console.error(`id 重复: ${id}`);
       process.exit(1);
     }
+    // 品牌图形:必须有许可记录;verdict=withheld 的不发布(分析留档,图标不发)
+    if (NEEDS_RECORD.has(catName)) {
+      const rec = records.get(id);
+      if (!rec) {
+        console.error(`${id} 缺许可记录 —— 在 brands/ 里补一个 ${catName}-${concept}.md`);
+        process.exit(1);
+      }
+      if (rec.meta.verdict === 'withheld') {
+        console.log(`跳过 ${id}(记录结论:withheld —— 不发布)`);
+        continue;
+      }
+    }
     found.set(id, `icons/${catName}/${f}`);
   }
 }
@@ -73,6 +133,14 @@ for (const id of found.keys()) {
 for (const id of catalog.keys()) {
   if (!found.has(id)) {
     console.error(`catalog.tsv 里的 ${id} 没有对应文件`);
+    bad++;
+  }
+}
+// 反向:许可记录里的 id 必须真有图标(除非它自己标了 withheld)
+for (const [id, rec] of records) {
+  if (rec.meta.verdict === 'withheld') continue;
+  if (!found.has(id)) {
+    console.error(`brands/ 里的 ${id} 没有对应图标文件`);
     bad++;
   }
 }
@@ -96,6 +164,7 @@ for (const [id, file] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
   const concept = id.slice(id.indexOf(':') + 1);
   const rel = file.replace(/^icons\//, '');
   blobs[file] = buf.toString('base64');
+  const rec = records.get(id);
   metas.push({
     id,
     cat,
@@ -105,9 +174,20 @@ for (const [id, file] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     path: `i/${rel}`,
     mime: MIME[ext],
     bytes: buf.length,
-    source: CATS[cat].source,
-    license: CATS[cat].license,
-    note: CATS[cat].note,
+    source: rec?.meta.source || CATS[cat].source,
+    license: rec?.meta.license || CATS[cat].license,
+    note: rec?.meta.note || CATS[cat].note,
+    ...(rec
+      ? {
+          verdict: rec.meta.verdict,
+          trademark: rec.meta.trademarkOwner || '',
+          trademarkPolicy: rec.meta.trademarkPolicy || '',
+          licenseUrl: rec.meta.licenseUrl || '',
+          restrictions: rec.meta.restrictions || '',
+          reviewed: rec.meta.reviewed || '',
+          notes: rec.body,
+        }
+      : {}),
   });
 }
 
@@ -141,6 +221,18 @@ export interface IconMeta {
   source: string;
   license: string;
   note: string;
+  /** 许可结论:ok / caution(品牌图形才有) */
+  verdict?: string;
+  /** 商标权人 */
+  trademark?: string;
+  /** 官方商标政策地址 */
+  trademarkPolicy?: string;
+  licenseUrl?: string;
+  /** 使用限制(分号分隔) */
+  restrictions?: string;
+  reviewed?: string;
+  /** 许可分析正文(markdown) */
+  notes?: string;
 }
 
 export interface CatMeta {

@@ -175,6 +175,39 @@ dialog::backdrop { background: rgba(2, 6, 23, .45); }
 .dlg-meta { display: grid; grid-template-columns: 64px 1fr; gap: 7px 12px; margin: 0; font-size: 13.5px; }
 .dlg-meta dt { color: var(--muted); }
 .dlg-meta dd { margin: 0; }
+.verdict {
+  display: inline-block;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.verdict.ok { background: #dcfce7; color: #15803d; }
+.verdict.caution { background: #fef3c7; color: #b45309; }
+html[data-theme="dark"] .verdict.ok { background: #14342a; color: #4ade80; }
+html[data-theme="dark"] .verdict.caution { background: #3b2d0c; color: #fbbf24; }
+.vflag {
+  display: inline-block;
+  margin: 3px 0 1px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 10.5px;
+  line-height: 16px;
+}
+html[data-theme="dark"] .vflag { background: #3b2d0c; color: #fbbf24; }
+.notes {
+  white-space: pre-wrap;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-height: 300px;
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
 .copy {
   border: 1px solid var(--line); background: transparent; color: var(--muted);
   border-radius: 6px; padding: 1px 7px; font-size: 11.5px; cursor: pointer;

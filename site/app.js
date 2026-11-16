@@ -35,7 +35,9 @@ function cell(m) {
   img.src = iconUrl(m);
   img.alt = m.id;
   img.loading = 'lazy';
-  c.append(img, el('div', 'id', m.id), el('div', 'desc', m.desc));
+  c.append(img, el('div', 'id', m.id));
+  if (m.verdict === 'caution') c.append(el('span', 'vflag', '谨慎'));
+  c.append(el('div', 'desc', m.desc));
   c.addEventListener('click', () => onCell(m));
   return c;
 }
@@ -144,6 +146,19 @@ function onCell(m) {
 
 /* ---------- 详情 ---------- */
 const dlg = $('#detail');
+const VERDICT_TEXT = { ok: '可用', caution: '谨慎 —— 限指示性引用' };
+
+function row(sel, value) {
+  const n = $(sel);
+  const dd = n.closest('dd');
+  if (value) {
+    dd.hidden = false;
+    n.textContent = value;
+  } else {
+    dd.hidden = true;
+  }
+}
+
 async function openDetail(m) {
   $('#dlg-img').src = iconUrl(m);
   $('#dlg-img').alt = m.id;
@@ -151,7 +166,45 @@ async function openDetail(m) {
   $('#dlg-desc').textContent = m.desc;
   $('#dlg-cat').textContent = (DATA.cats.find((c) => c.cat === m.cat) || {}).title || m.cat;
   $('#dlg-source').textContent = m.source;
-  $('#dlg-license').textContent = m.license;
+  row('#dlg-license', m.license);
+  row('#dlg-trademark', m.trademark);
+  row('#dlg-restrictions', (m.restrictions || '').replace(/;/g, '; '));
+  row('#dlg-reviewed', m.reviewed);
+
+  const v = $('#dlg-verdict');
+  const vdd = v.closest('dd');
+  if (m.verdict) {
+    vdd.hidden = false;
+    v.textContent = VERDICT_TEXT[m.verdict] || m.verdict;
+    v.className = 'verdict ' + m.verdict;
+  } else {
+    vdd.hidden = true;
+    v.className = '';
+  }
+
+  const pol = $('#dlg-policy');
+  const pdd = pol.closest('dd');
+  if (m.trademarkPolicy && /^https?:/.test(m.trademarkPolicy)) {
+    pdd.hidden = false;
+    pol.textContent = '';
+    const a = document.createElement('a');
+    a.href = m.trademarkPolicy;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = m.trademarkPolicy.replace(/^https?:\/\//, '').slice(0, 60);
+    pol.append(a);
+  } else {
+    pdd.hidden = true;
+  }
+
+  const nw = $('#dlg-notes-wrap');
+  if (m.notes) {
+    nw.hidden = false;
+    $('#dlg-notes').textContent = m.notes;
+  } else {
+    nw.hidden = true;
+  }
+
   const a = $('#dlg-file');
   a.href = iconUrl(m);
   a.download = m.file.replace(/^.*\//, '');

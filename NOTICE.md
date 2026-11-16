@@ -18,3 +18,19 @@
 
 这些图标是 AWS / Microsoft / Google 的商标,商标权归各自权利人所有;
 Apache-2.0 覆盖的是素材本身的著作权,不涉及商标授权。
+
+## 品牌图形(icons/brand/、icons/bootstrap/)
+
+这两类目录里的图标是**第三方品牌的图形**:
+
+- `icons/brand/` —— 取自品牌方官方渠道(项目自己的仓库、官方素材页)
+- `icons/bootstrap/` —— 取自 [Bootstrap Icons](https://github.com/twbs/icons)
+  (MIT, Copyright (c) 2019-2024 The Bootstrap Authors)
+
+每个图标在 `brands/<cat>-<concept>.md` 里有一份许可记录:著作权许可、商标权人、
+官方商标政策、使用限制、我们的结论,以及**没查到什么**。
+
+记录的结论分三档:`ok`(可收录)、`caution`(收录但限指示性引用)、`withheld`(不发布)。
+
+这些图形的商标权归各自权利人所有;上面那份著作权许可只覆盖素材本身的著作权,
+不构成商标授权。使用限制逐条见各自的记录文件。
