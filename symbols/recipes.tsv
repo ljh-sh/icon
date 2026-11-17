@@ -102,3 +102,15 @@ common/v0	gear	in/gear@solo
 common/v0	chart	in/chart@solo
 common/v0	bulb	in/bulb@solo
 common/v0	code	in/code@solo
+
+# 网络设备 —— 自绘的抽象符号(厂商那套授权只允许"画拓扑图时用",不能当图标库再分发)
+network/v0	switch	obj/switch@solo
+network/v0	router	obj/router@solo
+network/v0	firewall	obj/firewall@solo
+network/v0	load-balancer	obj/load-balancer@solo
+network/v0	wireless-ap	obj/wireless-ap@solo
+network/v0	rack	obj/rack@solo
+network/v0	patch-panel	obj/patch-panel@solo
+network/v0	optical-module	obj/optical-module@solo
+network/v0	cable	obj/cable@solo
+network/v0	gateway	obj/gateway@solo

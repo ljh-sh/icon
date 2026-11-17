@@ -368,3 +368,129 @@ common/v0:gear	齿轮	Gear
 common/v0:chart	图表	Chart
 common/v0:bulb	灯泡	Light Bulb
 common/v0:code	代码	Code
+network/v0:switch	交换机	Switch
+network/v0:router	路由器	Router
+network/v0:firewall	防火墙	Firewall
+network/v0:load-balancer	负载均衡器	Load Balancer
+network/v0:wireless-ap	无线接入点	Wireless Access Point
+network/v0:rack	机架	Rack
+network/v0:patch-panel	配线架	Patch Panel
+network/v0:optical-module	光模块	Optical Module
+network/v0:cable	网线	Network Cable
+network/v0:gateway	网关	Gateway
+aws:fsx	文件存储	FSx
+aws:glacier	冷存储	S3 Glacier
+aws:neptune	图数据库	Neptune
+aws:memorydb	内存数据库	MemoryDB
+aws:mq	消息队列	Amazon MQ
+aws:msk	托管 Kafka	MSK
+aws:emr	弹性大数据	EMR
+aws:firehose	数据流入	Data Firehose
+aws:datazone	数据区	DataZone
+aws:sagemaker	机器学习	SageMaker
+aws:bedrock	生成式 AI	Bedrock
+aws:bedrock-agentcore	智能体内核	Bedrock AgentCore
+aws:rekognition	图像识别	Rekognition
+aws:textract	文档识别	Textract
+aws:comprehend	自然语言理解	Comprehend
+aws:transcribe	语音转写	Transcribe
+aws:translate	机器翻译	Translate
+aws:lex	对话机器人	Lex
+aws:polly	语音合成	Polly
+aws:kendra	企业搜索	Kendra
+aws:forecast	预测	Forecast
+aws:lookout-vision	视觉检测	Lookout for Vision
+aws:lookout-equipment	设备检测	Lookout for Equipment
+aws:braket	量子计算	Braket
+aws:finspace	金融数据湖	FinSpace
+aws:frauddetector	欺诈检测	Fraud Detector
+aws:pinpoint	移动推送	Pinpoint
+aws:q	商业智能助手	Amazon Q
+aws:personalize	个性化推荐	Personalize
+aws:dms	数据库迁移	DMS
+aws:directconnect	专线连接	Direct Connect
+aws:network-firewall	网络防火墙	Network Firewall
+aws:privatelink	私有连接	PrivateLink
+aws:site-to-site-vpn	站点到站点 VPN	Site-to-Site VPN
+aws:transit-gateway	Transit 网关	Transit Gateway
+aws:iot-core	物联网核心	IoT Core
+aws:iot-fleetwise	车队管理	IoT FleetWise
+aws:workspaces	虚拟桌面	WorkSpaces
+aws:appflow	应用流集成	AppFlow
+aws:outposts	边缘计算	Outposts
+aws:snowball	离线数据迁移	Snowball
+aws:transfer	文件传输	Transfer Family
+aws:x-ray	应用追踪	X-Ray
+aws:security-hub	安全中心	Security Hub
+aws:inspector	安全检查	Inspector
+aws:macie	数据防泄漏	Macie
+aws:cloudhsm	硬件密钥	CloudHSM
+aws:lake-formation	湖仓治理	Lake Formation
+aws:grafana	托管 Grafana	Managed Grafana
+aws:proton	容器化托管	Proton
+aws:appconfig	应用配置	AppConfig
+aws:appsync	无服务器 API	AppSync
+aws:amplify	应用托管	Amplify
+aws:lightsail	轻量应用服务器	Lightsail
+aws:apprunner	应用运行服务	App Runner
+aws:beanstalk	弹性托管	Elastic Beanstalk
+aws:cloud9	云端 IDE	Cloud9
+aws:codecommit	代码仓库	CodeCommit
+aws:codeartifact	软件包仓库	CodeArtifact
+aws:cloudshell	云端终端	CloudShell
+aws:control-tower	账号治理	Control Tower
+aws:organizations	组织管理	Organizations
+azure:databricks	数据湖仓	Databricks
+azure:synapse	数据分析	Synapse Analytics
+azure:machine-learning	机器学习	Machine Learning
+azure:sentinel	安全日志	Sentinel
+azure:service-bus	服务总线	Service Bus
+azure:event-hubs	事件中心	Event Hubs
+azure:event-grid	事件网格	Event Grid
+azure:iot-hub	物联网中心	IoT Hub
+azure:iot-edge	边缘计算	IoT Edge
+azure:digital-twins	数字孪生	Digital Twins
+azure:application-gateway	应用网关	Application Gateway
+azure:firewall	防火墙	Azure Firewall
+azure:bastion	堡垒机	Bastion
+azure:front-door	前端加速	Front Door
+azure:dns	云 DNS	Azure DNS
+azure:container-registry	容器注册表	Container Registry
+azure:app-configuration	应用配置	App Configuration
+azure:api-management	API 管理	API Management
+azure:firewall-manager	防火墙管理	Firewall Manager
+azure:monitor	云监控	Azure Monitor
+azure:postgresql	PostgreSQL	PostgreSQL
+azure:arc-kubernetes	Arc Kubernetes	Arc-enabled Kubernetes
+azure:functions	函数应用	Function Apps
+azure:logic-apps	逻辑应用	Logic Apps
+azure:key-vault	密钥保管库	Key Vault
+azure:service-fabric	微服务编排	Service Fabric
+azure:stream-analytics	流式分析	Stream Analytics
+gcp:pubsub	发布订阅	Pub/Sub
+gcp:dataflow	数据流	Dataflow
+gcp:dataproc	大数据处理	Dataproc
+gcp:bigquery	数据仓库	BigQuery
+gcp:composer	工作流编排	Composer
+gcp:dataplex	数据治理	Dataplex
+gcp:cdn	内容分发	Cloud CDN
+gcp:armor	边缘防护	Cloud Armor
+gcp:dns	云 DNS	Cloud DNS
+gcp:load-balancing	负载均衡	Cloud Load Balancing
+gcp:firewall	防火墙规则	Cloud Firewall
+gcp:interconnect	专线互连	Cloud Interconnect
+gcp:router	云路由器	Cloud Router
+gcp:nat	网络地址转换	Cloud NAT
+gcp:vpn	VPN	Cloud VPN
+gcp:vertex-ai	机器学习平台	Vertex AI
+gcp:identity	身份平台	Identity Platform
+gcp:secret-manager	密钥管理	Secret Manager
+gcp:logging	日志服务	Cloud Logging
+gcp:monitoring	监控	Cloud Monitoring
+gcp:trace	分布式追踪	Cloud Trace
+gcp:artifact-registry	制品仓库	Artifact Registry
+gcp:build	云构建	Cloud Build
+gcp:container-registry	镜像仓库	Container Registry
+gcp:app-engine	应用引擎	App Engine
+gcp:functions	函数	Cloud Functions
+gcp:cloudrun	云运行	Cloud Run
