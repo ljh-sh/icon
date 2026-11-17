@@ -17,5 +17,6 @@
   "github": "v0",
   "common": "v0",
   "frame": "v0",
-  "network": "v0"
+  "network": "v0",
+  "base": "v0"
 }

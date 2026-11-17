@@ -81,6 +81,18 @@ function inner(file) {
   return body;
 }
 
+// 符号根元素上的声明:data-type(正常/底座/框型)与 data-inner(内容放哪)
+//   data-inner="x y w h" —— 那个"长方区间",后面按需合成图就往这儿放
+function rootMeta(file) {
+  const path = join(SYMBOLS, `${file}.svg`);
+  if (!existsSync(path)) return {};
+  const open = readFileSync(path, 'utf8').match(/<svg[^>]*>/)?.[0] || '';
+  return {
+    type: open.match(/data-type="([^"]+)"/)?.[1],
+    inner: open.match(/data-inner="([^"]+)"/)?.[1],
+  };
+}
+
 // 把一个 part 变成 SVG 片段
 //   obj/<name> / mod/<name> 走槽位
 //   obj/<name>@solo / mod/<name>@solo 单元素 —— 居中放大
@@ -131,10 +143,16 @@ for (const line of readFileSync(RECIPES, 'utf8').split('\n')) {
   const frameKind = parts.map((p) => p.match(/^frame\/(full|left|right|bottom)\//)?.[1]).find(Boolean);
   const innerSlot = frameKind ? FRAME_KIND[frameKind] : 'in';
   const body = parts.map((p) => part(p, innerSlot)).join('');
+  // 类型与内容区:空着的框/底座才带 —— 里面放了东西就不算框了
+  const hasContent = parts.some((p) => /^in\//.test(p));
+  const carrier = parts.find((p) => /^(frame|base)\//.test(p));
+  const meta = carrier && !hasContent ? rootMeta(carrier) : {};
   // 单行 —— 合并成 sprite 时一行就是一个 symbol
   writeFileSync(
     join(dir, `${concept}.svg`),
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">${body}</svg>\n`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"${
+      meta.type ? ` data-type="${meta.type}"` : ''
+    }${meta.inner ? ` data-inner="${meta.inner}"` : ''}>${body}</svg>\n`,
   );
   n++;
 }

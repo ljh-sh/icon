@@ -40,6 +40,7 @@ const CATS = {
   music: { title: '音乐', titleEn: 'Music', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '音乐与音频', noteEn: 'Music and audio' },
   food: { title: '食物', titleEn: 'Food', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '食物与饮品', noteEn: 'Food and drink' },
   network: { title: '网络设备', titleEn: 'Network Devices', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '交换机 / 路由器 / 防火墙 / 机架 这类设备与符号 —— 自绘的抽象图形', noteEn: 'Switches, routers, firewalls, racks — self-drawn abstract shapes' },
+  base: { title: '底座', titleEn: 'Bases', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '上面放东西的台面 —— 内容区在底座之上', noteEn: 'Pedestals and slabs — content sits on top' },
   frame: { title: '框架', titleEn: 'Frames', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '框在外、内容在里面的框架型图标 —— 屏 / 白板 / 门 / 云 / 地图', noteEn: 'Containers with room inside — screens, boards, doors, clouds, maps' },
   common: { title: '通用符号', titleEn: 'Common Symbols', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步', noteEn: 'Basic symbols shared across the library — lock, clock, check, sync' },
 };
@@ -341,6 +342,15 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
   const rec = records.get(id);
   const tm = trademarks.get(id);
   const raw = readFileSync(join(ROOT, info.file), 'utf8');
+  // 图标自己声明的类型与内容区:
+  //   type  = normal(正常) / base(底座) / frame(框型)
+  //   inner = "x y w h" —— 那个长方区间,后面按需合成图就往这儿放
+  const rootTag = raw.match(/<svg[^>]*>/)?.[0] || '';
+  const type = rootTag.match(/data-type="([^"]+)"/)?.[1] || 'normal';
+  const innerRaw = rootTag.match(/data-inner="([^"]+)"/)?.[1];
+  const inner = innerRaw
+    ? (([x, y, w, h]) => ({ x, y, w, h }))(innerRaw.split(/\s+/).map(Number))
+    : undefined;
   const c = catalog.get(id);
   // 整库搬入的分类没有手写描述 —— 用概念名兜底
   const autoEn = info.concept.replace(/-/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase());
@@ -362,6 +372,8 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     license: rec?.meta.license || CATS[info.cat].license,
     note: rec?.meta.note || CATS[info.cat].note,
     mono: !!CATS[info.cat].mono,
+    type,
+    ...(inner ? { inner } : {}),
     ...(rec
       ? {
           verdict: rec.meta.verdict,
@@ -454,6 +466,10 @@ export interface IconMeta {
   note: string;
   /** 单色图形(深色主题下垫白底) */
   mono?: boolean;
+  /** normal(正常) / base(底座) / frame(框型) */
+  type: 'normal' | 'base' | 'frame';
+  /** 框型/底座的内容区(长方区间)—— 按需合成图往这儿放 */
+  inner?: { x: number; y: number; w: number; h: number };
   /** 许可结论:ok / caution / pending / withheld */
   verdict?: string;
   trademark?: string;

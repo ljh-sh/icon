@@ -114,3 +114,7 @@ network/v0	patch-panel	obj/patch-panel@solo
 network/v0	optical-module	obj/optical-module@solo
 network/v0	cable	obj/cable@solo
 network/v0	gateway	obj/gateway@solo
+
+# 底座 —— 上面放东西(type=base,内容区在台面之上)
+base/v0	pedestal	base/pedestal
+base/v0	slab	base/slab

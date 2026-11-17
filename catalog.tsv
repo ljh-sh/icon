@@ -494,3 +494,5 @@ gcp:container-registry	镜像仓库	Container Registry
 gcp:app-engine	应用引擎	App Engine
 gcp:functions	函数	Cloud Functions
 gcp:cloudrun	云运行	Cloud Run
+base/v0:pedestal	底座	Pedestal
+base/v0:slab	台面	Slab
