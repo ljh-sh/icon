@@ -1,7 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-  <path d="M14.4 2.6h4v3.2h-1.4v2.6h-2.6V5.8h-1.4Z" fill="#92400e"/>
-  <path d="M14.6 8.4h3.6v3.2h-3.6Z" fill="#b45309"/>
-  <path d="M12.6 11.6c2.6-1 5 .4 5.4 2.8.5 2.6-1 5.2-3.4 6.6-2.2 1.2-4.8.8-6-1-1.2-1.8-.4-4.4 1.6-5.8-1.4-.6-1.4-2.2.2-2.8.8-.3 1.6-.1 2.2.2Z" fill="#d97706"/>
-  <circle cx="14" cy="16.4" r="1.8" fill="#1e293b"/>
-  <g stroke="#78350f" stroke-width="0.9" stroke-linecap="round"><path d="M15.2 3.6v2M16.4 3.6v2M17.6 3.6v2"/></g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M14.4 2.6h4v3.2h-1.4v2.6h-2.6V5.8h-1.4Z" fill="#92400e"/><path d="M14.6 8.4h3.6v3.2h-3.6Z" fill="#b45309"/><path d="M12.6 11.6c2.6-1 5 .4 5.4 2.8.5 2.6-1 5.2-3.4 6.6-2.2 1.2-4.8.8-6-1-1.2-1.8-.4-4.4 1.6-5.8-1.4-.6-1.4-2.2.2-2.8.8-.3 1.6-.1 2.2.2Z" fill="#d97706"/><circle cx="14" cy="16.4" r="1.8" fill="#1e293b"/><g stroke="#78350f" stroke-width="0.9" stroke-linecap="round"><path d="M15.2 3.6v2M16.4 3.6v2M17.6 3.6v2"/></g></svg>

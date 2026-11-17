@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-  <ellipse cx="12" cy="6.4" rx="8" ry="3" fill="#7c3aed"/>
-  <path d="M4 6.4v11.2c0 1.66 3.58 3 8 3s8-1.34 8-3V6.4c0 1.66-3.58 3-8 3s-8-1.34-8-3Z" fill="#6d28d9"/>
-  <g fill="#ddd6fe">
-    <circle cx="8.6" cy="12" r="1.2"/><circle cx="12.6" cy="13.4" r="1.2"/><circle cx="16" cy="11.4" r="1.2"/>
-    <circle cx="9.6" cy="16.2" r="1.2"/><circle cx="14.4" cy="16.8" r="1.2"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><ellipse cx="12" cy="6.4" rx="8" ry="3" fill="#7c3aed"/><path d="M4 6.4v11.2c0 1.66 3.58 3 8 3s8-1.34 8-3V6.4c0 1.66-3.58 3-8 3s-8-1.34-8-3Z" fill="#6d28d9"/><g fill="#ddd6fe"><circle cx="8.6" cy="12" r="1.2"/><circle cx="12.6" cy="13.4" r="1.2"/><circle cx="16" cy="11.4" r="1.2"/><circle cx="9.6" cy="16.2" r="1.2"/><circle cx="14.4" cy="16.8" r="1.2"/></g></svg>

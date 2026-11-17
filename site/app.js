@@ -144,6 +144,53 @@ function descOf(m) {
   return lang === 'en' ? m.descEn || m.desc : m.desc || m.descEn;
 }
 
+// ---------- SVG 源码:展开 + 高亮 ----------
+// 图标文件在仓里是单行的(sprite 一行一个 symbol),显示时展开成缩进的可读格式。
+const escHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function prettySvg(src) {
+  const doc = new DOMParser().parseFromString(src, 'image/svg+xml');
+  const root = doc.documentElement;
+  if (!root || doc.getElementsByTagNameNS('*', 'parsererror').length) return null;
+  const out = [];
+  const esc = (v) => escHtml(v).replace(/"/g, '&quot;');
+  // 输出的还是转义过的文本 —— 高亮器按 &lt; 认标签,直接吐真 < 会被浏览器当元素吃掉
+  const walk = (el, depth) => {
+    const pad = '  '.repeat(depth);
+    const attrs = Array.from(el.attributes).map((a) => ` ${a.name}="${esc(a.value)}"`).join('');
+    const kids = Array.from(el.childNodes).filter(
+      (n) => n.nodeType === 1 || (n.nodeType === 3 && n.textContent.trim())
+    );
+    if (!kids.length) {
+      out.push(`${pad}&lt;${el.tagName}${attrs}/&gt;`);
+      return;
+    }
+    out.push(`${pad}&lt;${el.tagName}${attrs}&gt;`);
+    for (const k of kids) {
+      if (k.nodeType === 1) walk(k, depth + 1);
+      else out.push('  '.repeat(depth + 1) + esc(k.textContent.trim()));
+    }
+    out.push(`${pad}&lt;/${el.tagName}&gt;`);
+  };
+  walk(root, 0);
+  return out.join('\n');
+}
+
+// 自己写的小高亮器:标签、属性名、属性值、注释各一个颜色。
+// 不引第三方库 —— 页面就一个文件,几十行够了。输入是已经转义过的文本。
+function highlightSvg(escaped) {
+  return escaped.replace(
+    /(&lt;!--[\s\S]*?--&gt;)|(&lt;\/?)([a-zA-Z][\w:.-]*)|([a-zA-Z][\w:.-]*)(\s*=\s*)("[^"]*")|(\/?&gt;)/g,
+    (all, com, pre, name, attr, eq, val, punc) => {
+      if (com) return `<span class="tok-com">${com}</span>`;
+      if (pre) return `<span class="tok-pun">${pre}</span><span class="tok-tag">${name}</span>`;
+      if (attr) return `<span class="tok-attr">${attr}</span>${eq}<span class="tok-str">${val}</span>`;
+      if (punc) return `<span class="tok-pun">${punc}</span>`;
+      return all;
+    }
+  );
+}
+
 // 分类名与说明:中英文分开,英文版不能还挂着中文
 const catTitle = (c) => (c ? (lang === 'en' ? c.titleEn || c.title : c.title) : '');
 const catNote = (c) => (c ? (lang === 'en' ? c.noteEn || c.note : c.note) : '');
@@ -319,7 +366,9 @@ async function openPanel(m) {
     wrap.hidden = false;
     $('#p-src').textContent = '…';
     try {
-      $('#p-src').textContent = await (await fetch(`${BASE}${m.path}${V}`)).text();
+      const txt = await (await fetch(`${BASE}${m.path}${V}`)).text();
+      // 文件是单行的,展开成缩进的可读格式再上色
+      $('#p-src').innerHTML = highlightSvg(prettySvg(txt) ?? escHtml(txt));
     } catch {
       $('#p-src').textContent = t('srcFail');
     }

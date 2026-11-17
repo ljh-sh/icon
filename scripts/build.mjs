@@ -53,6 +53,16 @@ const BRANDISH =
 
 const MIME = { svg: 'image/svg+xml', png: 'image/png' };
 
+// 图标文件一律单行 —— sprite 一行一个 symbol,合并、grep、diff 都靠这个
+// (页面上看源码时再展开成缩进的可读格式)
+function checkOneLine(file) {
+  const raw = readFileSync(file, 'utf8');
+  if (raw.replace(/\n$/, '').includes('\n')) {
+    console.error(`${file.replace(`${ROOT}/`, '')}: 图标文件必须单行(sprite 一行一个 symbol)`);
+    process.exit(1);
+  }
+}
+
 // 版本号比较:v2 比 v10 小
 const verCmp = (a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10);
 
@@ -211,6 +221,7 @@ for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => 
           process.exit(1);
         }
         const concept = f.slice(0, -(ext.length + 1));
+        checkOneLine(join(dir, vd, f));
         const id = `${catName}/${vd}:${concept}`;
         if (found.has(id)) {
           console.error(`id 重复: ${id}`);
@@ -228,6 +239,7 @@ for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => 
         process.exit(1);
       }
       const concept = f.slice(0, -(ext.length + 1));
+      checkOneLine(join(dir, f));
       const id = `${catName}:${concept}`;
       if (found.has(id)) {
         console.error(`id 重复: ${id}`);

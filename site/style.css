@@ -188,9 +188,20 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 /* 首页:一个大搜索框 */
 .hero { text-align: center; padding: 30px 0 8px; }
 .search.big { max-width: 960px; margin: 0 auto; }
-.search.big input { height: 78px; font-size: 20px; border-radius: 26px; padding: 0 62px 0 66px; }
+.search.big input { height: 78px; font-size: 20px; border-radius: 26px; padding: 0 150px 0 66px; }
 .search.big .s-icon { left: 26px; width: 24px; height: 24px; }
 .search.big .s-clear { right: 16px; width: 36px; height: 36px; font-size: 22px; }
+/* 命中数:放在搜索框右端,一边过滤一边变 */
+.s-count {
+  position: absolute;
+  right: 70px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--faint);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
 .search.slim { max-width: 460px; margin-bottom: 18px; }
 
 /* ---------- 分类筛选 —— 不描边,选中才上底色 ---------- */
@@ -246,6 +257,9 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   object-fit: contain;
   display: block;
   margin: 0 auto 10px;
+  /* 显示时自动圆角 —— 带底色的方形标识(云厂商那批)看着像 app 图标 */
+  border-radius: 14px;
+  overflow: hidden;
 }
 /* 单色图形(brand / bootstrap)继承 currentColor —— 深浅两套主题都看得见 */
 .ic.mono { color: var(--ink); fill: currentColor; }
@@ -316,7 +330,13 @@ html[data-theme="dark"] .panel { box-shadow: -18px 0 50px rgba(0, 0, 0, .5); }
   background: var(--surface-2);
   border-radius: var(--radius);
 }
-.panel-preview img, .panel-preview .ic { width: 124px; height: 124px; object-fit: contain; }
+.panel-preview img, .panel-preview .ic {
+  width: 124px;
+  height: 124px;
+  object-fit: contain;
+  border-radius: 20px;
+  overflow: hidden;
+}
 .panel-preview .ic.mono { color: var(--ink); fill: currentColor; }
 .panel-meta { display: grid; grid-template-columns: 76px 1fr; gap: 7px 14px; margin: 0; font-size: 13.5px; }
 .panel-meta dt { color: var(--muted); }
@@ -344,10 +364,19 @@ pre {
   border-radius: 10px;
   padding: 12px;
   overflow: auto;
-  max-height: 220px;
+  max-height: 260px;
   font-size: 11.5px;
-  line-height: 1.45;
+  line-height: 1.55;
+  /* 路径数据那行特别长 —— 折行,别横向拖 */
+  white-space: pre-wrap;
+  word-break: break-all;
 }
+/* SVG 源码高亮 */
+.tok-tag { color: var(--violet-ink); }
+.tok-attr { color: var(--accent-ink); }
+.tok-str { color: var(--ok); }
+.tok-com { color: var(--faint); font-style: italic; }
+.tok-pun { color: var(--faint); }
 
 /* ---------- 相关图标 ---------- */
 .related { margin-top: 24px; }

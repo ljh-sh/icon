@@ -50,7 +50,8 @@ function inner(file) {
   }
   const s = readFileSync(path, 'utf8');
   const m = s.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
-  let body = (m ? m[1] : s).trim().replace(/\n\s*/g, '\n  ');
+  // 符号文件都是单行的 —— 拼出来的图标也必须是单行(sprite 一行一个 symbol)
+  let body = (m ? m[1] : s).trim().replace(/\s*\n\s*/g, ' ');
   body = body.replace(/@([a-z-]+)\.([a-z]+)/g, (whole, role, key) => {
     const hex = palette[role]?.[key];
     if (!hex) {
@@ -76,7 +77,7 @@ function part(src) {
   const transform = solo
     ? `translate(${((24 - SOLO) / 2).toFixed(3)} ${((24 - SOLO) / 2).toFixed(3)}) scale(${(SOLO / box).toFixed(4)})`
     : SLOTS[kind].transform;
-  return `<g transform="${transform}">\n  ${body}\n  </g>`;
+  return `<g transform="${transform}">${body}</g>`;
 }
 
 let n = 0;
@@ -95,10 +96,11 @@ for (const line of readFileSync(RECIPES, 'utf8').split('\n')) {
   }
   const dir = join(ROOT, 'icons', cat, version);
   mkdirSync(dir, { recursive: true });
-  const body = parts.map(part).join('\n  ');
+  const body = parts.map(part).join('');
+  // 单行 —— 合并成 sprite 时一行就是一个 symbol
   writeFileSync(
     join(dir, `${concept}.svg`),
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">\n  ${body}\n</svg>\n`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">${body}</svg>\n`,
   );
   n++;
 }

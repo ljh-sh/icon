@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12">
-  <g transform="translate(-0.550 -1.964) scale(0.7443)">
-<g stroke="@neutral.soft" stroke-width="1.5" fill="none">
-    <path d="M8.8 8.2v2.8M8.8 11 4.4 13.6M8.8 11l4.4 2.6"/>
-    </g>
-    <rect x="5.9" y="2.8" width="5.8" height="5.4" rx="1.7" fill="@violet.base"/>
-    <rect x="2" y="13.4" width="5.6" height="5.2" rx="1.6" fill="@violet.light"/>
-    <rect x="10" y="13.4" width="5.6" height="5.2" rx="1.6" fill="@violet.light"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12"><g transform="translate(-0.550 -1.964) scale(0.7443)"><g stroke="@neutral.soft" stroke-width="1.5" fill="none"><path d="M8.8 8.2v2.8M8.8 11 4.4 13.6M8.8 11l4.4 2.6"/></g><rect x="5.9" y="2.8" width="5.8" height="5.4" rx="1.7" fill="@violet.base"/><rect x="2" y="13.4" width="5.6" height="5.2" rx="1.6" fill="@violet.light"/><rect x="10" y="13.4" width="5.6" height="5.2" rx="1.6" fill="@violet.light"/></g></svg>
