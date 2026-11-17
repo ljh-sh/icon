@@ -8,16 +8,48 @@
 
 ## 第三方素材
 
-`icons/aws/`、`icons/azure/`、`icons/gcp/` 下的 PNG 来自开源项目:
+`icons/aws/`、`icons/azure/`、`icons/gcp/` 下的是**云厂商官方图标包**里的服务标识,
+直接取原厂的 SVG(矢量),不再经第三方转手:
 
-> **mingrammer/diagrams** —— https://github.com/mingrammer/diagrams
-> Copyright the mingrammer/diagrams contributors
-> Licensed under the Apache License, Version 2.0
+| 分类 | 来源 | 取用方式 |
+| --- | --- | --- |
+| `icons/aws/` | [AWS Architecture Icons](https://aws.amazon.com/architecture/icons/) 官方图标包(2026-07 版) | `Architecture-Service-Icons/` 与 `Resource-Icons/` 下的服务/资源标识,SVG 原样 |
+| `icons/azure/` | [Microsoft Azure Public Service Icons](https://learn.microsoft.com/en-us/azure/architecture/icons/) 官方图标包(V25) | `Icons/` 下各分类的服务标识,SVG 原样 |
+| `icons/gcp/` | [Google Cloud 产品图标](https://cloud.google.com/icons) 官方图标集 | 各产品标识,SVG 原样 |
 
-取的是该项目的 `resources/` 目录下的服务图标,缩到 48×48 并量化了调色板。
+导入时做的处理(不动图形本身):
 
-这些图标是 AWS / Microsoft / Google 的商标,商标权归各自权利人所有;
-Apache-2.0 覆盖的是素材本身的著作权,不涉及商标授权。
+- 去掉 `<title>` / `<desc>`,把内部 `id` 加上分类前缀改成全局唯一
+  (几十个图标合进一张 sprite,id 撞了会串色)
+- GCP 的图标用 CSS class 上色,已把 class 规则展开成写死的 `fill` ——
+  否则进了 sprite 之后几十条 `.cls-1` 会互相覆盖
+- Azure 的渐变(`url(#…)`)引用同步改过
+
+**商标**:这些是 AWS / Microsoft / Google 的商标,权归各自权利人所有。
+官方图标包本身就是给画架构图用的,本仓的用途(x-cmd/draw 画架构图)落在其许可范围内;
+但**不得**改色改形,也不得暗示与厂商有合作或背书关系。
+
+有 4 个键厂商从来没发布过对应的服务标识,拿不到官方 SVG,已经**从库里删掉**
+(留档与逐条原因见 issue #6):
+
+```
+aws/quicksight   AWS 现行图标包里没有 QuickSight 标识
+aws/es           Elasticsearch 已被 OpenSearch 取代,包里只剩 OpenSearch
+                 —— 语义由 aws:opensearch 接手,它的描述里带了 "formerly Elasticsearch"
+azure/container  Azure 公开图标包(V16–V25 都查过)没有 Container Apps 服务标识,
+                 只有 Container-Apps-Environments(图形不同,不是同一个标识)
+azure/blob       同上,没有 Blob Storage 服务标识(Storage-Accounts 是另一个图形)
+```
+
+`azure/ad` 原来也是 PNG,已换成 Microsoft 官方包(V16)里的 `Azure-Active-Directory`
+—— 与原 PNG 是同一个图形,已逐个比对过。
+
+## 早期版本里的第三方素材
+
+2026-11-17 之前,`icons/aws/`、`icons/azure/`、`icons/gcp/` 下的图标是
+[mingrammer/diagrams](https://github.com/mingrammer/diagrams)(Apache-2.0,
+Copyright the mingrammer/diagrams contributors)的 `resources/` 目录下的 PNG,
+缩到 48×48 并量化了调色板。那批 PNG 已经从本仓移除,历史里仍可取回。
 
 ## 品牌图形(icons/brand/、icons/bootstrap/)
 

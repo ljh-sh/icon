@@ -4,8 +4,10 @@
 
 两类东西放在一起:
 
-- **云厂商官方标识** —— AWS / Azure / GCP,来自开源项目
-  [mingrammer/diagrams](https://github.com/mingrammer/diagrams)(Apache-2.0),缩到 48×48。
+- **云厂商官方标识** —— AWS / Azure / GCP,直接取**厂商自己的官方图标包**里的 SVG
+  (矢量,原样不改):[AWS Architecture Icons](https://aws.amazon.com/architecture/icons/)、
+  [Microsoft Azure Public Service Icons](https://learn.microsoft.com/en-us/azure/architecture/icons/)、
+  [Google Cloud 产品图标](https://cloud.google.com/icons)。条款与处理见 `NOTICE.md`。
 - **本仓自绘的通用概念** —— 服务器、磁盘阵列、路由器、显示器、桌面应用这类没有厂商归属的东西,
   24×24 网格、彩色填充的 SVG。
 
@@ -22,7 +24,7 @@
 
 | cat | 来源 | 含义 | 许可怎么算 |
 | --- | --- | --- | --- |
-| `aws` `azure` `gcp` | 云厂商官方架构图标包 | 云服务 | Apache-2.0 素材(官方发布的图标包,明确用于画图) |
+| `aws` `azure` `gcp` | 厂商官方图标包 | 云服务 | 原厂 SVG 原样;商标归各自权利人,见 `NOTICE.md` |
 | `infra` | 本仓自绘 | 通用基础设施概念 | 本仓 Apache-2.0 |
 | `org` | 本仓自绘 | 公司与机构的**抽象符号** | 本仓 Apache-2.0,不含任何商标图形 |
 | `brand` | 官方渠道 / Simple Icons(CC0) / Wikimedia Commons | 常用品牌图形 | **逐个按该品牌的条款分析**,记在 `brands/` 里 |
@@ -35,8 +37,9 @@
 | `cat` `dog` `animal` | 本仓自绘 | 动物 | 本仓 Apache-2.0 |
 | `chem` `circuit` `music` `food` | 本仓自绘 | 化学 / 电路 / 音乐 / 食物 | 本仓 Apache-2.0 |
 | `dev` | 本仓自绘 | 开发项目流程 —— 通用阶段 / 软件 / 硬件 | 本仓 Apache-2.0 |
+| `common` | 本仓自绘 | 全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步 | 本仓 Apache-2.0 |
 
-例:`aws:ec2`、`infra:disk-array`、`db:lock`、`org:openai`、`brand:kubernetes`、`bootstrap:alipay`。
+例:`aws:ec2`、`infra:disk-array`、`db:locked`、`org:openai`、`brand:kubernetes`、`bootstrap:alipay`。
 
 > `org:` 那一族是**自绘的抽象符号**,不含任何公司的商标图形 —— 公开分发不能带别人的 mark。
 > 想要真正的 logo,走 `brand:`(官方优先,拿不到用 CC0 图标库)或 `bootstrap:`(第三方库),两者都要有许可记录。
@@ -66,9 +69,12 @@
 - 外部那五个分类(aws / azure / gcp / brand / bootstrap)不带版本 ——
   `aws:ec2` 既是具体键也是别名。
 - `catalog.tsv` 只写**具体版本**的键;别名由构建生成,写进去构建直接报错。
-- 查询页的分类页有版本切换(推荐 / v0 / v1),具体版本的格子带版本角标,
-  详情里标出"别名 → infra/v0:gui";首页按分类展示(每类先放 20 个左右,取推荐版本),
-  搜索时才把全库各版本都放出来。
+- 查询页就一个过滤页:大搜索框 + 分类 chip,一边打一边筛。**没有分类子页** ——
+  分类只是筛选条件,条件进 URL(`?cat=db&q=lock`),链接能分享。
+- 点图标开右侧面板:图标信息(分类 / 版本 / 许可结论 / 商标 / 出处 / SVG 源码)
+  + 一组相关图标(同分类的邻居、同名概念、描述相近的)。
+  具体版本的格子带版本角标,面板里标出"别名 → infra/v0:gui"。
+- 空查询时只摆推荐版本(别名条目);打了字才把全库各版本都放出来。
 
 画一版新的:复制一份到 `icons/<cat>/v1/`,在 `catalog.tsv` 补上 `<cat>/v1:<concept>` 的行,
 再把 `versions.json` 里那个分类改成 `"v1"` —— 别名就跟着走了,`v0` 还在。
@@ -97,34 +103,44 @@ src/page.ts                      生成物:CSS/JS 内联后的页面
 自绘的图标不该一个概念画一张插画 —— 那样没有共同的视觉词汇,改一次画风要翻
 几百个文件。做法是先定**基本符号**,概念由符号**会意**出来(像会意字)。
 
-**组合规则:相同要素要小,不同要素要大。**
+**构图规范 v3:一个图标 = 对象(大,居中偏左)+ 修饰(大,右上角,叠在对象上)。**
 
 ```
-db:lock       =  挂锁(大) + 数据库(右下角小标记)
-db:backup     =  时钟(大) + 数据库(右下角小标记)
-k8s:pod       =  Pod(大) + k8s 轮子(右下角小标记)
+db:locked     =  数据库圆柱(对象) + 挂锁(修饰,右上)
+db:index      =  表(对象) + 索引条(修饰,右上)
+db:kv         =  键值条目(对象) + 闪电(修饰,右上)
 ```
 
-- **大**的是"这是什么" —— 这个概念独有的部分,占主区,细节画足
-- **小**的是"它属于哪" —— 归属标记(数据库 / 安全 / k8s 轮子),固定在右下角
+- **对象** = 这个概念作用在什么上 —— 不是"分类"。`db:locked` 的对象是数据库圆柱,
+  `db:index` 的对象是表,`db:kv` 的对象是键值条目
+- **修饰** = 状态或动作 —— 锁 / 时钟 / 对勾 / 同步 / 切换 / 箭头,全库共用一套,
+  同一个符号只画一次
+- **分类**(`db:` / `sec:` / `k8s:`)只活在键名里,不画进图形
+- **右下角空着** —— 将来放"×2"这种程序化生成的计数徽标
+
+修饰符**不是徽章**:它跟对象一样大,叠在对象上,不是一个压在角上的小标记。
 
 ```
 symbols/
   palette.json        色板 —— 角色的唯一出处(surface / neutral / primary /
                       accent / success / danger / violet / on-color)
-  glyph/*.svg         大元素 —— 概念本身
-  corner/*.svg        归属角标 —— 数据库 / 安全 / k8s
+  obj/*.svg           对象 —— 每个概念挑一个(圆柱 / 表 / 键值条目 / 产品盘…)
+  mod/*.svg           修饰 —— 全库共用的状态符号(lock / clock / check / sync…)
   recipes.tsv         配方表:哪个概念 = 哪些符号叠起来
 ```
 
-- `scripts/compose.mjs` 按配方拼出 SVG,写进 `icons/<cat>/v<n>/`。
+- 符号画在自己的规范框里(对象 14×14、修饰 12×12),`scripts/compose.mjs` 按槽位
+  摆好再拼成 24×24 的 SVG,写进 `icons/<cat>/v<n>/`。
   `npm run build` 先跑它 —— 改一个符号,全库跟着变,不会走样。
 - 符号里颜色写 `@role.key`,compose 时按 `palette.json` 换成实际颜色;
   用了色板里没有的颜色,构建直接报错。
 - 产品的"大标记"是品牌色圆盘 + 白色自绘字形 —— 图形是自绘的抽象符号,
   不是官方标识,配色取接近该品牌的颜色。
+- `common:` 分类放共用符号本身(`common:lock` / `clock` / `check` / `sync`)——
+  要一把锁,直接用锁的图标,不用绕到 `db:` 里。
 
-> 键名天然就是会意结构:`db:lock` 字面上就是"数据库 + 锁"。
+> 键名读作"对象处于该状态" —— `db:lock`(一把锁这个名词)与 `db:locked`
+> (锁定状态的数据库)是两个概念,前者没进库,锁本身用 `common:lock`。
 
 ## 品牌图形:逐个按许可分析
 
@@ -224,7 +240,7 @@ Worker 提供的接口(路径里的 `/icon` 换成所在挂载点):
 
 | 路径 | 内容 |
 | --- | --- |
-| `/icon` | 查询页(深链 `/icon/c/<cat>`、`/icon/c/<cat>#<id>` 也走这里) |
+| `/icon` | 查询页(老链接 `/icon/c/<cat>` 会重定向到 `?cat=<cat>`) |
 | `/icon/manifest.json` | 图标清单(元数据)—— 静态资源,边缘直发 |
 | `/icon/i/<cat>/<file>` | 图标原文件 —— 静态资源,边缘直发 |
 | `/icon/api/icons.json?ids=a,b` | `{ "infra:server": "data:image/svg+xml;base64,…" }` |
@@ -257,8 +273,11 @@ export const ICON_FIELD_RE = /^(?:aws|azure|gcp|brand|bootstrap|[a-z0-9]+)\/v\d+
 ## 许可与出处
 
 - 本仓代码与自绘图标:Apache-2.0(见 `LICENSE`)。
-- AWS / Azure / GCP 标识:来自 [mingrammer/diagrams](https://github.com/mingrammer/diagrams),Apache-2.0;
-  商标归各自权利人所有。详见 `NOTICE.md`。
+- AWS / Azure / GCP 标识:来自各厂商自己的官方图标包
+  ([AWS](https://aws.amazon.com/architecture/icons/)、
+  [Azure](https://learn.microsoft.com/en-us/azure/architecture/icons/)、
+  [Google Cloud](https://cloud.google.com/icons)),原样取 SVG;
+  商标归各自权利人所有,不得改色改形。详见 `NOTICE.md`。
 - `org:` 那族是自绘抽象符号,与任何公司无商标关联。
 - `brand:` 里有一部分取自 Wikimedia Commons(公有领域 + 商标标记),
   见 `licenses/wikimedia-commons/`。

@@ -36,7 +36,7 @@ aws:kms	密钥管理	KMS
 aws:lambda	无服务器函数	Lambda
 aws:nat	NAT 网关	NAT Gateway
 aws:nlb	网络负载均衡	Network Load Balancer
-aws:opensearch	托管检索	OpenSearch
+aws:opensearch	托管检索(原 Elasticsearch)	OpenSearch (formerly Elasticsearch Service)
 aws:rds	关系型数据库	RDS
 aws:redis	缓存	ElastiCache for Redis
 aws:redshift	数据仓库	Redshift
@@ -343,7 +343,3 @@ github/v0:workflow	工作流	Workflow
 github/v0:runner	执行器	Runner
 github/v0:package	包	Package
 github/v0:milestone	里程碑	Milestone
-aws:quicksight	BI 报表	QuickSight
-aws:es	托管检索服务	Elasticsearch Service
-azure:container	容器应用	Container Apps
-azure:blob	对象存储	Blob Storage

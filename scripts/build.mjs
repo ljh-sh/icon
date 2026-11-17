@@ -16,9 +16,9 @@ const PUBLIC = join(ROOT, 'public/icon');
 
 // 每个分类的出处与许可 —— 图标库的"血缘",页面上要显示
 const CATS = {
-  aws: { title: 'AWS', source: 'mingrammer/diagrams', license: 'Apache-2.0', note: '云厂商官方标识' },
-  azure: { title: 'Azure', source: 'mingrammer/diagrams', license: 'Apache-2.0', note: '云厂商官方标识' },
-  gcp: { title: 'GCP', source: 'mingrammer/diagrams', license: 'Apache-2.0', note: '云厂商官方标识' },
+  aws: { title: 'AWS', source: 'AWS 官方架构图标包', license: '厂商图标包(商标归 AWS)', note: 'AWS 官方服务标识,原样 SVG' },
+  azure: { title: 'Azure', source: 'Microsoft Azure 官方图标包', license: '厂商图标包(商标归 Microsoft)', note: 'Azure 官方服务标识,原样 SVG' },
+  gcp: { title: 'GCP', source: 'Google Cloud 官方图标集', license: '厂商图标包(商标归 Google)', note: 'Google Cloud 官方产品标识,原样 SVG' },
   infra: { title: '通用基础设施', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '通用概念,彩色填充' },
   org: { title: '公司与机构', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '自绘抽象符号,不含任何商标图形' },
   // 品牌图形:许可逐个分析,记在 brands/ 里 —— 分类只给个默认说法
