@@ -12,32 +12,43 @@
 #   行为(锁 / 时钟 / 对勾 …)—— 中性深色底,全库一个样
 #   身份(产品徽章)—— 品牌色底 + 白色自绘字形。图形是自绘的抽象符号,
 #     不是官方标识;配色取接近该品牌的颜色,浅色品牌色压深一档保证白字可读。
-db/v0	check	db	badge	mod/check
-db/v0	lock	db	badge	mod/lock
-db/v0	kv	db	badge	mod/bolt
-db/v0	cluster	db	badge	mod/branch
-db/v0	backup	db	badge	mod/clock
-db/v0	replication	db	db-b	badge	mod/sync
-db/v0	sharding	db	badge	mod/grid
-db/v0	index	db	badge	mod/index
-db/v0	migration	db	badge	mod/arrow
-db/v0	transaction	db	badge	mod/cycle
-db/v0	failover	db	db-b	badge	mod/switch
-db/v0	redis	db	mod/redis
-db/v0	pg	db	mod/pg
-db/v0	mysql	db	mod/mysql
-db/v0	clickhouse	db	mod/clickhouse
-db/v0	duckdb	db	mod/duckdb
-db/v0	mongo	db	mod/mongo
-db/v0	influx	db	mod/influx
-db/v0	neo4j	db	mod/neo4j
-db/v0	milvus	db	mod/milvus
-db/v0	tidb	db	mod/tidb
-sec/v0	certificate	sec-doc	badge	mod/check
-sec/v0	key	sec-doc	badge	mod/key
-sec/v0	audit	sec-lens	badge	mod/list
-sec/v0	zero-trust	sec-shield	badge	mod/lock
-sec/v0	dlp	sec-doc	badge	mod/drop
-sec/v0	vulnerability	sec-shield	badge	mod/crack
-sec/v0	mfa	sec-device	badge	mod/code
-sec/v0	encryption	sec-lock	badge	mod/key
+# 组合规则:大元素 = 这个概念本身(独特要素),右下角小标记 = 归属(平台/家族)。
+# 相同要素要小,不同要素要大 —— 大的是"这是什么",小的是"它属于哪"。
+db/v0	backup	glyph/clock	corner/db
+db/v0	lock	glyph/lock	corner/db
+db/v0	check	glyph/check	corner/db
+db/v0	kv	glyph/bolt	corner/db
+db/v0	cluster	glyph/tree	corner/db
+db/v0	replication	glyph/sync	corner/db
+db/v0	sharding	glyph/shards	corner/db
+db/v0	index	glyph/bars	corner/db
+db/v0	migration	glyph/arrow	corner/db
+db/v0	transaction	glyph/cycle	corner/db
+db/v0	failover	glyph/switch	corner/db
+db/v0	redis	glyph/redis	corner/db
+db/v0	pg	glyph/pg	corner/db
+db/v0	mysql	glyph/mysql	corner/db
+db/v0	clickhouse	glyph/clickhouse	corner/db
+db/v0	duckdb	glyph/duckdb	corner/db
+db/v0	mongo	glyph/mongo	corner/db
+db/v0	influx	glyph/influx	corner/db
+db/v0	neo4j	glyph/neo4j	corner/db
+db/v0	milvus	glyph/milvus	corner/db
+db/v0	tidb	glyph/tidb	corner/db
+k8s/v0	pod	glyph/k-pod	corner/k8s
+k8s/v0	deployment	glyph/k-deployment	corner/k8s
+k8s/v0	service	glyph/k-service	corner/k8s
+k8s/v0	ingress	glyph/k-ingress	corner/k8s
+k8s/v0	configmap	glyph/k-configmap	corner/k8s
+k8s/v0	job	glyph/k-job	corner/k8s
+k8s/v0	statefulset	glyph/k-statefulset	corner/k8s
+k8s/v0	cronjob	glyph/k-cronjob	corner/k8s
+sec/v0	certificate	glyph/s-certificate	corner/sec
+sec/v0	key	glyph/s-key	corner/sec
+sec/v0	audit	glyph/s-audit	corner/sec
+sec/v0	zero-trust	glyph/s-zero-trust	corner/sec
+sec/v0	dlp	glyph/s-dlp	corner/sec
+sec/v0	vulnerability	glyph/s-vulnerability	corner/sec
+sec/v0	mfa	glyph/s-mfa	corner/sec
+sec/v0	encryption	glyph/s-encryption	corner/sec
+
