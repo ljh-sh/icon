@@ -12,24 +12,32 @@
 #   行为(锁 / 时钟 / 对勾 …)—— 中性深色底,全库一个样
 #   身份(产品徽章)—— 品牌色底 + 白色自绘字形。图形是自绘的抽象符号,
 #     不是官方标识;配色取接近该品牌的颜色,浅色品牌色压深一档保证白字可读。
-db/v1	check	db	badge	mod/check
-db/v1	lock	db	badge	mod/lock
-db/v1	kv	db	badge	mod/bolt
-db/v1	cluster	db	badge	mod/branch
-db/v1	backup	db	badge	mod/clock
-db/v1	replication	db	db-b	badge	mod/sync
-db/v1	sharding	db	badge	mod/grid
-db/v1	index	db	badge	mod/index
-db/v1	migration	db	badge	mod/arrow
-db/v1	transaction	db	badge	mod/cycle
-db/v1	failover	db	db-b	badge	mod/switch
-db/v1	redis	db	mod/redis
-db/v1	pg	db	mod/pg
-db/v1	mysql	db	mod/mysql
-db/v1	clickhouse	db	mod/clickhouse
-db/v1	duckdb	db	mod/duckdb
-db/v1	mongo	db	mod/mongo
-db/v1	influx	db	mod/influx
-db/v1	neo4j	db	mod/neo4j
-db/v1	milvus	db	mod/milvus
-db/v1	tidb	db	mod/tidb
+db/v0	check	db	badge	mod/check
+db/v0	lock	db	badge	mod/lock
+db/v0	kv	db	badge	mod/bolt
+db/v0	cluster	db	badge	mod/branch
+db/v0	backup	db	badge	mod/clock
+db/v0	replication	db	db-b	badge	mod/sync
+db/v0	sharding	db	badge	mod/grid
+db/v0	index	db	badge	mod/index
+db/v0	migration	db	badge	mod/arrow
+db/v0	transaction	db	badge	mod/cycle
+db/v0	failover	db	db-b	badge	mod/switch
+db/v0	redis	db	mod/redis
+db/v0	pg	db	mod/pg
+db/v0	mysql	db	mod/mysql
+db/v0	clickhouse	db	mod/clickhouse
+db/v0	duckdb	db	mod/duckdb
+db/v0	mongo	db	mod/mongo
+db/v0	influx	db	mod/influx
+db/v0	neo4j	db	mod/neo4j
+db/v0	milvus	db	mod/milvus
+db/v0	tidb	db	mod/tidb
+sec/v0	certificate	sec-doc	badge	mod/check
+sec/v0	key	sec-doc	badge	mod/key
+sec/v0	audit	sec-lens	badge	mod/list
+sec/v0	zero-trust	sec-shield	badge	mod/lock
+sec/v0	dlp	sec-doc	badge	mod/drop
+sec/v0	vulnerability	sec-shield	badge	mod/crack
+sec/v0	mfa	sec-device	badge	mod/code
+sec/v0	encryption	sec-lock	badge	mod/key

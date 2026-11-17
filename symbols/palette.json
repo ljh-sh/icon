@@ -1,0 +1,10 @@
+{
+  "surface": { "base": "#f1f5f9", "line": "#cbd5e1" },
+  "neutral": { "base": "#334155", "soft": "#94a3b8" },
+  "primary": { "light": "#38bdf8", "base": "#0284c7", "deep": "#075985" },
+  "accent": { "base": "#f59e0b", "deep": "#b45309" },
+  "success": { "base": "#22c55e", "deep": "#16a34a" },
+  "danger": { "base": "#ef4444", "deep": "#b91c1c" },
+  "violet": { "base": "#8b5cf6", "deep": "#6d28d9" },
+  "on-color": { "base": "#f8fafc" }
+}

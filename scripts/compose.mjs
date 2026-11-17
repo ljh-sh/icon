@@ -11,13 +11,15 @@ import { join, dirname } from 'node:path';
 const ROOT = new URL('..', import.meta.url).pathname;
 const SYMBOLS = join(ROOT, 'symbols');
 const RECIPES = join(SYMBOLS, 'recipes.tsv');
+// 色板 —— 角色的唯一出处,符号里写 @role.key,这里换成实际颜色
+const palette = JSON.parse(readFileSync(join(SYMBOLS, 'palette.json'), 'utf8'));
 
 if (!existsSync(RECIPES)) {
   console.log('compose: 没有 symbols/recipes.tsv,跳过');
   process.exit(0);
 }
 
-// 取一个符号文件的内部内容(剥掉 <svg> 外壳)
+// 取一个符号文件的内部内容(剥掉 <svg> 外壳),并把 @role.key 换成色板里的颜色
 function inner(file) {
   const path = join(SYMBOLS, `${file}.svg`);
   if (!existsSync(path)) {
@@ -26,7 +28,16 @@ function inner(file) {
   }
   const s = readFileSync(path, 'utf8');
   const m = s.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
-  return (m ? m[1] : s).trim().replace(/\n\s*/g, '\n  ');
+  let body = (m ? m[1] : s).trim().replace(/\n\s*/g, '\n  ');
+  body = body.replace(/@([a-z-]+)\.([a-z]+)/g, (whole, role, key) => {
+    const hex = palette[role]?.[key];
+    if (!hex) {
+      console.error(`compose: ${file}.svg 用了色板里没有的颜色 ${whole}`);
+      process.exit(1);
+    }
+    return hex;
+  });
+  return body;
 }
 
 let n = 0;
