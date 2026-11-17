@@ -356,13 +356,8 @@ frame/v0:door	门	Door
 frame/v0:cloud	云	Cloud
 frame/v0:sun	太阳	Sun
 frame/v0:digitizer	数位板	Graphics Tablet
-frame/v0:map	地图	Map
-frame/v0:country	国家地图	Country Map
-frame/v0:lake	湖	Lake
-frame/v0:display-chart	显示屏上的图表	Chart on a Display
-frame/v0:board-atom	白板上的原子	Atom on a Whiteboard
-frame/v0:lake-data	湖里的数据	Data in a Lake
-frame/v0:terminal-code	终端里的代码	Code in a Terminal
+base/v0:map	地图	Map
+base/v0:lake	湖	Lake
 common/v0:atom	原子	Atom
 common/v0:gear	齿轮	Gear
 common/v0:chart	图表	Chart
@@ -496,3 +491,7 @@ gcp:functions	函数	Cloud Functions
 gcp:cloudrun	云运行	Cloud Run
 base/v0:pedestal	底座	Pedestal
 base/v0:slab	台面	Slab
+frame/v0:whiteboard-professor	女教授与白板	Professor at a Whiteboard
+frame/v0:whiteboard-doctor	医生与白板	Doctor at a Whiteboard
+frame/v0:whiteboard-teacher	老师与白板	Teacher at a Whiteboard
+frame/v0:blackboard-engineer	工程师与黑板	Engineer at a Blackboard

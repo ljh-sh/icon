@@ -90,13 +90,8 @@ frame/v0	door	frame/full/door
 frame/v0	cloud	frame/full/cloud
 frame/v0	sun	frame/full/sun
 frame/v0	digitizer	frame/full/digitizer
-frame/v0	map	frame/bottom/map
-frame/v0	country	frame/bottom/country
-frame/v0	lake	frame/bottom/lake
-frame/v0	display-chart	frame/full/display	in/chart
-frame/v0	board-atom	frame/full/whiteboard	in/atom
-frame/v0	lake-data	frame/bottom/lake	in/data
-frame/v0	terminal-code	frame/full/terminal	in/code
+base/v0	map	base/map
+base/v0	lake	base/lake
 common/v0	atom	in/atom@solo
 common/v0	gear	in/gear@solo
 common/v0	chart	in/chart@solo
@@ -118,3 +113,7 @@ network/v0	gateway	obj/gateway@solo
 # 底座 —— 上面放东西(type=base,内容区在台面之上)
 base/v0	pedestal	base/pedestal
 base/v0	slab	base/slab
+frame/v0	whiteboard-professor	frame/full/whiteboard-professor
+frame/v0	whiteboard-doctor	frame/full/whiteboard-doctor
+frame/v0	whiteboard-teacher	frame/full/whiteboard-teacher
+frame/v0	blackboard-engineer	frame/full/blackboard-engineer

@@ -52,7 +52,9 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font: 16px/1.6 Inter, "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
   /* 底子偏白,靠几团柔和的色晕做出设计感:橙在右上、紫在左上、天蓝在右下 */
   background:
@@ -88,8 +90,9 @@ button { font: inherit; cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -.015em;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -97,7 +100,7 @@ button { font: inherit; cursor: pointer; }
 .brand .slash { font-weight: 400; font-size: 20px; color: var(--faint); margin: 0 1px; }
 .brand .product { font-weight: 500; color: var(--muted); }
 /* 站名跟在品牌后面 —— 标题就在 nav bar 上 */
-.site-title { color: var(--muted); font-size: 14px; }
+.site-title { color: var(--muted); font-size: 15.5px; font-weight: 500; letter-spacing: -.01em; }
 
 /* 右侧动作区:GitHub + 语言 + 主题(跟 draw 的站一个次序) */
 .gh-link {
@@ -108,7 +111,7 @@ button { font: inherit; cursor: pointer; }
   padding: 0 10px;
   border-radius: 8px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   text-decoration: none;
   transition: background-color .15s ease, color .15s ease;
 }
@@ -123,7 +126,7 @@ button { font: inherit; cursor: pointer; }
   border: 0;
   background: none;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .lang-toggle:hover { color: var(--ink); }
 
@@ -143,7 +146,7 @@ button { font: inherit; cursor: pointer; }
 main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 .empty { color: var(--muted); padding: 48px 0; text-align: center; }
 .grid-head { margin: 22px 0 12px; }
-.count { color: var(--muted); font-size: 13px; }
+.count { color: var(--muted); font-size: 14px; }
 
 /* ---------- 搜索框(参考 x-cmd.com:一个宽的圆角输入框,左边一把放大镜) ---------- */
 .search { position: relative; }
@@ -194,7 +197,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 /* 首页:一个大搜索框 */
 .hero { text-align: center; padding: 30px 0 8px; }
 .search.big { max-width: 960px; margin: 0 auto; }
-.search.big input { height: 78px; font-size: 20px; border-radius: 26px; padding: 0 150px 0 66px; }
+.search.big input { height: 78px; font-size: 21px; border-radius: 26px; padding: 0 150px 0 66px; }
 .search.big .s-icon { left: 26px; width: 24px; height: 24px; }
 .search.big .s-clear { right: 16px; width: 36px; height: 36px; font-size: 22px; }
 /* 命中数:放在搜索框右端,一边过滤一边变 */
@@ -203,7 +206,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   right: 70px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 15px;
+  font-size: 16px;
   color: var(--faint);
   pointer-events: none;
   font-variant-numeric: tabular-nums;
@@ -217,8 +220,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   background: none;
   color: var(--muted);
   font: inherit;
-  font-size: 13.5px;
-  padding: 6px 13px;
+  font-size: 14.5px;
+  padding: 7px 14px;
   border-radius: 999px;
   transition: background-color .15s ease, color .15s ease;
 }
@@ -231,8 +234,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   background: var(--surface);
   color: var(--muted);
   font: inherit;
-  font-size: 13.5px;
-  padding: 9px 22px;
+  font-size: 14.5px;
+  padding: 10px 24px;
   border-radius: 999px;
   box-shadow: var(--shadow);
 }
@@ -272,8 +275,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 .cell:hover img, .cell:hover .ic { transform: scale(1.07); }
 /* 单色图形(brand / bootstrap)继承 currentColor —— 深浅两套主题都看得见 */
 .ic.mono { color: var(--ink); fill: currentColor; }
-.cell .id { font-size: 11.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
-.cell .desc { font-size: 11px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell .id { font-size: 12.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
+.cell .desc { font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell.hit { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent); }
 .cell.flash { animation: flash 1.1s ease-out; }
 @keyframes flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
@@ -283,8 +286,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   margin: 3px 0 1px;
   padding: 0 7px;
   border-radius: 999px;
-  font-size: 10.5px;
-  line-height: 16px;
+  font-size: 11.5px;
+  line-height: 17px;
   background: var(--violet-soft);
   color: var(--violet-ink);
 }
@@ -347,10 +350,10 @@ html[data-theme="dark"] .panel { box-shadow: -18px 0 50px rgba(0, 0, 0, .5); }
   overflow: hidden;
 }
 .panel-preview .ic.mono { color: var(--ink); fill: currentColor; }
-.panel-meta { display: grid; grid-template-columns: 76px 1fr; gap: 7px 14px; margin: 0; font-size: 13.5px; }
+.panel-meta { display: grid; grid-template-columns: 78px 1fr; gap: 8px 14px; margin: 0; font-size: 14.5px; }
 .panel-meta dt { color: var(--muted); }
 .panel-meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-.verdict { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; }
+.verdict { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; }
 .verdict.ok { background: rgba(34, 197, 94, .14); color: var(--ok); }
 .verdict.caution { background: rgba(251, 146, 60, .18); color: var(--caution); }
 .verdict.pending { background: var(--surface-2); color: var(--muted); }
@@ -359,8 +362,8 @@ details { margin-top: 16px; font-size: 13px; }
 summary { cursor: pointer; color: var(--muted); }
 .notes {
   white-space: pre-wrap;
-  font-size: 12.5px;
-  line-height: 1.65;
+  font-size: 13.5px;
+  line-height: 1.7;
   color: var(--muted);
   max-height: 300px;
   overflow: auto;
@@ -374,8 +377,8 @@ pre {
   padding: 12px;
   overflow: auto;
   max-height: 260px;
-  font-size: 11.5px;
-  line-height: 1.55;
+  font-size: 12.5px;
+  line-height: 1.6;
   /* 路径数据那行特别长 —— 折行,别横向拖 */
   white-space: pre-wrap;
   word-break: break-all;
@@ -393,7 +396,7 @@ pre {
 .rel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
 .cell.small { padding: 10px 6px 8px; border-radius: 10px; }
 .cell.small img, .cell.small .ic { width: 36px; height: 36px; margin: 0 auto 6px; }
-.cell.small .id { font-size: 10.5px; }
+.cell.small .id { font-size: 11.5px; }
 
 @media (max-width: 720px) {
   .top-inner { padding: 0 16px; gap: 12px; }
