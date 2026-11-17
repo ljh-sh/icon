@@ -52,7 +52,7 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  font: 16px/1.6 Inter, "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 17px/1.6 "Geist Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
@@ -65,7 +65,7 @@ body {
   background-attachment: fixed;
 }
 
-code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+code, pre, .mono { font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 a { color: inherit; }
 button { font: inherit; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
@@ -87,10 +87,11 @@ button { font: inherit; cursor: pointer; }
 .nav-actions { display: flex; align-items: center; gap: 14px; flex: none; }
 
 .brand {
+  font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 650;
   letter-spacing: -.015em;
   text-decoration: none;
@@ -100,7 +101,7 @@ button { font: inherit; cursor: pointer; }
 .brand .slash { font-weight: 400; font-size: 20px; color: var(--faint); margin: 0 1px; }
 .brand .product { font-weight: 500; color: var(--muted); }
 /* 站名跟在品牌后面 —— 标题就在 nav bar 上 */
-.site-title { color: var(--muted); font-size: 15.5px; font-weight: 500; letter-spacing: -.01em; }
+.site-title { font-family: "Space Grotesk", "Noto Sans SC", sans-serif; color: var(--muted); font-size: 16.5px; font-weight: 500; letter-spacing: -.01em; }
 
 /* 右侧动作区:GitHub + 语言 + 主题(跟 draw 的站一个次序) */
 .gh-link {
@@ -111,7 +112,7 @@ button { font: inherit; cursor: pointer; }
   padding: 0 10px;
   border-radius: 8px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15px;
   text-decoration: none;
   transition: background-color .15s ease, color .15s ease;
 }
@@ -126,7 +127,7 @@ button { font: inherit; cursor: pointer; }
   border: 0;
   background: none;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15px;
 }
 .lang-toggle:hover { color: var(--ink); }
 
@@ -146,7 +147,7 @@ button { font: inherit; cursor: pointer; }
 main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 .empty { color: var(--muted); padding: 48px 0; text-align: center; }
 .grid-head { margin: 22px 0 12px; }
-.count { color: var(--muted); font-size: 14px; }
+.count { color: var(--muted); font-size: 15px; }
 
 /* ---------- 搜索框(参考 x-cmd.com:一个宽的圆角输入框,左边一把放大镜) ---------- */
 .search { position: relative; }
@@ -197,7 +198,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 /* 首页:一个大搜索框 */
 .hero { text-align: center; padding: 30px 0 8px; }
 .search.big { max-width: 960px; margin: 0 auto; }
-.search.big input { height: 78px; font-size: 21px; border-radius: 26px; padding: 0 150px 0 66px; }
+.search.big input { height: 78px; font-size: 22px; border-radius: 26px; padding: 0 150px 0 66px; }
 .search.big .s-icon { left: 26px; width: 24px; height: 24px; }
 .search.big .s-clear { right: 16px; width: 36px; height: 36px; font-size: 22px; }
 /* 命中数:放在搜索框右端,一边过滤一边变 */
@@ -206,7 +207,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   right: 70px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 16px;
+  font-size: 17px;
   color: var(--faint);
   pointer-events: none;
   font-variant-numeric: tabular-nums;
@@ -220,8 +221,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   background: none;
   color: var(--muted);
   font: inherit;
-  font-size: 14.5px;
-  padding: 7px 14px;
+  font-size: 15.5px;
+  padding: 8px 15px;
   border-radius: 999px;
   transition: background-color .15s ease, color .15s ease;
 }
@@ -234,8 +235,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
   background: var(--surface);
   color: var(--muted);
   font: inherit;
-  font-size: 14.5px;
-  padding: 10px 24px;
+  font-size: 15.5px;
+  padding: 11px 25px;
   border-radius: 999px;
   box-shadow: var(--shadow);
 }
@@ -275,8 +276,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 .cell:hover img, .cell:hover .ic { transform: scale(1.07); }
 /* 单色图形(brand / bootstrap)继承 currentColor —— 深浅两套主题都看得见 */
 .ic.mono { color: var(--ink); fill: currentColor; }
-.cell .id { font-size: 12.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
-.cell .desc { font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell .id { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
+.cell .desc { font-size: 13px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell.hit { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent); }
 .cell.flash { animation: flash 1.1s ease-out; }
 @keyframes flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
@@ -331,7 +332,7 @@ html[data-theme="dark"] .panel { box-shadow: -18px 0 50px rgba(0, 0, 0, .5); }
   padding: 18px 20px 12px;
 }
 .panel-head-text { flex: 1; min-width: 0; }
-.p-id { font-size: 15px; color: var(--accent-ink); word-break: break-all; cursor: pointer; }
+.p-id { font-family: "Geist Mono", ui-monospace, monospace; font-size: 15px; color: var(--accent-ink); word-break: break-all; cursor: pointer; }
 .p-desc { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
 .panel-body { flex: 1; overflow-y: auto; padding: 0 20px 28px; }
 .panel-preview {
@@ -350,10 +351,10 @@ html[data-theme="dark"] .panel { box-shadow: -18px 0 50px rgba(0, 0, 0, .5); }
   overflow: hidden;
 }
 .panel-preview .ic.mono { color: var(--ink); fill: currentColor; }
-.panel-meta { display: grid; grid-template-columns: 78px 1fr; gap: 8px 14px; margin: 0; font-size: 14.5px; }
+.panel-meta { display: grid; grid-template-columns: 80px 1fr; gap: 8px 14px; margin: 0; font-size: 15px; }
 .panel-meta dt { color: var(--muted); }
 .panel-meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-.verdict { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; }
+.verdict { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13.5px; }
 .verdict.ok { background: rgba(34, 197, 94, .14); color: var(--ok); }
 .verdict.caution { background: rgba(251, 146, 60, .18); color: var(--caution); }
 .verdict.pending { background: var(--surface-2); color: var(--muted); }
@@ -362,7 +363,7 @@ details { margin-top: 16px; font-size: 13px; }
 summary { cursor: pointer; color: var(--muted); }
 .notes {
   white-space: pre-wrap;
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.7;
   color: var(--muted);
   max-height: 300px;
@@ -377,7 +378,7 @@ pre {
   padding: 12px;
   overflow: auto;
   max-height: 260px;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.6;
   /* 路径数据那行特别长 —— 折行,别横向拖 */
   white-space: pre-wrap;

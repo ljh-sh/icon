@@ -5,7 +5,6 @@
 #     obj/<name>        symbols/obj/<name>.svg,套对象槽位(14×14 框,居中偏左)
 #     mod/<name>        symbols/mod/<name>.svg,套修饰槽位(12×12 框,右上角,叠在对象上)
 #     mod/<name>@solo   同一个文件,套单元素槽位(12×12 框,居中放大)
-#     其它前缀          原样拼进去(旧规则:glyph/… / corner/…)
 #
 # 构图规范 v3 —— 一个图标 = 对象(大,居中偏左)+ 修饰(大,右上角)。
 #   对象 = 这个概念作用在什么上:db:lock 的对象是数据库圆柱,db:index 的对象是表,
@@ -43,38 +42,38 @@ common/v0	lock	mod/lock@solo
 common/v0	clock	mod/clock@solo
 common/v0	check	mod/check@solo
 common/v0	sync	mod/sync@solo
-k8s/v0	pod	glyph/k-pod	corner/k8s
-k8s/v0	deployment	glyph/k-deployment	corner/k8s
-k8s/v0	service	glyph/k-service	corner/k8s
-k8s/v0	ingress	glyph/k-ingress	corner/k8s
-k8s/v0	configmap	glyph/k-configmap	corner/k8s
-k8s/v0	job	glyph/k-job	corner/k8s
-k8s/v0	statefulset	glyph/k-statefulset	corner/k8s
-k8s/v0	cronjob	glyph/k-cronjob	corner/k8s
-sec/v0	certificate	glyph/s-certificate	corner/sec
-sec/v0	key	glyph/s-key	corner/sec
-sec/v0	audit	glyph/s-audit	corner/sec
-sec/v0	zero-trust	glyph/s-zero-trust	corner/sec
-sec/v0	dlp	glyph/s-dlp	corner/sec
-sec/v0	vulnerability	glyph/s-vulnerability	corner/sec
-sec/v0	mfa	glyph/s-mfa	corner/sec
-sec/v0	encryption	glyph/s-encryption	corner/sec
-github/v0	issue	glyph/gh-issue	corner/github
-github/v0	pr	glyph/gh-pr	corner/github
-github/v0	release	glyph/gh-release	corner/github
-github/v0	discussion	glyph/gh-discussion	corner/github
-github/v0	wiki	glyph/gh-wiki	corner/github
-github/v0	action	glyph/gh-action	corner/github
-github/v0	ci	glyph/gh-ci	corner/github
-github/v0	artifact	glyph/gh-artifact	corner/github
-github/v0	repo	glyph/gh-repo	corner/github
-github/v0	branch	glyph/gh-branch	corner/github
-github/v0	commit	glyph/gh-commit	corner/github
-github/v0	tag	glyph/gh-tag	corner/github
-github/v0	workflow	glyph/gh-workflow	corner/github
-github/v0	runner	glyph/gh-runner	corner/github
-github/v0	package	glyph/gh-package	corner/github
-github/v0	milestone	glyph/gh-milestone	corner/github
+k8s/v0	pod	obj/k-pod	mod/k8s
+k8s/v0	deployment	obj/k-deployment	mod/k8s
+k8s/v0	service	obj/k-service	mod/k8s
+k8s/v0	ingress	obj/k-ingress	mod/k8s
+k8s/v0	configmap	obj/k-configmap	mod/k8s
+k8s/v0	job	obj/k-job	mod/k8s
+k8s/v0	statefulset	obj/k-statefulset	mod/k8s
+k8s/v0	cronjob	obj/k-cronjob	mod/k8s
+sec/v0	certificate	obj/s-certificate	mod/sec
+sec/v0	key	obj/s-key	mod/sec
+sec/v0	audit	obj/s-audit	mod/sec
+sec/v0	zero-trust	obj/s-zero-trust	mod/sec
+sec/v0	dlp	obj/s-dlp	mod/sec
+sec/v0	vulnerability	obj/s-vulnerability	mod/sec
+sec/v0	mfa	obj/s-mfa	mod/sec
+sec/v0	encryption	obj/s-encryption	mod/sec
+github/v0	issue	obj/gh-issue	mod/github
+github/v0	pr	obj/gh-pr	mod/github
+github/v0	release	obj/gh-release	mod/github
+github/v0	discussion	obj/gh-discussion	mod/github
+github/v0	wiki	obj/gh-wiki	mod/github
+github/v0	action	obj/gh-action	mod/github
+github/v0	ci	obj/gh-ci	mod/github
+github/v0	artifact	obj/gh-artifact	mod/github
+github/v0	repo	obj/gh-repo	mod/github
+github/v0	branch	obj/gh-branch	mod/github
+github/v0	commit	obj/gh-commit	mod/github
+github/v0	tag	obj/gh-tag	mod/github
+github/v0	workflow	obj/gh-workflow	mod/github
+github/v0	runner	obj/gh-runner	mod/github
+github/v0	package	obj/gh-package	mod/github
+github/v0	milestone	obj/gh-milestone	mod/github
 
 # 框架型 —— 框在外,内容在里面(全包围/下包围,见 issue #8)
 frame/v0	display	frame/full/display

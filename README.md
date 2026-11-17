@@ -156,8 +156,9 @@ in/<n>             框里的内容 —— 位置由框的 kind 决定
 symbols/
   palette.json        色板 —— 角色的唯一出处(surface / neutral / primary /
                       accent / success / danger / violet / on-color)
-  obj/*.svg           对象 —— 每个概念挑一个(圆柱 / 表 / 键值条目 / 产品盘…)
-  mod/*.svg           修饰 —— 全库共用的状态符号(lock / clock / check / sync…)
+  obj/*.svg           对象 —— 每个概念挑一个(圆柱 / 表 / 键值条目 / 产品盘 / 工作负载…)
+  mod/*.svg           修饰 —— 全库共用的状态符号(lock / clock / check / sync…),
+                      以及各家的商标(github 的猫 / k8s 的轮子 / sec 的盾)
   frame/full/*.svg    全包围的框 —— 满画布,中间空着(屏 / 白板 / 门 / 云 / 太阳…)
   frame/bottom/*.svg  下包围的框 —— 地图 / 国家 / 湖
   in/*.svg            框里的内容(原子 / 齿轮 / 图表 / 灯泡 / 代码)
