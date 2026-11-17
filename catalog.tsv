@@ -326,3 +326,20 @@ dev/v0:emc	EMC 测试	EMC Test
 dev/v0:certification	认证	Certification
 dev/v0:bom	物料清单	BOM
 dev/v0:supply-chain	供应链	Supply Chain
+
+github/v0:issue	问题单	Issue
+github/v0:pr	拉取请求	Pull Request
+github/v0:release	发布	Release
+github/v0:discussion	讨论	Discussion
+github/v0:wiki	文档库	Wiki
+github/v0:action	自动化工作流	Action
+github/v0:ci	持续集成	CI
+github/v0:artifact	构建产物	Artifact
+github/v0:repo	仓库	Repository
+github/v0:branch	分支	Branch
+github/v0:commit	提交	Commit
+github/v0:tag	标签	Tag
+github/v0:workflow	工作流	Workflow
+github/v0:runner	执行器	Runner
+github/v0:package	包	Package
+github/v0:milestone	里程碑	Milestone

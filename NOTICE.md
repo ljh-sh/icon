@@ -36,3 +36,9 @@ Apache-2.0 覆盖的是素材本身的著作权,不涉及商标授权。
 
 这些图形的商标权归各自权利人所有;上面那份著作权许可只覆盖素材本身的著作权,
 不构成商标授权。使用限制逐条见各自的记录文件。
+
+`icons/github/` 的每个图标右下角有一枚 GitHub 官方 mark(黑猫),作次要位置,
+表示"这是 GitHub 的概念"。GitHub 商标政策(https://github.com/logos)明确允许
+这种"表示集成"的用法(Show integration / Secondary placement),且要求不得改色改形 ——
+所以那枚 mark 原样输出黑色,其余部分是本仓自绘。依据见
+`brands/bootstrap-github.md`。

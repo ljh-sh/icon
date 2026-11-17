@@ -47,4 +47,20 @@ sec/v0	dlp	glyph/s-dlp	corner/sec
 sec/v0	vulnerability	glyph/s-vulnerability	corner/sec
 sec/v0	mfa	glyph/s-mfa	corner/sec
 sec/v0	encryption	glyph/s-encryption	corner/sec
+github/v0	issue	glyph/gh-issue	corner/github
+github/v0	pr	glyph/gh-pr	corner/github
+github/v0	release	glyph/gh-release	corner/github
+github/v0	discussion	glyph/gh-discussion	corner/github
+github/v0	wiki	glyph/gh-wiki	corner/github
+github/v0	action	glyph/gh-action	corner/github
+github/v0	ci	glyph/gh-ci	corner/github
+github/v0	artifact	glyph/gh-artifact	corner/github
+github/v0	repo	glyph/gh-repo	corner/github
+github/v0	branch	glyph/gh-branch	corner/github
+github/v0	commit	glyph/gh-commit	corner/github
+github/v0	tag	glyph/gh-tag	corner/github
+github/v0	workflow	glyph/gh-workflow	corner/github
+github/v0	runner	glyph/gh-runner	corner/github
+github/v0	package	glyph/gh-package	corner/github
+github/v0	milestone	glyph/gh-milestone	corner/github
 
