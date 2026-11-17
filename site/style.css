@@ -52,7 +52,7 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  font: 17px/1.6 "Geist Sans", "Noto Serif SC Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 17px/1.65 "Geist Sans", "Noto Sans SC Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
@@ -87,7 +87,7 @@ button { font: inherit; cursor: pointer; }
 .nav-actions { display: flex; align-items: center; gap: 14px; flex: none; }
 
 .brand {
-  font-family: "Space Grotesk", "Noto Serif SC Variable", sans-serif;
+  font-family: "Space Grotesk", "Noto Sans SC Variable", sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -101,7 +101,7 @@ button { font: inherit; cursor: pointer; }
 .brand .slash { font-weight: 400; font-size: 20px; color: var(--faint); margin: 0 1px; }
 .brand .product { font-weight: 500; color: var(--muted); }
 /* 站名跟在品牌后面 —— 标题就在 nav bar 上 */
-.site-title { font-family: "Space Grotesk", "Noto Serif SC Variable", sans-serif; color: var(--muted); font-size: 16.5px; font-weight: 500; letter-spacing: -.01em; }
+.site-title { font-family: "Space Grotesk", "Noto Sans SC Variable", sans-serif; color: var(--muted); font-size: 16.5px; font-weight: 550; letter-spacing: .01em; }
 
 /* 右侧动作区:GitHub + 语言 + 主题(跟 draw 的站一个次序) */
 .gh-link {
@@ -221,6 +221,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 56px 24px 88px; }
   background: none;
   color: var(--muted);
   font: inherit;
+  font-weight: 500;
   font-size: 15.5px;
   padding: 8px 15px;
   border-radius: 999px;
@@ -277,7 +278,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 56px 24px 88px; }
 /* 单色图形(brand / bootstrap)继承 currentColor —— 深浅两套主题都看得见 */
 .ic.mono { color: var(--ink); fill: currentColor; }
 .cell .id { font-family: "Geist Mono Variable", ui-monospace, monospace; font-size: 13.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
-.cell .desc { font-size: 13px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell .desc { font-size: 13px; font-weight: 450; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell.hit { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent); }
 .cell.flash { animation: flash 1.1s ease-out; }
 @keyframes flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
