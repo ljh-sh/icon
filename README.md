@@ -9,7 +9,7 @@
 - **本仓自绘的通用概念** —— 服务器、磁盘阵列、路由器、显示器、桌面应用这类没有厂商归属的东西,
   24×24 网格、彩色填充的 SVG。
 
-查询页:**https://po6.sh/icon**
+查询页:**https://x-cmd.com/iconbase/**(另一处:https://po6.sh/icon)
 
 ## 键名规范
 
@@ -206,11 +206,21 @@ npm run dev              # http://localhost:8787/
 
 ```sh
 npm run deploy           # = npm run build && wrangler deploy
+npm run deploy:iconbase  # 发到 x-cmd.com/iconbase(另一个 Cloudflare 账号)
 ```
 
-挂在 `po6.sh/icon` 下(路由写在 `wrangler.jsonc` 的 `routes`)。换域名改那一行。
+两个挂载点,同一个 Worker 代码:
 
-Worker 提供的接口:
+| 挂载点 | 域名 | 账号 |
+| --- | --- | --- |
+| `/icon` | po6.sh/icon | Edwin.jh.lee@gmail.com's Account |
+| `/iconbase` | x-cmd.com/iconbase | It@x-cmd.com's Account |
+
+**跨账号加不了路由**,所以是两个 worker 各发一次(`wrangler.jsonc` 里的 `env.iconbase`)。
+挂载点由 `vars.MOUNTS` 声明,请求路径的第一段对上才算挂载;静态资源只有一份
+(`public/icon/**`),各挂载点都从那儿取。改挂载点改这两处:`vars.MOUNTS` 与 `routes`。
+
+Worker 提供的接口(路径里的 `/icon` 换成所在挂载点):
 
 | 路径 | 内容 |
 | --- | --- |

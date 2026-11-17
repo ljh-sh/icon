@@ -11,15 +11,35 @@
     "head_sampling_rate": 1
   },
   // 静态资源:图标文件与清单。目录结构是 public/icon/**,
-  // 路由是 po6.sh/icon*,所以 /icon/i/… 与 /icon/manifest.json 由边缘直接发。
+  // 所以 /icon/i/… 与 /icon/manifest.json 由边缘直接发;
+  // 别的挂载点(x-cmd.com/iconbase)由 Worker 转一下,资源还是这一份。
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
   },
-  // 挂在 po6.sh/icon 下;改域名只改这一行
+  // 挂载点:请求路径的第一段,是这里列出来的才算挂载
+  "vars": {
+    "MOUNTS": "/icon,/iconbase"
+  },
+  // 挂在 po6.sh/icon 下
   "routes": [
     { "pattern": "po6.sh/icon*", "zone_name": "po6.sh" }
   ],
+  // x-cmd.com 是另一个 Cloudflare 账号("It@x-cmd.com's Account")里的 zone,
+  // 跨账号加不了路由 —— 那边单独发一个 worker:同样的代码,换个挂载点。
+  //   npm run deploy:iconbase
+  "env": {
+    "iconbase": {
+      "name": "icon-xcmd",
+      "account_id": "9b91040f4823535bef6af07dcc3f1e58",
+      "vars": {
+        "MOUNTS": "/iconbase"
+      },
+      "routes": [
+        { "pattern": "x-cmd.com/iconbase*", "zone_name": "x-cmd.com" }
+      ]
+    }
+  },
   "workers_dev": true,
   "preview_urls": false
 }

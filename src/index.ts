@@ -1,6 +1,9 @@
-// x-cmd/icon 的 Worker:把图标库挂在 po6.sh/icon 上。
+// x-cmd/icon 的 Worker:把图标库挂在 po6.sh/icon 与 x-cmd.com/iconbase 上。
 //
-// 路由(去掉挂载前缀 /icon 之后):
+// 同一个 Worker 挂在多个挂载点下 —— 挂载前缀从请求路径推断(见 MOUNTS),
+// 静态资源只有一份(public/icon/**),各挂载点都从那儿取。
+//
+// 路由(去掉挂载前缀之后):
 //   /                → 查询页(深链 /c/<cat> 也走这里,前端路由)
 //   /manifest.json   → 图标清单 —— 静态资源,边缘直接发
 //   /i/<cat>/<file>  → 图标原文件 —— 静态资源,边缘直接发
@@ -8,11 +11,14 @@
 import { CATS, ID2FILE, LICENSE, BUILD } from './gen.js';
 import { PAGE } from './page.js';
 
-const MOUNT = '/icon';
+// 静态资源在 public/icon/** 下的那个前缀 —— 所有挂载点都从这儿取
+const ASSET_ROOT = '/icon';
 const API_MAX = 300;
 
 interface Env {
   ASSETS: Fetcher;
+  /** 挂载点,逗号分隔 */
+  MOUNTS?: string;
 }
 
 function html(body: string, base: string): Response {
@@ -44,16 +50,15 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     let path = url.pathname;
-    let base = '';
-    if (path === MOUNT || path.startsWith(`${MOUNT}/`)) {
-      base = MOUNT;
-      path = path.slice(MOUNT.length) || '/';
-    }
+    // 挂载前缀:请求路径的第一段,得是已知的挂载点才算
+    const mounts = (env.MOUNTS || ASSET_ROOT).split(',').map((s) => s.trim()).filter(Boolean);
+    const base = mounts.find((m) => path === m || path.startsWith(`${m}/`)) || '';
+    if (base) path = path.slice(base.length) || '/';
 
     // 图标清单与图标文件是静态资源(public/icon/**),边缘直接发;
     // 这里的分支只是 workers.dev 直连时的兜底。
-    if (path === '/manifest.json' || path.startsWith('/i/')) {
-      const res = await env.ASSETS.fetch(new URL(`${base}${path}`, url.origin));
+    if (path === '/manifest.json' || path.startsWith('/i/') || path === '/sprite.svg') {
+      const res = await env.ASSETS.fetch(new URL(`${ASSET_ROOT}${path}`, url.origin));
       if (res.status === 200) return res;
       return new Response('not found', { status: 404 });
     }
@@ -66,13 +71,13 @@ export default {
         .filter(Boolean)
         .slice(0, API_MAX);
       if (!ids.length) {
-        return json({ error: `带 ids= 参数,如 /icon/api/icons.json?ids=infra:server,aws:ec2` }, 0);
+        return json({ error: `带 ids= 参数,如 ${ASSET_ROOT}/api/icons.json?ids=infra:server,aws:ec2` }, 0);
       }
       const out: Record<string, string> = {};
       for (const id of ids) {
         const file = ID2FILE[id];
         if (!file) continue;
-        const res = await env.ASSETS.fetch(new URL(`${base}/${file}`, url.origin));
+        const res = await env.ASSETS.fetch(new URL(`${ASSET_ROOT}/${file}`, url.origin));
         if (!res.ok) continue;
         const buf = new Uint8Array(await res.arrayBuffer());
         let bin = '';
