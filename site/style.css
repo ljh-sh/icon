@@ -250,7 +250,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 88px 24px 104px; }
 .more:hover { background: var(--surface-2); color: var(--ink); }
 
 /* ---------- 图标网格 ---------- */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 26px; }
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 26px; }
 /* 平时不套框 —— 图标和字直接落在页面上,hover 才浮起一张卡 */
 .cell {
   background: none;
@@ -406,10 +406,13 @@ pre {
 .cell.small img, .cell.small .ic { width: 36px; height: 36px; margin: 0 auto 6px; }
 .cell.small .id { font-size: 11.5px; }
 
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 @media (max-width: 720px) {
   .top-inner { padding: 0 16px; gap: 12px; }
   .nav-left { gap: 16px; }
   .site-title { display: none; }
   main { padding: 28px 16px 56px; }
-  .grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
