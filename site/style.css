@@ -106,27 +106,34 @@ main { max-width: 1180px; margin: 0 auto; padding: 30px 20px 60px; }
 .crumbs a:hover { text-decoration: underline; }
 .empty { color: var(--muted); padding: 40px 0; text-align: center; }
 
-/* ---------- 分类卡 ---------- */
-.cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 12px; }
-.cat-card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px;
-  transition: border-color .15s, transform .15s, box-shadow .15s;
+/* ---------- 首页:一个过滤页 ---------- */
+.hero { text-align: center; padding: 22px 0 4px; }
+.hero .page-title { font-size: 27px; }
+.hero-sub { color: var(--muted); font-size: 13.5px; margin: 12px 0 0; }
+.hero-sub code, .crumbs code { background: var(--accent-soft); color: var(--accent); padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+.search-wrap.big { max-width: 620px; margin: 20px auto 0; }
+.search-wrap.big #q2 { padding: 13px 42px 13px 18px; font-size: 16px; border-radius: 14px; }
+.search-wrap.big #clear2 { width: 30px; height: 30px; font-size: 20px; right: 8px; }
+/* 首页用中间那个大搜索框,顶上这个让位 */
+body.is-home .top .search-wrap { visibility: hidden; }
+
+/* 分类筛选 —— 像 Google 的过滤条 */
+.filters { display: flex; flex-wrap: wrap; gap: 7px; margin: 24px 0 4px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); background: var(--card); color: var(--muted);
+  font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 999px; cursor: pointer;
 }
-.cat-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
-.cat-card h3 { margin: 0 0 2px; font-size: 15px; }
-.cat-card .n { color: var(--muted); font-size: 12.5px; }
-.cat-card .preview { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 12px 0 10px; }
-.cat-card .preview img {
-  width: 100%; height: auto; aspect-ratio: 1; object-fit: contain;
-  background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 2px;
+.chip:hover { color: var(--ink); border-color: var(--accent); }
+.chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.chip .n { font-size: 11px; opacity: .72; font-weight: 400; }
+
+.more-wrap { display: flex; justify-content: center; margin: 24px 0 8px; }
+.more {
+  border: 1px solid var(--line); background: var(--card); color: var(--muted);
+  font: inherit; font-size: 13.5px; padding: 8px 20px; border-radius: 999px; cursor: pointer;
 }
-.cat-card .src { color: var(--muted); font-size: 11.5px; border-top: 1px solid var(--line); padding-top: 8px; }
+.more:hover { color: var(--ink); border-color: var(--accent); }
 
 /* ---------- 版本切换 ---------- */
 .vers { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 16px; }
@@ -161,9 +168,9 @@ main { max-width: 1180px; margin: 0 auto; padding: 30px 20px 60px; }
   scroll-margin-top: 90px;
 }
 .cell:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
-.cell img { width: 38px; height: 38px; object-fit: contain; display: block; margin: 0 auto 6px; }
-/* 单色图形(brand / bootstrap)是黑白的 —— 深色主题下垫一块白底,不然等于隐形 */
-html[data-theme="dark"] .cell img.mono { background: #fff; border-radius: 8px; }
+.cell img, .cell .ic { width: 38px; height: 38px; object-fit: contain; display: block; margin: 0 auto 6px; }
+/* 单色图形(brand / bootstrap)继承 currentColor —— 深浅两套主题都看得见,不用垫白底 */
+.ic.mono { color: var(--ink); fill: currentColor; }
 .cell .id { font-size: 11.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
 .cell .desc { font-size: 11px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell.hit { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
@@ -193,7 +200,9 @@ dialog::backdrop { background: rgba(2, 6, 23, .45); }
   height: 150px; margin-bottom: 16px;
   background: #fff; border: 1px solid var(--line); border-radius: 12px;
 }
-.dlg-preview img { width: 104px; height: 104px; object-fit: contain; }
+.dlg-preview img, .dlg-preview .ic { width: 104px; height: 104px; object-fit: contain; }
+/* 详情里的预览底是白的,单色图形得用深色 */
+.dlg-preview .ic.mono { color: #0f172a; fill: currentColor; }
 .dlg-meta { display: grid; grid-template-columns: 64px 1fr; gap: 7px 12px; margin: 0; font-size: 13.5px; }
 .dlg-meta dt { color: var(--muted); }
 .dlg-meta dd { margin: 0; }

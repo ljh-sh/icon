@@ -53,6 +53,9 @@ const MIME = { svg: 'image/svg+xml', png: 'image/png' };
 // 版本号比较:v2 比 v10 小
 const verCmp = (a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10);
 
+// sprite 里的 id:把 <cat>/v<n>:<concept> 压成合法片段
+const spriteId = (id) => id.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '');
+
 // 品牌图形的闸门:有记录按记录走(withheld 不发布),名字像品牌的必须登记
 function brandGate(id, concept, records, trademarks) {
   const rec = records.get(id);
@@ -155,21 +158,22 @@ if (existsSync(VERSIONS_FILE)) {
 }
 
 // ---- 读 catalog.tsv ----
-const catalog = new Map();
+// 格式:<id>\t<中文>\t<English> —— 中英文分开,页面上按语言取其一,不合在一起显示
+const catalog = new Map(); // id → { zh, en }
 const lines = readFileSync(CATALOG, 'utf8').split('\n');
 lines.forEach((line, i) => {
   const t = line.trim();
   if (!t || t.startsWith('#')) return;
-  const [id, desc, ...rest] = t.split('\t');
-  if (!id || !desc || rest.length) {
-    console.error(`catalog.tsv:${i + 1} 格式不对(应为 <id>\\t<desc>): ${line}`);
+  const [id, zh, en, ...rest] = t.split('\t');
+  if (!id || !zh || !en || rest.length) {
+    console.error(`catalog.tsv:${i + 1} 格式不对(应为 <id>\\t<中文>\\t<English>): ${line}`);
     process.exit(1);
   }
   if (catalog.has(id)) {
     console.error(`catalog.tsv:${i + 1} id 重复: ${id}`);
     process.exit(1);
   }
-  catalog.set(id, desc.trim());
+  catalog.set(id, { zh: zh.trim(), en: en.trim() });
 });
 
 // ---- 扫 icons/ ----
@@ -307,16 +311,24 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
   const ext = info.file.split('.').pop();
   const rec = records.get(id);
   const tm = trademarks.get(id);
+  const raw = readFileSync(join(ROOT, info.file), 'utf8');
+  const c = catalog.get(id);
+  // 整库搬入的分类没有手写描述 —— 用概念名兜底
+  const autoEn = info.concept.replace(/-/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase());
   const m = {
     id,
     cat: info.cat,
     concept: info.concept,
     version: info.version || undefined, // 版本化分类才有
-    desc: catalog.get(id) || `${CATS[info.cat].source} · ${info.concept.replace(/-/g, ' ')}`,
+    desc: c ? c.zh : info.concept,
+    descEn: c ? c.en : autoEn,
     file: info.file,
     path: `i/${info.file.replace(/^icons\//, '')}`,
     mime: MIME[ext],
-    bytes: readFileSync(join(ROOT, info.file)).length,
+    bytes: raw.length,
+    // sprite 用的 id 与 viewBox(PNG 进不了 sprite,还是单独文件)
+    spriteId: ext === 'svg' ? spriteId(id) : undefined,
+    viewBox: ext === 'svg' ? raw.match(/viewBox="([^"]+)"/)?.[1] || '0 0 24 24' : undefined,
     source: rec?.meta.source || CATS[info.cat].source,
     license: rec?.meta.license || CATS[info.cat].license,
     note: rec?.meta.note || CATS[info.cat].note,
@@ -394,7 +406,14 @@ export interface IconMeta {
   aliasOf?: string;
   /** 指向本条的具体键的别名(只有推荐版本有) */
   aliasFor?: string;
+  /** 中文说明 */
   desc: string;
+  /** 英文说明 */
+  descEn: string;
+  /** sprite 里的符号 id(PNG 没有) */
+  spriteId?: string;
+  /** 图标的 viewBox(PNG 没有) */
+  viewBox?: string;
   file: string;
   path: string;
   mime: string;
@@ -452,10 +471,46 @@ for (const m of metas) {
   copyFileSync(join(ROOT, m.file), dest);
 }
 writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
+
+// ---- sprite:所有矢量图标合成一张,页面用 <use> 引用 ----
+// 一个分类页要显示两千多个图标,逐个请求太碎;合成一张,一次拿完。
+// PNG(云厂商那批)进不了 sprite,还是单独文件。
+const symbols = new Map(); // spriteId → { viewBox, body, ns }
+for (const m of metas) {
+  if (!m.spriteId || symbols.has(m.spriteId)) continue;
+  const raw = readFileSync(join(ROOT, m.file), 'utf8');
+  const open = raw.match(/<svg[^>]*>/)?.[0] || '<svg>';
+  const inner = raw.match(/<svg[^>]*>([\s\S]*)<\/svg>/)?.[1]?.trim();
+  if (!inner) continue;
+  // 根元素上的命名空间声明要搬到 symbol 上 —— 少了 xmlns:xlink 之类的前缀没人声明,
+  // 整个 sprite 的 XML 会在这里断掉,后面的图标全都不渲染。
+  const ns = [...open.matchAll(/xmlns(?::[\w-]+)?="[^"]*"/g)].map((x) => x[0]).join(' ');
+  symbols.set(m.spriteId, { viewBox: m.viewBox, body: inner, ns });
+}
+const sprite = ['<svg xmlns="http://www.w3.org/2000/svg" style="display:none">'];
+for (const [id, s] of symbols) {
+  sprite.push(`<symbol id="${id}" viewBox="${s.viewBox}" ${s.ns}>${s.body}</symbol>`);
+}
+sprite.push('</svg>');
+const spriteText = sprite.join('\n');
+
+// 守门:XML 一旦在中间断了,浏览器会从断点往后全不渲染 —— 构建时就得发现
+for (const [id, s] of symbols) {
+  const used = new Set([...s.body.matchAll(/<([a-zA-Z][\w-]*):/g)].map((x) => x[1]));
+  const declared = new Set([...s.ns.matchAll(/xmlns:([\w-]+)=/g)].map((x) => x[1]));
+  for (const u of used) {
+    if (!declared.has(u)) {
+      console.error(`sprite: ${id} 用了没声明的命名空间前缀 ${u}: —— 补上它的 xmlns 声明`);
+      process.exit(1);
+    }
+  }
+}
+writeFileSync(join(PUBLIC, 'sprite.svg'), spriteText);
+console.log(`public/icon/sprite.svg: ${symbols.size} 个符号`);
 // 缓存策略:图标文件长缓存(URL 上带构建号,重新部署即失效),清单短缓存
 writeFileSync(
   join(ROOT, 'public/_headers'),
-  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/manifest.json\n  Cache-Control: public, max-age=0, must-revalidate\n`,
+  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/sprite.svg\n  Cache-Control: public, max-age=3600\n\n/icon/manifest.json\n  Cache-Control: public, max-age=0, must-revalidate\n`,
 );
 console.log(`public/icon/: ${metas.length} 个文件 + manifest.json`);
 
@@ -469,6 +524,7 @@ for (const m of metas) {
   mkdirSync(join(dest, '..'), { recursive: true });
   copyFileSync(join(ROOT, m.file), dest);
 }
+copyFileSync(join(PUBLIC, 'sprite.svg'), join(DIST, 'sprite.svg'));
 for (const f of ['style.css', 'app.js']) copyFileSync(join(ROOT, 'site', f), join(DIST, f));
 writeFileSync(
   join(DIST, 'index.html'),

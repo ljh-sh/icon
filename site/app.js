@@ -1,8 +1,102 @@
 // x-cmd/icon 查询页。
-// 路由:/            首页(分类 + 全部图标,可过滤)
-//      /c/<cat>    某个分类的完整列表
-//      /c/<cat>#<id>  定位到分类里的某个图标
-const BASE = new URL('.', document.baseURI).pathname; // '/icon/' 或 '/'
+// 路由:/            首页 —— 一个过滤页(搜索 + 分类筛选),一边打一边筛
+//      /c/<cat>    某个分类的完整列表(带版本切换)
+const BASE = new URL('.', document.baseURI).pathname;
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+// ---------- 文案 ----------
+// 中英文分开,页面上按语言取其一 —— 不再中英并排
+const LANGS = {
+  zh: {
+    title: 'x-cmd/icon —— 架构图图标库',
+    metaDesc: 'x-cmd 架构图图标库:云厂商官方标识 + 自绘概念图标 + 品牌标识,按 <cat>:<concept> 索引。',
+    search: '搜索图标:id / 名称 / 分类',
+    heroTitle: '架构图图标库',
+    heroSub: '给 x-cmd/draw 画架构图用的图标 · 键名 <cat>:<concept> · 一边打一边筛',
+    all: '全部',
+    count: '个图标',
+    shown: '已显示',
+    more: '显示更多',
+    navAll: '← 全部图标',
+    rec: '推荐',
+    lblDesc: '说明',
+    lblCat: '分类',
+    lblVer: '版本',
+    lblVerdict: '结论',
+    lblLicense: '著作权',
+    lblTrademark: '商标权人',
+    lblPolicy: '商标政策',
+    lblRestrictions: '使用限制',
+    lblReviewed: '复核',
+    lblSource: '出处',
+    lblFile: '文件',
+    copy: '复制',
+    copied: '已复制',
+    copyFail: '复制失败',
+    notes: '许可分析',
+    src: 'SVG 源码',
+    srcFail: '(取不到源码)',
+    download: '下载',
+    close: '关闭',
+    empty: '没有匹配的图标。',
+    emptyCat: '这个分类还没有图标。',
+    vOk: '可用',
+    vCaution: '谨慎 —— 限指示性引用',
+    vPending: '未审 —— 商标条款未逐条核对',
+    fCaution: '谨慎',
+    fPending: '未审',
+    alias: '别名 → ',
+    aliasOf: '别名 {id} 指向这里',
+    footer:
+      '图标版权归各自权利人所有;云厂商标识来自 <a href="https://github.com/mingrammer/diagrams" target="_blank" rel="noopener">mingrammer/diagrams</a>(Apache-2.0),通用概念与公司符号为本仓自绘(不含任何商标图形)。',
+    langBtn: 'EN',
+  },
+  en: {
+    title: 'x-cmd/icon — icon library for architecture diagrams',
+    metaDesc:
+      'Icon library for x-cmd/draw: cloud vendor marks, self-drawn concepts and brand logos, keyed by <cat>:<concept>.',
+    search: 'Search icons: id / name / category',
+    heroTitle: 'Icon library for architecture diagrams',
+    heroSub: 'Icons for x-cmd/draw · key format <cat>:<concept> · filters as you type',
+    all: 'All',
+    count: 'icons',
+    shown: 'shown',
+    more: 'Show more',
+    navAll: '← All icons',
+    rec: 'Recommended',
+    lblDesc: 'Description',
+    lblCat: 'Category',
+    lblVer: 'Version',
+    lblVerdict: 'Verdict',
+    lblLicense: 'Copyright',
+    lblTrademark: 'Trademark owner',
+    lblPolicy: 'Trademark policy',
+    lblRestrictions: 'Restrictions',
+    lblReviewed: 'Reviewed',
+    lblSource: 'Source',
+    lblFile: 'File',
+    copy: 'Copy',
+    copied: 'Copied',
+    copyFail: 'Copy failed',
+    notes: 'License analysis',
+    src: 'SVG source',
+    srcFail: '(source unavailable)',
+    download: 'Download',
+    close: 'Close',
+    empty: 'No matching icons.',
+    emptyCat: 'This category has no icons yet.',
+    vOk: 'OK',
+    vCaution: 'Caution — indicative use only',
+    vPending: 'Unreviewed — trademark terms not checked one by one',
+    fCaution: 'Caution',
+    fPending: 'Unreviewed',
+    alias: 'Alias → ',
+    aliasOf: 'Alias {id} points here',
+    footer:
+      'Icon copyrights belong to their respective owners; cloud vendor marks come from <a href="https://github.com/mingrammer/diagrams" target="_blank" rel="noopener">mingrammer/diagrams</a> (Apache-2.0); general concepts and company symbols are self-drawn (no trademark artwork).',
+    langBtn: '中',
+  },
+};
 
 const $ = (s) => document.querySelector(s);
 const el = (tag, cls, text) => {
@@ -15,79 +109,164 @@ const el = (tag, cls, text) => {
 let DATA = { cats: [], icons: [] };
 let q = '';
 let ver = ''; // 版本化分类里当前看的版本;空 = 推荐版本
+let catFilter = ''; // 首页的分类筛选;空 = 全部
+let lang = 'zh';
+let limit = 240; // 一次渲染多少个(两三千个节点一起铺会卡)
 let hitId = null;
-const PREVIEW = 20; // 首页每个分类先放这么多个图标
+let V = ''; // 构建号:URL 上带上,重新部署后不会顶着旧缓存
 
-// 图标 URL 带上构建号:重新部署后 URL 变了,边缘缓存不会顶着旧图
-let V = '';
-const iconUrl = (m) => `${BASE}${m.path}${V}`;
 const byId = new Map();
+const t = (key) => (LANGS[lang] && LANGS[lang][key]) || key;
+
+function applyI18n() {
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  for (const n of document.querySelectorAll('[data-i18n]')) n.textContent = t(n.dataset.i18n);
+  for (const n of document.querySelectorAll('[data-i18n-html]')) n.innerHTML = t(n.dataset.i18nHtml);
+  for (const n of document.querySelectorAll('[data-i18n-ph]')) n.placeholder = t(n.dataset.i18nPh);
+  $('#lang').textContent = t('langBtn');
+  document.title = t('title');
+  const md = document.querySelector('meta[name="description"]');
+  if (md) md.setAttribute('content', t('metaDesc'));
+}
+
+// ---------- 图标 ----------
+// 矢量图标走 sprite:一次请求拿全,页面用 <use> 引用
+// PNG(云厂商那批)进不了 sprite,还是单独文件
+function iconEl(m) {
+  if (m.spriteId) {
+    const svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('viewBox', m.viewBox || '0 0 24 24');
+    svg.setAttribute('class', 'ic' + (m.mono ? ' mono' : ''));
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', m.id);
+    const use = document.createElementNS(SVGNS, 'use');
+    use.setAttribute('href', `${BASE}sprite.svg${V}#${m.spriteId}`);
+    svg.append(use);
+    return svg;
+  }
+  const img = el('img');
+  img.src = `${BASE}${m.path}${V}`;
+  img.alt = m.id;
+  img.loading = 'lazy';
+  return img;
+}
+
+function descOf(m) {
+  return lang === 'en' ? m.descEn || m.desc : m.desc || m.descEn;
+}
 
 function match(m) {
-  if (!q) return true;
-  const hay = `${m.id} ${m.desc} ${m.cat} ${m.concept}`.toLowerCase();
+  if (catFilter && m.cat !== catFilter) return false;
+  // 空查询:只显示推荐版本(别名),别把每一版都摆出来;打了字才把各版本都放出来
+  if (!q) return !m.version || m.alias;
+  const hay = `${m.id} ${m.desc} ${m.descEn} ${m.cat} ${m.concept}`.toLowerCase();
   return hay.includes(q);
 }
 
 function cell(m) {
   const c = el('div', 'cell');
   c.dataset.id = m.id;
-  c.title = m.desc;
-  const img = el('img');
-  img.src = iconUrl(m);
-  img.alt = m.id;
-  img.loading = 'lazy';
-  if (m.mono) img.classList.add('mono'); // 单色图形:深色主题下垫白底
-  c.append(img, el('div', 'id', m.id));
+  c.title = descOf(m);
+  c.append(iconEl(m), el('div', 'id', m.id));
   if (m.version && !m.alias) c.append(el('span', 'vbadge', m.version));
-  if (m.verdict === 'caution') c.append(el('span', 'vflag caution', '谨慎'));
-  if (m.verdict === 'pending') c.append(el('span', 'vflag pending', '未审'));
-  c.append(el('div', 'desc', m.desc));
+  if (m.verdict === 'caution') c.append(el('span', 'vflag caution', t('fCaution')));
+  if (m.verdict === 'pending') c.append(el('span', 'vflag pending', t('fPending')));
+  c.append(el('div', 'desc', descOf(m)));
   c.addEventListener('click', () => onCell(m));
   return c;
 }
 
+// 渲染前 limit 个,其余给「显示更多」
 function grid(host, list) {
+  const shown = list.slice(0, limit);
   host.textContent = '';
-  const shown = list.filter(match);
   for (const m of shown) host.append(cell(m));
+  const left = list.length - shown.length;
+  for (const more of document.querySelectorAll('.more')) {
+    more.hidden = left <= 0;
+    more.textContent = `${t('more')} (${left})`;
+    more.onclick = () => {
+      limit += 240;
+      render();
+    };
+  }
   return shown.length;
 }
 
-function renderCats() {
-  const host = $('#cats');
+// ---------- 首页 ----------
+function renderFilters() {
+  const host = $('#filters');
   host.textContent = '';
-  for (const cat of DATA.cats) {
-    const a = el('a', 'cat-card');
-    a.href = `${BASE}c/${cat.cat}`;
-    a.append(el('h3', null, cat.title), el('div', 'n', `${cat.count} 个图标`));
-    const pv = el('div', 'preview');
-    for (const m of previewIcons(cat.cat)) {
-      const img = el('img');
-      img.src = iconUrl(m);
-      img.alt = m.id;
-      img.loading = 'lazy';
-      pv.append(img);
-    }
-    a.append(pv, el('div', 'src', `${cat.source} · ${cat.license} · ${cat.note}`));
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      navigate(`${BASE}c/${cat.cat}`);
+  const mk = (label, value, n) => {
+    const b = el('button', 'chip' + (catFilter === value ? ' on' : ''), label);
+    b.type = 'button';
+    if (n != null) b.append(el('span', 'n', n));
+    b.addEventListener('click', () => {
+      catFilter = value;
+      limit = 240;
+      render();
     });
-    host.append(a);
-  }
+    host.append(b);
+  };
+  mk(t('all'), '', DATA.icons.length);
+  for (const c of DATA.cats) mk(c.title, c.cat, c.count);
 }
 
-// 首页每个分类先放 20 个左右 —— 全库两千多个 svg 一次铺出来太重。
-// 均匀抽样,免得全是字母序开头的那几个;版本化分类取推荐版本。
-function previewIcons(cat) {
-  const list = DATA.icons.filter((x) => x.cat === cat && (!x.version || x.alias));
-  const n = Math.min(PREVIEW, list.length);
-  const out = [];
-  for (let i = 0; i < n; i++) out.push(list[Math.floor((i * list.length) / n)]);
-  return out;
+function renderHome() {
+  $('#filters').hidden = false;
+  renderFilters();
+  const list = DATA.icons.filter(match);
+  const n = grid($('#all'), list);
+  $('#all-count').textContent = `${list.length.toLocaleString()} ${t('count')}`;
+  $('#empty').hidden = n > 0;
+  $('#empty').textContent = t('empty');
 }
 
+// ---------- 分类页 ----------
+function renderVersions(vers) {
+  const host = $('#cat-vers');
+  host.textContent = '';
+  host.hidden = !vers.length;
+  if (!vers.length) return;
+  const mk = (label, value) => {
+    const b = el('button', 'vbtn' + (ver === value ? ' on' : ''), label);
+    b.type = 'button';
+    b.addEventListener('click', () => setVersion(value));
+    host.append(b);
+  };
+  mk(t('rec'), '');
+  for (const v of vers) mk(v, v);
+}
+
+function renderCat(cat) {
+  const meta = DATA.cats.find((c) => c.cat === cat);
+  $('#cat-title').textContent = meta ? meta.title : cat;
+  $('#cat-note').textContent = meta
+    ? `${meta.count} ${t('count')} · ${meta.source} · ${meta.license} · ${meta.note}`
+    : '';
+  const vers = meta?.versions || [];
+  renderVersions(vers);
+  // 「推荐」看别名条目(概念键),具体版本看该版本的条目
+  const list = vers.length
+    ? DATA.icons.filter((m) => m.cat === cat && (ver ? m.version === ver && !m.alias : m.alias))
+    : DATA.icons.filter((m) => m.cat === cat);
+  const n = grid($('#cat-grid'), list);
+  $('#all-count').textContent = `${list.length.toLocaleString()} ${t('count')}`;
+  $('#empty').hidden = n > 0;
+  $('#empty').textContent = list.length ? t('empty') : t('emptyCat');
+}
+
+function setVersion(v) {
+  ver = v;
+  limit = 240;
+  const url = new URL(location.href);
+  if (v) url.searchParams.set('v', v);
+  else url.searchParams.delete('v');
+  history.pushState({}, '', url.pathname + url.search + url.hash);
+  render();
+}
+
+// ---------- 路由 ----------
 function catRoute() {
   const rel = location.pathname.startsWith(BASE)
     ? location.pathname.slice(BASE.length)
@@ -103,64 +282,15 @@ function render() {
   if (cat) {
     home.hidden = true;
     catp.hidden = false;
-    const meta = DATA.cats.find((c) => c.cat === cat);
-    $('#cat-title').textContent = meta ? meta.title : cat;
-    $('#cat-note').textContent = meta
-      ? `${meta.count} 个图标 · 出处 ${meta.source} · 许可 ${meta.license} · ${meta.note}`
-      : '';
-    const vers = meta?.versions || [];
-    renderVersions(vers);
-    // 「推荐」看别名条目(概念键),具体版本看该版本的条目
-    const list = vers.length
-      ? DATA.icons.filter((m) => m.cat === cat && (ver ? m.version === ver && !m.alias : m.alias))
-      : DATA.icons.filter((m) => m.cat === cat);
-    const n = grid($('#cat-grid'), list);
-    $('#empty').hidden = n > 0;
-    $('#empty').textContent = list.length ? '没有匹配的图标。' : '这个分类还没有图标。';
+    document.body.classList.remove('is-home');
+    renderCat(cat);
   } else {
     catp.hidden = true;
     home.hidden = false;
-    $('#cat-vers').hidden = true;
-    // 首页按分类展示(每类先放 20 个左右);搜索时才出全库结果
-    const searching = !!q;
-    $('#cats').hidden = searching;
-    $('#all-title').hidden = !searching;
-    $('#all').hidden = !searching;
-    if (searching) {
-      const n = grid($('#all'), DATA.icons);
-      $('#all-count').textContent = `${n} / ${DATA.icons.length}`;
-      $('#empty').hidden = n > 0;
-      $('#empty').textContent = '没有匹配的图标。';
-    } else {
-      $('#empty').hidden = true;
-    }
+    document.body.classList.add('is-home');
+    renderHome();
   }
   locate();
-}
-
-// 版本切换:推荐 / v0 / v1 …
-function renderVersions(vers) {
-  const host = $('#cat-vers');
-  host.textContent = '';
-  host.hidden = !vers.length;
-  if (!vers.length) return;
-  const mk = (label, value) => {
-    const b = el('button', 'vbtn' + (ver === value ? ' on' : ''), label);
-    b.type = 'button';
-    b.addEventListener('click', () => setVersion(value));
-    host.append(b);
-  };
-  mk('推荐', '');
-  for (const v of vers) mk(v, v);
-}
-
-function setVersion(v) {
-  ver = v;
-  const url = new URL(location.href);
-  if (v) url.searchParams.set('v', v);
-  else url.searchParams.delete('v');
-  history.pushState({}, '', url.pathname + url.search + url.hash);
-  render();
 }
 
 function locate() {
@@ -203,7 +333,6 @@ function onCell(m) {
 
 /* ---------- 详情 ---------- */
 const dlg = $('#detail');
-const VERDICT_TEXT = { ok: '可用', caution: '谨慎 —— 限指示性引用', pending: '未审 —— 商标条款未逐条核对' };
 
 function row(sel, value) {
   const n = $(sel);
@@ -217,20 +346,16 @@ function row(sel, value) {
 }
 
 async function openDetail(m) {
-  $('#dlg-img').src = iconUrl(m);
-  $('#dlg-img').alt = m.id;
+  $('#dlg-img').replaceWith(withImg(m));
+  $('#dlg-img').id = 'dlg-img';
   $('#dlg-id').textContent = m.id;
-  $('#dlg-desc').textContent = m.desc;
+  $('#dlg-desc').textContent = descOf(m);
   $('#dlg-cat').textContent = (DATA.cats.find((c) => c.cat === m.cat) || {}).title || m.cat;
   $('#dlg-source').textContent = m.source;
   // 版本:别名条目指向推荐版本的具体键,具体版本标出指向它的别名
-  if (m.alias) {
-    row('#dlg-version', `别名 → ${m.aliasOf}`);
-  } else if (m.version) {
-    row('#dlg-version', m.aliasFor ? `${m.version} —— 别名 ${m.aliasFor} 指向这里` : m.version);
-  } else {
-    row('#dlg-version', '');
-  }
+  if (m.alias) row('#dlg-version', t('alias') + m.aliasOf);
+  else if (m.version) row('#dlg-version', m.aliasFor ? `${m.version} — ${t('aliasOf').replace('{id}', m.aliasFor)}` : m.version);
+  else row('#dlg-version', '');
   row('#dlg-license', m.license);
   row('#dlg-trademark', m.trademark);
   row('#dlg-restrictions', (m.restrictions || '').replace(/;/g, '; '));
@@ -240,7 +365,7 @@ async function openDetail(m) {
   const vdd = v.closest('dd');
   if (m.verdict) {
     vdd.hidden = false;
-    v.textContent = VERDICT_TEXT[m.verdict] || m.verdict;
+    v.textContent = { ok: t('vOk'), caution: t('vCaution'), pending: t('vPending') }[m.verdict] || m.verdict;
     v.className = 'verdict ' + m.verdict;
   } else {
     vdd.hidden = true;
@@ -271,22 +396,31 @@ async function openDetail(m) {
   }
 
   const a = $('#dlg-file');
-  a.href = iconUrl(m);
+  a.href = `${BASE}${m.path}${V}`;
   a.download = m.file.replace(/^.*\//, '');
   const wrap = $('#dlg-src-wrap');
   if (m.mime === 'image/svg+xml') {
     wrap.hidden = false;
-    $('#dlg-src').textContent = '加载中…';
+    $('#dlg-src').textContent = '…';
     try {
-      const txt = await (await fetch(iconUrl(m))).text();
+      const txt = await (await fetch(`${BASE}${m.path}${V}`)).text();
       $('#dlg-src').textContent = txt;
     } catch {
-      $('#dlg-src').textContent = '(取不到源码)';
+      $('#dlg-src').textContent = t('srcFail');
     }
   } else {
     wrap.hidden = true;
   }
   if (!dlg.open) dlg.showModal();
+}
+
+// 详情里的预览:统一成 <svg> 或 <img>,换语言时不用重建
+function withImg(m) {
+  const img = iconEl(m);
+  img.id = 'dlg-img';
+  img.removeAttribute('loading');
+  if (img.tagName === 'img') img.classList.add('preview-img');
+  return img;
 }
 
 dlg.addEventListener('click', (e) => {
@@ -299,45 +433,60 @@ dlg.addEventListener('click', async (e) => {
   const id = $('#dlg-id').textContent;
   try {
     await navigator.clipboard.writeText(id);
-    btn.textContent = '已复制';
-    setTimeout(() => (btn.textContent = '复制'), 1200);
+    btn.textContent = t('copied');
+    setTimeout(() => (btn.textContent = t('copy')), 1200);
   } catch {
-    btn.textContent = '复制失败';
+    btn.textContent = t('copyFail');
   }
 });
 
-/* ---------- 搜索 / 键盘 ---------- */
-const qEl = $('#q');
+/* ---------- 搜索 / 语言 ---------- */
+const qEls = [$('#q'), $('#q2')];
 function setQuery(v, push) {
   q = v.trim().toLowerCase();
-  qEl.value = v;
-  $('#clear').hidden = !q;
+  for (const e of qEls) e.value = v;
+  for (const id of ['#clear', '#clear2']) $(id).hidden = !q;
+  limit = 240;
   const url = new URL(location.href);
   if (q) url.searchParams.set('q', q);
   else url.searchParams.delete('q');
-  history[push ? 'pushState' : 'replaceState']({}, '', url);
+  history[push ? 'pushState' : 'replaceState']({}, '', url.pathname + url.search + url.hash);
   render();
 }
-qEl.addEventListener('input', () => setQuery(qEl.value, false));
-$('#clear').addEventListener('click', () => {
-  setQuery('', false);
-  qEl.focus();
+for (const e of qEls) e.addEventListener('input', () => setQuery(e.value, false));
+for (const id of ['#clear', '#clear2']) {
+  $(id).addEventListener('click', () => {
+    setQuery('', false);
+    qEls[0].focus();
+  });
+}
+$('#lang').addEventListener('click', () => {
+  lang = lang === 'zh' ? 'en' : 'zh';
+  try {
+    localStorage.setItem('icon-lang', lang);
+  } catch {}
+  applyI18n();
+  render();
 });
+
 document.addEventListener('keydown', (e) => {
-  if (e.key === '/' && document.activeElement !== qEl && !dlg.open) {
+  if (e.key === '/' && document.activeElement !== qEls[0] && document.activeElement !== qEls[1] && !dlg.open) {
     e.preventDefault();
-    qEl.focus();
-    qEl.select();
+    (catRoute() ? qEls[0] : qEls[1]).focus();
+    (catRoute() ? qEls[0] : qEls[1]).select();
   }
-  if (e.key === 'Escape' && document.activeElement === qEl) qEl.blur();
+  if (e.key === 'Escape' && document.activeElement === qEls[0]) qEls[0].blur();
+  if (e.key === 'Escape' && document.activeElement === qEls[1]) qEls[1].blur();
 });
 
 /* ---------- 主题 ---------- */
 const themeBtn = $('#theme');
-function applyTheme(t) {
-  if (t) document.documentElement.setAttribute('data-theme', t);
+function applyTheme(v) {
+  if (v) document.documentElement.setAttribute('data-theme', v);
   else document.documentElement.removeAttribute('data-theme');
-  try { localStorage.setItem('icon-theme', t || ''); } catch {}
+  try {
+    localStorage.setItem('icon-theme', v || '');
+  } catch {}
 }
 themeBtn.addEventListener('click', () => {
   const cur = document.documentElement.getAttribute('data-theme');
@@ -354,9 +503,10 @@ function syncFromUrl() {
   const p = new URL(location.href).searchParams;
   const v = p.get('q') || '';
   q = v.trim().toLowerCase();
-  qEl.value = v;
-  $('#clear').hidden = !q;
+  for (const e of qEls) e.value = v;
+  for (const id of ['#clear', '#clear2']) $(id).hidden = !q;
   ver = p.get('v') || '';
+  limit = 240;
   render();
 }
 window.addEventListener('popstate', syncFromUrl);
@@ -376,10 +526,12 @@ document.addEventListener('click', (e) => {
     DATA = await res.json();
     V = DATA.build ? `?v=${DATA.build}` : '';
     for (const m of DATA.icons) byId.set(m.id, m);
-    renderCats();
+    try {
+      lang = localStorage.getItem('icon-lang') || lang;
+    } catch {}
+    applyI18n();
     syncFromUrl();
   } catch (err) {
-    document.querySelector('main').innerHTML =
-      '<p class="empty">图标清单取不到(manifest.json)。</p>';
+    document.querySelector('main').innerHTML = `<p class="empty">${t('empty')}</p>`;
   }
 })();

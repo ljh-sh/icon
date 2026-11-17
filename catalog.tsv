@@ -3,327 +3,327 @@
 # id = <cat>:<concept>          平铺分类(aws / azure / gcp / brand / bootstrap)
 #     = <cat>/v<n>:<concept>    版本化分类(自绘那批)—— 写具体版本
 # 别名(版本化分类里的 <cat>:<concept>)由构建按 versions.json 生成,不用写在这里。
-aws:acm	证书管理 / Certificate Manager
-aws:alb	应用负载均衡 / Application Load Balancer
-aws:apigw	API 网关 / API Gateway
-aws:athena	交互式查询 / Athena
-aws:aurora	关系型数据库 / Aurora
-aws:batch	批处理作业 / Batch
-aws:cloudformation	基础设施即代码 / CloudFormation
-aws:cloudfront	内容分发 CDN / CloudFront
-aws:cloudtrail	审计日志 / CloudTrail
-aws:cloudwatch	监控与告警 / CloudWatch
-aws:codebuild	持续构建 / CodeBuild
-aws:codedeploy	持续部署 / CodeDeploy
-aws:codepipeline	交付流水线 / CodePipeline
-aws:cognito	用户身份 / Cognito
-aws:docdb	文档数据库 / DocumentDB
-aws:dynamodb	NoSQL 数据库 / DynamoDB
-aws:ebs	块存储 / Elastic Block Store
-aws:ec2	虚拟机 / EC2 实例
-aws:ecr	容器镜像仓库 / ECR
-aws:ecs	容器编排 / ECS
-aws:efs	文件存储 / EFS
-aws:eks	托管 Kubernetes / EKS
-aws:es	托管检索服务 / Elasticsearch Service
-aws:eventbridge	事件总线 / EventBridge
-aws:fargate	无服务器容器 / Fargate
-aws:glue	ETL 数据处理 / Glue
-aws:guardduty	威胁检测 / GuardDuty
-aws:iam	身份与访问管理 / IAM
-aws:igw	互联网网关 / Internet Gateway
-aws:kinesis	流式数据 / Kinesis
-aws:kms	密钥管理 / KMS
-aws:lambda	无服务器函数 / Lambda
-aws:nat	NAT 网关 / NAT Gateway
-aws:nlb	网络负载均衡 / Network Load Balancer
-aws:opensearch	托管检索 / OpenSearch
-aws:quicksight	BI 报表 / QuickSight
-aws:rds	关系型数据库 / RDS
-aws:redis	缓存 / ElastiCache for Redis
-aws:redshift	数据仓库 / Redshift
-aws:route53	DNS 解析 / Route 53
-aws:s3	对象存储 / S3
-aws:secrets	密钥托管 / Secrets Manager
-aws:sns	通知服务 / SNS
-aws:sqs	消息队列 / SQS
-aws:sso	单点登录 / SSO
-aws:stepfn	工作流编排 / Step Functions
-aws:sts	临时凭证 / STS
-aws:vpc	私有网络 / VPC
-aws:waf	Web 应用防火墙 / WAF
-azure:aci	容器实例 / Container Instances
-azure:ad	身份目录 / Entra ID
-azure:app	应用服务 / App Service
-azure:blob	对象存储 / Blob Storage
-azure:container	容器应用 / Container Apps
-azure:cosmos	数据库 / Cosmos DB
-azure:redis	缓存 / Cache for Redis
-azure:sql	关系型数据库 / SQL Database
-azure:vm	虚拟机 / Virtual Machine
-gcp:bigtable	NoSQL 数据库 / Bigtable
-gcp:disk	块存储 / Persistent Disk
-gcp:firestore	文档数据库 / Firestore
-gcp:func	无服务器函数 / Cloud Functions
-gcp:gce	虚拟机 / Compute Engine
-gcp:gcs	对象存储 / Cloud Storage
-gcp:gke	托管 Kubernetes / GKE
-gcp:redis	缓存 / Memorystore
-gcp:run	无服务器容器 / Cloud Run
-gcp:spanner	关系型数据库 / Spanner
-gcp:sql	关系型数据库 / Cloud SQL
-bootstrap:alipay	支付宝 / Alipay
-bootstrap:github	GitHub
-bootstrap:wechat	微信 / WeChat
-brand:kubernetes	Kubernetes
-brand:prometheus	Prometheus
-infra/v0:api	接口 / API
-infra/v0:browser	浏览器 / Browser
-infra/v0:cloud	云 / Cloud
-infra/v0:cluster	集群 / Cluster
-infra/v0:container	容器 / Container
-infra/v0:cpu	处理器 / CPU
-infra/v0:database	数据库 / Database
-infra/v0:desktop	台式机 / Desktop
-infra/v0:disk-array	磁盘阵列 / Disk Array
-infra/v0:envelope	邮件与消息 / Envelope
-infra/v0:firewall	防火墙 / Firewall
-infra/v0:gpu	图形处理器 / GPU
-infra/v0:gui	桌面应用 / GUI Application
-infra/v0:laptop	笔记本电脑 / Laptop
-infra/v0:load-balancer	负载均衡 / Load Balancer
-infra/v0:monitor	显示器 / Monitor
-infra/v0:phone	手机 / Phone
-infra/v0:router	路由器 / Router
-infra/v0:server	服务器 / Server
-infra/v0:storage	本地存储 / Storage
-infra/v0:switch	交换机 / Switch
-infra/v0:terminal	终端 / Terminal
-infra/v0:user	用户 / User
-org/v0:anthropic	Anthropic(自绘抽象符号,非官方标识)
-org/v0:openai	OpenAI(自绘抽象符号,非官方标识)
-db/v0:check	一致性校验 / Consistency Check
-db/v0:lock	锁 / Lock
-db/v0:redis	内存键值库 / In-Memory KV
-db/v0:cluster	数据库集群 / Database Cluster
-db/v0:backup	备份 / Backup
-db/v0:replication	主从复制 / Replication
-db/v0:sharding	分片 / Sharding
-db/v0:index	索引 / Index
-db/v0:migration	结构迁移 / Migration
-db/v0:transaction	事务 / Transaction
-db/v0:failover	故障切换 / Failover
-db/v1:check	一致性校验 / Consistency Check
-db/v1:lock	锁 / Lock
-db/v1:redis	内存键值库 / In-Memory KV
-db/v1:cluster	数据库集群 / Database Cluster
-db/v1:backup	备份 / Backup
-db/v1:replication	主从复制 / Replication
-db/v1:sharding	分片 / Sharding
-db/v1:index	索引 / Index
-db/v1:migration	结构迁移 / Migration
-db/v1:transaction	事务 / Transaction
-db/v1:failover	故障切换 / Failover
-ai/v0:llm	大模型 / Large Language Model
-ai/v0:agent	智能体 / Agent
-ai/v0:rag	检索增强生成 / RAG
-ai/v0:embedding	向量化 / Embedding
-ai/v0:vector-db	向量数据库 / Vector Database
-ai/v0:finetune	微调 / Fine-tuning
-ai/v0:inference	推理 / Inference
-ai/v0:prompt	提示词 / Prompt
-ai/v0:tokenizer	分词 / Tokenizer
-ai/v0:multimodal	多模态 / Multimodal
-k8s/v0:pod	Pod
-k8s/v0:deployment	Deployment
-k8s/v0:service	Service
-k8s/v0:ingress	Ingress
-k8s/v0:configmap	ConfigMap
-k8s/v0:job	Job
-k8s/v0:statefulset	StatefulSet
-k8s/v0:cronjob	CronJob
-sec/v0:certificate	证书 / Certificate
-sec/v0:key	密钥 / Key
-sec/v0:audit	审计 / Audit
-sec/v0:zero-trust	零信任 / Zero Trust
-sec/v0:dlp	数据防泄漏 / DLP
-sec/v0:vulnerability	漏洞 / Vulnerability
-sec/v0:mfa	多因子认证 / MFA
-sec/v0:encryption	加密 / Encryption
-obs/v0:metrics	指标 / Metrics
-obs/v0:logs	日志 / Logs
-obs/v0:trace	链路追踪 / Trace
-obs/v0:alert	告警 / Alert
-obs/v0:dashboard	仪表盘 / Dashboard
-obs/v0:slo	服务水平目标 / SLO
-obs/v0:profiling	性能剖析 / Profiling
-obs/v0:sampling	采样 / Sampling
-cat/v0:cat	猫头 / Cat
-cat/v0:kitten	小猫 / Kitten
-cat/v0:sleeping	睡着的猫 / Sleeping Cat
-cat/v0:paw	猫爪 / Paw
-cat/v0:cat-face	猫脸 / Cat Face
-dog/v0:dog	狗头 / Dog
-dog/v0:puppy	小狗 / Puppy
-dog/v0:bone	骨头 / Bone
-dog/v0:paw	狗爪 / Paw
-dog/v0:dog-face	狗脸 / Dog Face
-animal/v0:bird	鸟 / Bird
-animal/v0:fish	鱼 / Fish
-animal/v0:horse	马 / Horse
-animal/v0:elephant	大象 / Elephant
-animal/v0:rabbit	兔子 / Rabbit
-animal/v0:turtle	乌龟 / Turtle
-animal/v0:bee	蜜蜂 / Bee
-animal/v0:butterfly	蝴蝶 / Butterfly
-chem/v0:molecule	分子 / Molecule
-chem/v0:atom	原子 / Atom
-chem/v0:flask	烧瓶 / Flask
-chem/v0:bond	化学键 / Bond
-chem/v0:reaction	化学反应 / Reaction
-chem/v0:catalyst	催化剂 / Catalyst
-chem/v0:solvent	溶剂 / Solvent
-chem/v0:balance	天平 / Balance
-chem/v0:beaker	烧杯 / Beaker
-chem/v0:test-tube	试管 / Test Tube
-chem/v0:round-flask	圆底烧瓶 / Round-Bottom Flask
-chem/v0:evaporating-dish	蒸发皿 / Evaporating Dish
-chem/v0:crystallizing-dish	结晶皿 / Crystallizing Dish
-chem/v0:petri-dish	培养皿 / Petri Dish
-chem/v0:crucible	坩埚 / Crucible
-chem/v0:graduated-cylinder	量筒 / Graduated Cylinder
-chem/v0:measuring-cup	量杯 / Measuring Cup
-chem/v0:reagent-bottle	试剂瓶 / Reagent Bottle
-chem/v0:acid-bottle	酸容器 / Acid Bottle
-chem/v0:wash-bottle	洗瓶 / Wash Bottle
-chem/v0:pressure-bottle	气压瓶 / Pressure Bottle
-chem/v0:separatory-funnel	分液漏斗 / Separatory Funnel
-chem/v0:burette	滴定管 / Burette
-chem/v0:pipette	移液管 / Pipette
-chem/v0:micropipette	移液枪 / Micropipette
-chem/v0:dropper	滴管 / Dropper
-chem/v0:funnel	漏斗 / Funnel
-chem/v0:condenser	冷凝管 / Condenser
-chem/v0:glass-rod	玻璃棒 / Glass Rod
-chem/v0:thermometer	温度计 / Thermometer
-chem/v0:ph-paper	酸碱试纸 / pH Paper
-chem/v0:test-tube-brush	试管刷 / Test Tube Brush
-chem/v0:test-tube-rack	试管架 / Test Tube Rack
-chem/v0:bunsen-burner	本生灯 / Bunsen Burner
-chem/v0:spirit-lamp	酒精灯 / Spirit Lamp
-chem/v0:tripod	三脚架 / Tripod
-chem/v0:heating-kit	加热套装 / Heating Kit
-chem/v0:magnetic-stirrer	磁力搅拌器 / Magnetic Stirrer
-chem/v0:centrifuge	离心机 / Centrifuge
-chem/v0:separator	分离机 / Separator
-chem/v0:desiccator	干燥器 / Desiccator
-chem/v0:fume-hood	通风橱 / Fume Hood
-chem/v0:lab-oven	实验烘箱 / Lab Oven
-chem/v0:electronic-scale	电子秤 / Electronic Scale
-chem/v0:analytical-balance	分析天平 / Analytical Balance
-chem/v0:lab-jack	千斤顶 / Lab Jack
-chem/v0:mortar-pestle	研钵与杵 / Mortar and Pestle
-chem/v0:spatula	铲 / Spatula
-chem/v0:filtration	过滤 / Filtration
-chem/v0:evaporator	蒸发仪 / Evaporator
-chem/v0:round-dish	圆皿 / Round Dish
-chem/v0:weighing-paper	称量纸 / Weighing Paper
-chem/v0:weighing-boat	称量盘 / Weighing Boat
-chem/v0:lab-coat	实验服 / Lab Coat
-chem/v0:gloves	实验手套 / Gloves
-chem/v0:goggles	护目镜 / Goggles
-chem/v0:respirator	防毒面具 / Respirator
-chem/v0:flammable	易燃 / Flammable
-chem/v0:toxic	有毒试剂 / Toxic Reagent
-chem/v0:radioactive	放射性 / Radioactive
-chem/v0:atomic-structure	原子结构 / Atomic Structure
-chem/v0:molecular-structure	分子结构 / Molecular Structure
-chem/v0:crystal-structure	晶体结构 / Crystal Structure
-chem/v0:equation	化学反应式 / Chemical Equation
-chem/v0:molecular-model	分子模型 / Molecular Model
-circuit/v0:chip	芯片 / Chip
-circuit/v0:resistor	电阻 / Resistor
-circuit/v0:capacitor	电容 / Capacitor
-circuit/v0:diode	二极管 / Diode
-circuit/v0:transistor	三极管 / Transistor
-circuit/v0:board	电路板 / Circuit Board
-circuit/v0:wave	信号波形 / Waveform
-circuit/v0:battery	电池 / Battery
-circuit/v0:sensor	传感器 / Sensor
-music/v0:note	音符 / Note
-music/v0:beat	节拍 / Beat
-music/v0:waveform	音频波形 / Waveform
-music/v0:equalizer	均衡器 / Equalizer
-music/v0:piano	钢琴 / Piano
-music/v0:guitar	吉他 / Guitar
-music/v0:mic	麦克风 / Microphone
-music/v0:vinyl	黑胶唱片 / Vinyl
-food/v0:coffee	咖啡 / Coffee
-food/v0:tea	茶 / Tea
-food/v0:bread	面包 / Bread
-food/v0:apple	苹果 / Apple
-food/v0:egg	鸡蛋 / Egg
-food/v0:rice	米饭 / Rice
-food/v0:noodle	面条 / Noodles
-food/v0:fish	鱼(食材) / Fish
-brand:openai	OpenAI
-brand:anthropic	Anthropic
-brand:claude	Claude
-brand:deepseek	DeepSeek
-brand:gemini	Google Gemini
-brand:mistral	Mistral AI
-brand:chatgpt	ChatGPT
-brand:grok	Grok(xAI)
-org/v0:chatgpt	ChatGPT(自绘抽象符号,非官方标识)
-org/v0:grok	Grok / xAI(自绘抽象符号,非官方标识)
+aws:acm	证书管理	Certificate Manager
+aws:alb	应用负载均衡	Application Load Balancer
+aws:apigw	API 网关	API Gateway
+aws:athena	交互式查询	Athena
+aws:aurora	关系型数据库	Aurora
+aws:batch	批处理作业	Batch
+aws:cloudformation	基础设施即代码	CloudFormation
+aws:cloudfront	内容分发 CDN	CloudFront
+aws:cloudtrail	审计日志	CloudTrail
+aws:cloudwatch	监控与告警	CloudWatch
+aws:codebuild	持续构建	CodeBuild
+aws:codedeploy	持续部署	CodeDeploy
+aws:codepipeline	交付流水线	CodePipeline
+aws:cognito	用户身份	Cognito
+aws:docdb	文档数据库	DocumentDB
+aws:dynamodb	NoSQL 数据库	DynamoDB
+aws:ebs	块存储	Elastic Block Store
+aws:ec2	虚拟机	EC2 实例
+aws:ecr	容器镜像仓库	ECR
+aws:ecs	容器编排	ECS
+aws:efs	文件存储	EFS
+aws:eks	托管 Kubernetes	EKS
+aws:es	托管检索服务	Elasticsearch Service
+aws:eventbridge	事件总线	EventBridge
+aws:fargate	无服务器容器	Fargate
+aws:glue	ETL 数据处理	Glue
+aws:guardduty	威胁检测	GuardDuty
+aws:iam	身份与访问管理	IAM
+aws:igw	互联网网关	Internet Gateway
+aws:kinesis	流式数据	Kinesis
+aws:kms	密钥管理	KMS
+aws:lambda	无服务器函数	Lambda
+aws:nat	NAT 网关	NAT Gateway
+aws:nlb	网络负载均衡	Network Load Balancer
+aws:opensearch	托管检索	OpenSearch
+aws:quicksight	BI 报表	QuickSight
+aws:rds	关系型数据库	RDS
+aws:redis	缓存	ElastiCache for Redis
+aws:redshift	数据仓库	Redshift
+aws:route53	DNS 解析	Route 53
+aws:s3	对象存储	S3
+aws:secrets	密钥托管	Secrets Manager
+aws:sns	通知服务	SNS
+aws:sqs	消息队列	SQS
+aws:sso	单点登录	SSO
+aws:stepfn	工作流编排	Step Functions
+aws:sts	临时凭证	STS
+aws:vpc	私有网络	VPC
+aws:waf	Web 应用防火墙	WAF
+azure:aci	容器实例	Container Instances
+azure:ad	身份目录	Entra ID
+azure:app	应用服务	App Service
+azure:blob	对象存储	Blob Storage
+azure:container	容器应用	Container Apps
+azure:cosmos	数据库	Cosmos DB
+azure:redis	缓存	Cache for Redis
+azure:sql	关系型数据库	SQL Database
+azure:vm	虚拟机	Virtual Machine
+gcp:bigtable	NoSQL 数据库	Bigtable
+gcp:disk	块存储	Persistent Disk
+gcp:firestore	文档数据库	Firestore
+gcp:func	无服务器函数	Cloud Functions
+gcp:gce	虚拟机	Compute Engine
+gcp:gcs	对象存储	Cloud Storage
+gcp:gke	托管 Kubernetes	GKE
+gcp:redis	缓存	Memorystore
+gcp:run	无服务器容器	Cloud Run
+gcp:spanner	关系型数据库	Spanner
+gcp:sql	关系型数据库	Cloud SQL
+bootstrap:alipay	支付宝	Alipay
+bootstrap:github	GitHub	GitHub
+bootstrap:wechat	微信	WeChat
+brand:kubernetes	Kubernetes	Kubernetes
+brand:prometheus	Prometheus	Prometheus
+infra/v0:api	接口	API
+infra/v0:browser	浏览器	Browser
+infra/v0:cloud	云	Cloud
+infra/v0:cluster	集群	Cluster
+infra/v0:container	容器	Container
+infra/v0:cpu	处理器	CPU
+infra/v0:database	数据库	Database
+infra/v0:desktop	台式机	Desktop
+infra/v0:disk-array	磁盘阵列	Disk Array
+infra/v0:envelope	邮件与消息	Envelope
+infra/v0:firewall	防火墙	Firewall
+infra/v0:gpu	图形处理器	GPU
+infra/v0:gui	桌面应用	GUI Application
+infra/v0:laptop	笔记本电脑	Laptop
+infra/v0:load-balancer	负载均衡	Load Balancer
+infra/v0:monitor	显示器	Monitor
+infra/v0:phone	手机	Phone
+infra/v0:router	路由器	Router
+infra/v0:server	服务器	Server
+infra/v0:storage	本地存储	Storage
+infra/v0:switch	交换机	Switch
+infra/v0:terminal	终端	Terminal
+infra/v0:user	用户	User
+org/v0:anthropic	Anthropic(自绘抽象符号,非官方标识)	Anthropic(self-drawn abstract symbol, not an official mark)
+org/v0:openai	OpenAI(自绘抽象符号,非官方标识)	OpenAI(self-drawn abstract symbol, not an official mark)
+db/v0:check	一致性校验	Consistency Check
+db/v0:lock	锁	Lock
+db/v0:redis	内存键值库	In-Memory KV
+db/v0:cluster	数据库集群	Database Cluster
+db/v0:backup	备份	Backup
+db/v0:replication	主从复制	Replication
+db/v0:sharding	分片	Sharding
+db/v0:index	索引	Index
+db/v0:migration	结构迁移	Migration
+db/v0:transaction	事务	Transaction
+db/v0:failover	故障切换	Failover
+db/v1:check	一致性校验	Consistency Check
+db/v1:lock	锁	Lock
+db/v1:redis	内存键值库	In-Memory KV
+db/v1:cluster	数据库集群	Database Cluster
+db/v1:backup	备份	Backup
+db/v1:replication	主从复制	Replication
+db/v1:sharding	分片	Sharding
+db/v1:index	索引	Index
+db/v1:migration	结构迁移	Migration
+db/v1:transaction	事务	Transaction
+db/v1:failover	故障切换	Failover
+ai/v0:llm	大模型	Large Language Model
+ai/v0:agent	智能体	Agent
+ai/v0:rag	检索增强生成	RAG
+ai/v0:embedding	向量化	Embedding
+ai/v0:vector-db	向量数据库	Vector Database
+ai/v0:finetune	微调	Fine-tuning
+ai/v0:inference	推理	Inference
+ai/v0:prompt	提示词	Prompt
+ai/v0:tokenizer	分词	Tokenizer
+ai/v0:multimodal	多模态	Multimodal
+k8s/v0:pod	Pod	Pod
+k8s/v0:deployment	Deployment	Deployment
+k8s/v0:service	Service	Service
+k8s/v0:ingress	Ingress	Ingress
+k8s/v0:configmap	ConfigMap	ConfigMap
+k8s/v0:job	Job	Job
+k8s/v0:statefulset	StatefulSet	StatefulSet
+k8s/v0:cronjob	CronJob	CronJob
+sec/v0:certificate	证书	Certificate
+sec/v0:key	密钥	Key
+sec/v0:audit	审计	Audit
+sec/v0:zero-trust	零信任	Zero Trust
+sec/v0:dlp	数据防泄漏	DLP
+sec/v0:vulnerability	漏洞	Vulnerability
+sec/v0:mfa	多因子认证	MFA
+sec/v0:encryption	加密	Encryption
+obs/v0:metrics	指标	Metrics
+obs/v0:logs	日志	Logs
+obs/v0:trace	链路追踪	Trace
+obs/v0:alert	告警	Alert
+obs/v0:dashboard	仪表盘	Dashboard
+obs/v0:slo	服务水平目标	SLO
+obs/v0:profiling	性能剖析	Profiling
+obs/v0:sampling	采样	Sampling
+cat/v0:cat	猫头	Cat
+cat/v0:kitten	小猫	Kitten
+cat/v0:sleeping	睡着的猫	Sleeping Cat
+cat/v0:paw	猫爪	Paw
+cat/v0:cat-face	猫脸	Cat Face
+dog/v0:dog	狗头	Dog
+dog/v0:puppy	小狗	Puppy
+dog/v0:bone	骨头	Bone
+dog/v0:paw	狗爪	Paw
+dog/v0:dog-face	狗脸	Dog Face
+animal/v0:bird	鸟	Bird
+animal/v0:fish	鱼	Fish
+animal/v0:horse	马	Horse
+animal/v0:elephant	大象	Elephant
+animal/v0:rabbit	兔子	Rabbit
+animal/v0:turtle	乌龟	Turtle
+animal/v0:bee	蜜蜂	Bee
+animal/v0:butterfly	蝴蝶	Butterfly
+chem/v0:molecule	分子	Molecule
+chem/v0:atom	原子	Atom
+chem/v0:flask	烧瓶	Flask
+chem/v0:bond	化学键	Bond
+chem/v0:reaction	化学反应	Reaction
+chem/v0:catalyst	催化剂	Catalyst
+chem/v0:solvent	溶剂	Solvent
+chem/v0:balance	天平	Balance
+chem/v0:beaker	烧杯	Beaker
+chem/v0:test-tube	试管	Test Tube
+chem/v0:round-flask	圆底烧瓶	Round-Bottom Flask
+chem/v0:evaporating-dish	蒸发皿	Evaporating Dish
+chem/v0:crystallizing-dish	结晶皿	Crystallizing Dish
+chem/v0:petri-dish	培养皿	Petri Dish
+chem/v0:crucible	坩埚	Crucible
+chem/v0:graduated-cylinder	量筒	Graduated Cylinder
+chem/v0:measuring-cup	量杯	Measuring Cup
+chem/v0:reagent-bottle	试剂瓶	Reagent Bottle
+chem/v0:acid-bottle	酸容器	Acid Bottle
+chem/v0:wash-bottle	洗瓶	Wash Bottle
+chem/v0:pressure-bottle	气压瓶	Pressure Bottle
+chem/v0:separatory-funnel	分液漏斗	Separatory Funnel
+chem/v0:burette	滴定管	Burette
+chem/v0:pipette	移液管	Pipette
+chem/v0:micropipette	移液枪	Micropipette
+chem/v0:dropper	滴管	Dropper
+chem/v0:funnel	漏斗	Funnel
+chem/v0:condenser	冷凝管	Condenser
+chem/v0:glass-rod	玻璃棒	Glass Rod
+chem/v0:thermometer	温度计	Thermometer
+chem/v0:ph-paper	酸碱试纸	pH Paper
+chem/v0:test-tube-brush	试管刷	Test Tube Brush
+chem/v0:test-tube-rack	试管架	Test Tube Rack
+chem/v0:bunsen-burner	本生灯	Bunsen Burner
+chem/v0:spirit-lamp	酒精灯	Spirit Lamp
+chem/v0:tripod	三脚架	Tripod
+chem/v0:heating-kit	加热套装	Heating Kit
+chem/v0:magnetic-stirrer	磁力搅拌器	Magnetic Stirrer
+chem/v0:centrifuge	离心机	Centrifuge
+chem/v0:separator	分离机	Separator
+chem/v0:desiccator	干燥器	Desiccator
+chem/v0:fume-hood	通风橱	Fume Hood
+chem/v0:lab-oven	实验烘箱	Lab Oven
+chem/v0:electronic-scale	电子秤	Electronic Scale
+chem/v0:analytical-balance	分析天平	Analytical Balance
+chem/v0:lab-jack	千斤顶	Lab Jack
+chem/v0:mortar-pestle	研钵与杵	Mortar and Pestle
+chem/v0:spatula	铲	Spatula
+chem/v0:filtration	过滤	Filtration
+chem/v0:evaporator	蒸发仪	Evaporator
+chem/v0:round-dish	圆皿	Round Dish
+chem/v0:weighing-paper	称量纸	Weighing Paper
+chem/v0:weighing-boat	称量盘	Weighing Boat
+chem/v0:lab-coat	实验服	Lab Coat
+chem/v0:gloves	实验手套	Gloves
+chem/v0:goggles	护目镜	Goggles
+chem/v0:respirator	防毒面具	Respirator
+chem/v0:flammable	易燃	Flammable
+chem/v0:toxic	有毒试剂	Toxic Reagent
+chem/v0:radioactive	放射性	Radioactive
+chem/v0:atomic-structure	原子结构	Atomic Structure
+chem/v0:molecular-structure	分子结构	Molecular Structure
+chem/v0:crystal-structure	晶体结构	Crystal Structure
+chem/v0:equation	化学反应式	Chemical Equation
+chem/v0:molecular-model	分子模型	Molecular Model
+circuit/v0:chip	芯片	Chip
+circuit/v0:resistor	电阻	Resistor
+circuit/v0:capacitor	电容	Capacitor
+circuit/v0:diode	二极管	Diode
+circuit/v0:transistor	三极管	Transistor
+circuit/v0:board	电路板	Circuit Board
+circuit/v0:wave	信号波形	Waveform
+circuit/v0:battery	电池	Battery
+circuit/v0:sensor	传感器	Sensor
+music/v0:note	音符	Note
+music/v0:beat	节拍	Beat
+music/v0:waveform	音频波形	Waveform
+music/v0:equalizer	均衡器	Equalizer
+music/v0:piano	钢琴	Piano
+music/v0:guitar	吉他	Guitar
+music/v0:mic	麦克风	Microphone
+music/v0:vinyl	黑胶唱片	Vinyl
+food/v0:coffee	咖啡	Coffee
+food/v0:tea	茶	Tea
+food/v0:bread	面包	Bread
+food/v0:apple	苹果	Apple
+food/v0:egg	鸡蛋	Egg
+food/v0:rice	米饭	Rice
+food/v0:noodle	面条	Noodles
+food/v0:fish	鱼(食材)	Fish
+brand:openai	OpenAI	OpenAI
+brand:anthropic	Anthropic	Anthropic
+brand:claude	Claude	Claude
+brand:deepseek	DeepSeek	DeepSeek
+brand:gemini	Google Gemini	Google Gemini
+brand:mistral	Mistral AI	Mistral AI
+brand:chatgpt	ChatGPT	ChatGPT
+brand:grok	Grok(xAI)	Grok(xAI)
+org/v0:chatgpt	ChatGPT(自绘抽象符号,非官方标识)	ChatGPT(self-drawn abstract symbol, not an official mark)
+org/v0:grok	Grok	xAI(自绘抽象符号,非官方标识)
 
 
-dev/v0:requirement	需求 / Requirement
-dev/v0:feasibility	可行性研究 / Feasibility Study
-dev/v0:planning	项目计划 / Planning
-dev/v0:design	设计 / Design
-dev/v0:prototype	原型 / Prototype
-dev/v0:development	开发实现 / Development
-dev/v0:review	评审 / Review
-dev/v0:test	测试 / Testing
-dev/v0:defect	缺陷 / Defect
-dev/v0:release	发布 / Release
-dev/v0:acceptance	验收 / Acceptance
-dev/v0:maintenance	运维维护 / Maintenance
-dev/v0:iteration	迭代 / Iteration
-dev/v0:milestone	里程碑 / Milestone
-dev/v0:roadmap	路线图 / Roadmap
-dev/v0:gantt	甘特图 / Gantt Chart
-dev/v0:risk	风险 / Risk
-dev/v0:change	变更 / Change Request
-dev/v0:retrospective	复盘 / Retrospective
-dev/v0:prd	需求文档 / PRD
-dev/v0:architecture	架构设计 / Architecture
-dev/v0:api-design	接口设计 / API Design
-dev/v0:code	编码 / Coding
-dev/v0:code-review	代码评审 / Code Review
-dev/v0:merge	合并请求 / Merge Request
-dev/v0:ci	持续集成 / Continuous Integration
-dev/v0:unit-test	单元测试 / Unit Test
-dev/v0:integration-test	集成测试 / Integration Test
-dev/v0:performance-test	性能测试 / Performance Test
-dev/v0:ci-cd	持续交付 / Continuous Delivery
-dev/v0:rollback	回滚 / Rollback
-dev/v0:canary	灰度发布 / Canary Release
-dev/v0:logging	日志监控 / Logging
-dev/v0:schematic	原理图 / Schematic
-dev/v0:pcb	PCB 布局 / PCB Layout
-dev/v0:routing	布线 / Routing
-dev/v0:fabrication	打样 / Fabrication
-dev/v0:smt	SMT 贴片 / SMT
-dev/v0:reflow	回流焊 / Reflow Soldering
-dev/v0:mechanical	结构设计 / Mechanical Design
-dev/v0:mold	模具 / Mold
-dev/v0:injection	注塑 / Injection Molding
-dev/v0:assembly	装配 / Assembly
-dev/v0:eol-test	出厂测试 / End-of-Line Test
-dev/v0:burn-in	老化测试 / Burn-in Test
-dev/v0:emc	EMC 测试 / EMC Test
-dev/v0:certification	认证 / Certification
-dev/v0:bom	物料清单 / BOM
-dev/v0:supply-chain	供应链 / Supply Chain
+dev/v0:requirement	需求	Requirement
+dev/v0:feasibility	可行性研究	Feasibility Study
+dev/v0:planning	项目计划	Planning
+dev/v0:design	设计	Design
+dev/v0:prototype	原型	Prototype
+dev/v0:development	开发实现	Development
+dev/v0:review	评审	Review
+dev/v0:test	测试	Testing
+dev/v0:defect	缺陷	Defect
+dev/v0:release	发布	Release
+dev/v0:acceptance	验收	Acceptance
+dev/v0:maintenance	运维维护	Maintenance
+dev/v0:iteration	迭代	Iteration
+dev/v0:milestone	里程碑	Milestone
+dev/v0:roadmap	路线图	Roadmap
+dev/v0:gantt	甘特图	Gantt Chart
+dev/v0:risk	风险	Risk
+dev/v0:change	变更	Change Request
+dev/v0:retrospective	复盘	Retrospective
+dev/v0:prd	需求文档	PRD
+dev/v0:architecture	架构设计	Architecture
+dev/v0:api-design	接口设计	API Design
+dev/v0:code	编码	Coding
+dev/v0:code-review	代码评审	Code Review
+dev/v0:merge	合并请求	Merge Request
+dev/v0:ci	持续集成	Continuous Integration
+dev/v0:unit-test	单元测试	Unit Test
+dev/v0:integration-test	集成测试	Integration Test
+dev/v0:performance-test	性能测试	Performance Test
+dev/v0:ci-cd	持续交付	Continuous Delivery
+dev/v0:rollback	回滚	Rollback
+dev/v0:canary	灰度发布	Canary Release
+dev/v0:logging	日志监控	Logging
+dev/v0:schematic	原理图	Schematic
+dev/v0:pcb	PCB 布局	PCB Layout
+dev/v0:routing	布线	Routing
+dev/v0:fabrication	打样	Fabrication
+dev/v0:smt	SMT 贴片	SMT
+dev/v0:reflow	回流焊	Reflow Soldering
+dev/v0:mechanical	结构设计	Mechanical Design
+dev/v0:mold	模具	Mold
+dev/v0:injection	注塑	Injection Molding
+dev/v0:assembly	装配	Assembly
+dev/v0:eol-test	出厂测试	End-of-Line Test
+dev/v0:burn-in	老化测试	Burn-in Test
+dev/v0:emc	EMC 测试	EMC Test
+dev/v0:certification	认证	Certification
+dev/v0:bom	物料清单	BOM
+dev/v0:supply-chain	供应链	Supply Chain

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>x-cmd/icon —— 架构图图标库</title>
-<meta name="description" content="x-cmd 架构图图标库:云厂商官方标识 + 通用基础设施概念 + 公司抽象符号。按 <cat>:<concept> 索引,可搜索、可过滤。">
+<title data-i18n="title">x-cmd/icon —— 架构图图标库</title>
+<meta name="description" content="x-cmd 架构图图标库:云厂商官方标识 + 自绘概念图标 + 品牌标识,按 <cat>:<concept> 索引。">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='3' y='3' width='8' height='8' rx='2' fill='%232dd4bf'/><rect x='13' y='3' width='8' height='8' rx='2' fill='%230d9488'/><rect x='8' y='13' width='8' height='8' rx='2' fill='%230f766e'/></svg>">
 <base href="__ICON_BASE__/">
 <link rel="stylesheet" href="style.css">
@@ -17,61 +17,69 @@
       <span>x-cmd<em>/</em>icon</span>
     </a>
     <div class="search-wrap">
-      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="搜索图标:id / 名称 / 分类   (按 / 聚焦)">
+      <input id="q" type="search" autocomplete="off" spellcheck="false" data-i18n-ph="search" placeholder="搜索图标:id / 名称 / 分类">
       <button id="clear" type="button" hidden aria-label="清空搜索">×</button>
     </div>
+    <button id="lang" type="button" class="ghost" aria-label="切换语言">EN</button>
     <button id="theme" type="button" class="ghost" aria-label="切换深浅色">◐</button>
   </div>
 </header>
 
 <main id="main">
-  <!-- 首页:分类卡片(每类先放 20 个左右)+ 搜索结果 -->
+  <!-- 首页:一个过滤页 —— 搜索 + 分类筛选,一边打一边筛 -->
   <section id="home">
-    <h1 class="page-title">架构图图标库</h1>
-    <p class="page-sub">给 <code>x-cmd/draw</code> 画架构图用的图标。键名格式 <code>&lt;cat&gt;:&lt;concept&gt;</code>,点分类进去看整类,点图标定位到它。</p>
-    <h2 class="sec-title">分类</h2>
-    <div id="cats" class="cats"></div>
-    <h2 class="sec-title" id="all-title" hidden>搜索结果 <span id="all-count" class="count"></span></h2>
-    <div id="all" class="grid" hidden></div>
+    <div class="hero">
+      <h1 class="page-title" data-i18n="heroTitle">架构图图标库</h1>
+      <div class="search-wrap big">
+        <input id="q2" type="search" autocomplete="off" spellcheck="false" data-i18n-ph="search" placeholder="搜索图标:id / 名称 / 分类">
+        <button id="clear2" type="button" hidden aria-label="清空搜索">×</button>
+      </div>
+      <p class="hero-sub" data-i18n="heroSub">给 x-cmd/draw 画架构图用的图标 · 键名 &lt;cat&gt;:&lt;concept&gt; · 一边打一边筛</p>
+    </div>
+    <div id="filters" class="filters"></div>
+    <h2 class="sec-title"><span id="all-count" class="count"></span></h2>
+    <div id="all" class="grid"></div>
+    <div class="more-wrap"><button id="more" class="more" type="button" hidden></button></div>
   </section>
 
   <!-- 分类页 -->
   <section id="cat" hidden>
-    <nav class="crumbs"><a href="./" data-nav>← 全部图标</a></nav>
+    <nav class="crumbs"><a href="./" data-nav data-i18n="navAll">← 全部图标</a></nav>
     <h1 class="page-title" id="cat-title"></h1>
     <p class="page-sub" id="cat-note"></p>
     <div id="cat-vers" class="vers" hidden></div>
     <div id="cat-grid" class="grid"></div>
+    <div class="more-wrap"><button id="more2" class="more" type="button" hidden></button></div>
   </section>
 
   <p id="empty" class="empty" hidden>没有匹配的图标。</p>
 </main>
 
 <dialog id="detail">
-  <button class="dlg-close" type="button" aria-label="关闭">×</button>
+  <button class="dlg-close" type="button" data-i18n="close" aria-label="关闭">×</button>
   <div class="dlg-body">
     <div class="dlg-preview"><img id="dlg-img" alt=""></div>
     <dl class="dlg-meta">
-      <dt>id</dt><dd><code id="dlg-id"></code> <button class="copy" type="button" data-copy="id">复制</button></dd>
-      <dt>说明</dt><dd id="dlg-desc"></dd>
-      <dt>分类</dt><dd id="dlg-cat"></dd>
-      <dt>版本</dt><dd id="dlg-version"></dd>
-      <dt>结论</dt><dd id="dlg-verdict"></dd>
-      <dt>著作权</dt><dd id="dlg-license"></dd>
-      <dt>商标权人</dt><dd id="dlg-trademark"></dd>
-      <dt>商标政策</dt><dd id="dlg-policy"></dd>
-      <dt>使用限制</dt><dd id="dlg-restrictions"></dd>
-      <dt>复核</dt><dd id="dlg-reviewed"></dd>
-      <dt>出处</dt><dd id="dlg-source"></dd>
-      <dt>文件</dt><dd><a id="dlg-file" href="#" download>下载</a></dd>
+      <dt>id</dt><dd><code id="dlg-id"></code> <button class="copy" type="button" data-copy="id" data-i18n="copy">复制</button></dd>
+      <dt data-i18n="lblDesc">说明</dt><dd id="dlg-desc"></dd>
+      <dt data-i18n="lblCat">分类</dt><dd id="dlg-cat"></dd>
+      <dt data-i18n="lblVer">版本</dt><dd id="dlg-version"></dd>
+      <dt data-i18n="lblVerdict">结论</dt><dd id="dlg-verdict"></dd>
+      <dt data-i18n="lblLicense">著作权</dt><dd id="dlg-license"></dd>
+      <dt data-i18n="lblTrademark">商标权人</dt><dd id="dlg-trademark"></dd>
+      <dt data-i18n="lblPolicy">商标政策</dt><dd id="dlg-policy"></dd>
+      <dt data-i18n="lblRestrictions">使用限制</dt><dd id="dlg-restrictions"></dd>
+      <dt data-i18n="lblReviewed">复核</dt><dd id="dlg-reviewed"></dd>
+      <dt data-i18n="lblSource">出处</dt><dd id="dlg-source"></dd>
+      <dt data-i18n="lblFile">文件</dt><dd><a id="dlg-file" href="#" download data-i18n="download">下载</a></dd>
     </dl>
-    <details id="dlg-notes-wrap"><summary>许可分析</summary><div id="dlg-notes" class="notes"></div></details>
-    <details id="dlg-src-wrap"><summary>SVG 源码</summary><pre id="dlg-src"></pre></details>
+    <details id="dlg-notes-wrap"><summary data-i18n="notes">许可分析</summary><div id="dlg-notes" class="notes"></div></details>
+    <details id="dlg-src-wrap"><summary data-i18n="src">SVG 源码</summary><pre id="dlg-src"></pre></details>
   </div>
 </dialog>
 
 <footer class="foot">
-  <p>图标版权归各自权利人所有;云厂商标识来自 <a href="https://github.com/mingrammer/diagrams" target="_blank" rel="noopener">mingrammer/diagrams</a>(Apache-2.0),通用概念与公司符号为本仓自绘(不含任何商标图形)。</p>
+  <p data-i18n-html="footer">图标版权归各自权利人所有;云厂商标识来自 <a href="https://github.com/mingrammer/diagrams" target="_blank" rel="noopener">mingrammer/diagrams</a>(Apache-2.0),通用概念与公司符号为本仓自绘(不含任何商标图形)。</p>
 </footer>
 
 <script src="app.js"></script>
