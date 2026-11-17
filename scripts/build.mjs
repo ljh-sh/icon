@@ -63,6 +63,18 @@ function checkOneLine(file) {
   }
 }
 
+// SVG 的 viewBox —— 文件里没写就从根元素的 width/height 推一个。
+// (Inkscape 导出的图标常常只有 width/height 没有 viewBox,没有的话在 sprite 里
+//  会退回 0 0 24 24,内容被缩得看不见。)
+function viewBoxOf(raw) {
+  const vb = raw.match(/viewBox="([^"]+)"/)?.[1];
+  if (vb) return vb;
+  const open = raw.match(/<svg[^>]*>/)?.[0] || '';
+  const w = open.match(/\bwidth="([\d.]+)/)?.[1];
+  const h = open.match(/\bheight="([\d.]+)/)?.[1];
+  return w && h ? `0 0 ${w} ${h}` : '0 0 24 24';
+}
+
 // 版本号比较:v2 比 v10 小
 const verCmp = (a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10);
 
@@ -343,7 +355,7 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     bytes: raw.length,
     // sprite 用的 id 与 viewBox(PNG 进不了 sprite,还是单独文件)
     spriteId: ext === 'svg' ? spriteId(id) : undefined,
-    viewBox: ext === 'svg' ? raw.match(/viewBox="([^"]+)"/)?.[1] || '0 0 24 24' : undefined,
+    viewBox: ext === 'svg' ? viewBoxOf(raw) : undefined,
     source: rec?.meta.source || CATS[info.cat].source,
     license: rec?.meta.license || CATS[info.cat].license,
     note: rec?.meta.note || CATS[info.cat].note,
