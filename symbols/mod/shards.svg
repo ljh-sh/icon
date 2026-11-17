@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12">
+  <g transform="translate(-2.772 -3.736) scale(0.9639)">
+<g fill="@violet.base">
+    <rect x="3" y="4" width="5.4" height="5.4" rx="1.8"/>
+    <rect x="9.8" y="4" width="5.4" height="5.4" rx="1.8"/>
+    <rect x="3" y="10.8" width="5.4" height="5.4" rx="1.8"/>
+    <rect x="9.8" y="10.8" width="5.4" height="5.4" rx="1.8"/>
+    </g>
+    <g fill="@violet.light">
+    <rect x="4.2" y="5.2" width="2.2" height="2.2" rx="0.8"/>
+    <rect x="11" y="12" width="2.2" height="2.2" rx="0.8"/>
+    </g>
+  </g>
+</svg>

@@ -25,7 +25,6 @@ aws:ecr	容器镜像仓库	ECR
 aws:ecs	容器编排	ECS
 aws:efs	文件存储	EFS
 aws:eks	托管 Kubernetes	EKS
-aws:es	托管检索服务	Elasticsearch Service
 aws:eventbridge	事件总线	EventBridge
 aws:fargate	无服务器容器	Fargate
 aws:glue	ETL 数据处理	Glue
@@ -38,7 +37,6 @@ aws:lambda	无服务器函数	Lambda
 aws:nat	NAT 网关	NAT Gateway
 aws:nlb	网络负载均衡	Network Load Balancer
 aws:opensearch	托管检索	OpenSearch
-aws:quicksight	BI 报表	QuickSight
 aws:rds	关系型数据库	RDS
 aws:redis	缓存	ElastiCache for Redis
 aws:redshift	数据仓库	Redshift
@@ -55,8 +53,6 @@ aws:waf	Web 应用防火墙	WAF
 azure:aci	容器实例	Container Instances
 azure:ad	身份目录	Entra ID
 azure:app	应用服务	App Service
-azure:blob	对象存储	Blob Storage
-azure:container	容器应用	Container Apps
 azure:cosmos	数据库	Cosmos DB
 azure:redis	缓存	Cache for Redis
 azure:sql	关系型数据库	SQL Database
@@ -103,7 +99,7 @@ infra/v0:user	用户	User
 org/v0:anthropic	Anthropic(自绘抽象符号,非官方标识)	Anthropic(self-drawn abstract symbol, not an official mark)
 org/v0:openai	OpenAI(自绘抽象符号,非官方标识)	OpenAI(self-drawn abstract symbol, not an official mark)
 db/v0:check	一致性校验	Consistency Check
-db/v0:lock	锁	Lock
+db/v0:locked	锁定	Locked
 db/v0:redis	Redis(自绘抽象符号,非官方标识)	Redis (self-drawn symbol, not an official mark)
 db/v0:cluster	数据库集群	Database Cluster
 db/v0:backup	备份	Backup
@@ -123,6 +119,10 @@ db/v0:neo4j	Neo4j(自绘抽象符号,非官方标识)	Neo4j (self-drawn symbol, 
 db/v0:milvus	Milvus(自绘抽象符号,非官方标识)	Milvus (self-drawn symbol, not an official mark)
 db/v0:tidb	TiDB(自绘抽象符号,非官方标识)	TiDB (self-drawn symbol, not an official mark)
 db/v0:kv	键值库	Key-Value Store
+common/v0:lock	锁	Lock
+common/v0:clock	时钟	Clock
+common/v0:check	对勾	Check
+common/v0:sync	同步	Sync
 ai/v0:llm	大模型	Large Language Model
 ai/v0:agent	智能体	Agent
 ai/v0:rag	检索增强生成	RAG
@@ -343,3 +343,7 @@ github/v0:workflow	工作流	Workflow
 github/v0:runner	执行器	Runner
 github/v0:package	包	Package
 github/v0:milestone	里程碑	Milestone
+aws:quicksight	BI 报表	QuickSight
+aws:es	托管检索服务	Elasticsearch Service
+azure:container	容器应用	Container Apps
+azure:blob	对象存储	Blob Storage

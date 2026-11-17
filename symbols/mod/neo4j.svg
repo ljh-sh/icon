@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-  <circle cx="17.6" cy="17.6" r="5" fill="#0e7c86"/>
-  <circle cx="17.6" cy="15" r="1.5" fill="@on-color.base"/>
-  <circle cx="15" cy="19.8" r="1.5" fill="@on-color.base"/>
-  <circle cx="20.2" cy="19.8" r="1.5" fill="@on-color.base"/>
-  <path d="M17.6 16.5v1.4M17.6 17.9h-1.6M17.6 17.9h1.6" stroke="@on-color.base" stroke-width="1.2" stroke-linecap="round"/>
-</svg>

@@ -1,36 +1,48 @@
-# 图标配方 —— 由基本符号组装,别手改 icons/ 下由它生成的图标。
+# 图标配方 —— 由基本符号组装,别改 icons/ 下由它生成的图标。
 #
 # 格式:<cat>/<version>	<concept>	<part>	<part>…
-#   part 是 symbols/ 下的相对路径(不含 .svg),按顺序叠放。
-#   主体:symbols/glyph/*.svg —— 这个概念独有的部分,占主区,细节画足
-#   归属角标:symbols/corner/*.svg —— 它属于哪(数据库 / 安全 / k8s 轮子),固定右下角
+#   part 的写法:
+#     obj/<name>        symbols/obj/<name>.svg,套对象槽位(14×14 框,居中偏左)
+#     mod/<name>        symbols/mod/<name>.svg,套修饰槽位(12×12 框,右上角,叠在对象上)
+#     mod/<name>@solo   同一个文件,套单元素槽位(12×12 框,居中放大)
+#     其它前缀          原样拼进去(旧规则:glyph/… / corner/…)
 #
-# 组合规则:相同要素要小,不同要素要大 ——
-#   大的是「这是什么」,小的是「它属于哪」。
+# 构图规范 v3 —— 一个图标 = 对象(大,居中偏左)+ 修饰(大,右上角)。
+#   对象 = 这个概念作用在什么上:db:lock 的对象是数据库圆柱,db:index 的对象是表,
+#         db:kv 的对象是键值条目。不是「分类」!
+#   修饰 = 状态或动作:锁 / 时钟 / 对勾 / 同步 / 切换 / 箭头…… 全库共用一套,
+#         同一个符号只画一次。
+#   分类(db: / sec: / k8s:)只活在键名里,不再画进图形 —— 右下角留空,
+#         将来放「×2」这种程序化生成的计数徽标。
 #
-# 键名天然就是会意结构:db:lock = 数据库 + 锁。
+# 键名读作「对象处于该状态」:db:lock(一把锁这个名词)与 db:locked(锁定状态的数据库)
+# 是两个概念。
 # 颜色写 @role.key,compose 时按 palette.json 换成实际颜色。
-db/v0	backup	glyph/clock	corner/db
-db/v0	lock	glyph/lock	corner/db
-db/v0	check	glyph/check	corner/db
-db/v0	kv	glyph/bolt	corner/db
-db/v0	cluster	glyph/tree	corner/db
-db/v0	replication	glyph/sync	corner/db
-db/v0	sharding	glyph/shards	corner/db
-db/v0	index	glyph/bars	corner/db
-db/v0	migration	glyph/arrow	corner/db
-db/v0	transaction	glyph/cycle	corner/db
-db/v0	failover	glyph/switch	corner/db
-db/v0	redis	glyph/redis	corner/db
-db/v0	pg	glyph/pg	corner/db
-db/v0	mysql	glyph/mysql	corner/db
-db/v0	clickhouse	glyph/clickhouse	corner/db
-db/v0	duckdb	glyph/duckdb	corner/db
-db/v0	mongo	glyph/mongo	corner/db
-db/v0	influx	glyph/influx	corner/db
-db/v0	neo4j	glyph/neo4j	corner/db
-db/v0	milvus	glyph/milvus	corner/db
-db/v0	tidb	glyph/tidb	corner/db
+db/v0	backup	obj/db	mod/clock
+db/v0	locked	obj/db	mod/lock
+db/v0	check	obj/db	mod/check
+db/v0	cluster	obj/db	mod/tree
+db/v0	replication	obj/db2	mod/sync
+db/v0	sharding	obj/db	mod/shards
+db/v0	index	obj/table	mod/bars
+db/v0	migration	obj/db	mod/arrow
+db/v0	transaction	obj/db	mod/cycle
+db/v0	failover	obj/db2	mod/switch
+db/v0	kv	obj/kv	mod/bolt
+db/v0	redis	obj/redis@solo
+db/v0	pg	obj/pg@solo
+db/v0	mysql	obj/mysql@solo
+db/v0	clickhouse	obj/clickhouse@solo
+db/v0	duckdb	obj/duckdb@solo
+db/v0	mongo	obj/mongo@solo
+db/v0	influx	obj/influx@solo
+db/v0	neo4j	obj/neo4j@solo
+db/v0	milvus	obj/milvus@solo
+db/v0	tidb	obj/tidb@solo
+common/v0	lock	mod/lock@solo
+common/v0	clock	mod/clock@solo
+common/v0	check	mod/check@solo
+common/v0	sync	mod/sync@solo
 k8s/v0	pod	glyph/k-pod	corner/k8s
 k8s/v0	deployment	glyph/k-deployment	corner/k8s
 k8s/v0	service	glyph/k-service	corner/k8s

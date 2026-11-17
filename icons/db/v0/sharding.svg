@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <g transform="translate(1.2 6.2)">
+  <path d="M1.7 3.4v7.2c0 1.35 2.39 2.45 5.3 2.45s5.3-1.1 5.3-2.45V3.4Z" fill="#0284c7"/>
+  <ellipse cx="7" cy="3.4" rx="5.3" ry="2.45" fill="#38bdf8"/>
+  <path d="M1.7 7.6c0 1.35 2.39 2.45 5.3 2.45s5.3-1.1 5.3-2.45" fill="none" stroke="#075985" stroke-width="1.1"/>
+  </g>
+  <g transform="translate(8.8 1.8)">
+  <g transform="translate(-2.772 -3.736) scale(0.9639)">
   <g fill="#8b5cf6">
   <rect x="3" y="4" width="5.4" height="5.4" rx="1.8"/>
   <rect x="9.8" y="4" width="5.4" height="5.4" rx="1.8"/>
@@ -9,7 +16,6 @@
   <rect x="4.2" y="5.2" width="2.2" height="2.2" rx="0.8"/>
   <rect x="11" y="12" width="2.2" height="2.2" rx="0.8"/>
   </g>
-  <circle cx="18.3" cy="18.3" r="4.3" fill="#334155"/>
-  <ellipse cx="18.3" cy="16.9" rx="2.6" ry="0.9" fill="#f8fafc"/>
-  <path d="M15.7 16.9v2.6c0 .5 1.16.9 2.6.9s2.6-.4 2.6-.9v-2.6c0 .5-1.16.9-2.6.9s-2.6-.4-2.6-.9Z" fill="#f8fafc"/>
+  </g>
+  </g>
 </svg>

@@ -33,6 +33,7 @@ const CATS = {
   dog: { title: '狗', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '狗' },
   animal: { title: '动物', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '动物' },
   chem: { title: '化学', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '化学:实验器材 / 试剂 / 结构' },
+  common: { title: '通用符号', titleEn: 'Common Symbols', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步', noteEn: 'Basic symbols shared across the library — lock, clock, check, sync' },
   dev: { title: '开发流程', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '开发项目流程 —— 通用阶段 / 软件 / 硬件' },
   github: { title: 'GitHub', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'GitHub 的概念与流程 —— 右下角是 GitHub 官方 mark(次要位置)' },
   circuit: { title: '电路', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '电子与电路' },
