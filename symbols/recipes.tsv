@@ -10,8 +10,6 @@
 #
 # 键名天然就是会意结构:db:lock = 数据库 + 锁。
 # 颜色写 @role.key,compose 时按 palette.json 换成实际颜色。
-# 组合规则:大元素 = 这个概念本身(独特要素),右下角小标记 = 归属(平台/家族)。
-# 相同要素要小,不同要素要大 —— 大的是"这是什么",小的是"它属于哪"。
 db/v0	backup	glyph/clock	corner/db
 db/v0	lock	glyph/lock	corner/db
 db/v0	check	glyph/check	corner/db
