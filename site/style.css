@@ -233,13 +233,13 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 .more:hover { background: var(--surface-2); color: var(--ink); }
 
 /* ---------- 图标网格 ---------- */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 14px; }
 /* 平时不套框 —— 图标和字直接落在页面上,hover 才浮起一张卡 */
 .cell {
   background: none;
   border: 0;
   border-radius: var(--radius);
-  padding: 16px 8px 12px;
+  padding: 18px 10px 13px;
   text-align: center;
   cursor: pointer;
   transition: background-color .15s ease, transform .15s ease, box-shadow .15s ease;
@@ -252,15 +252,18 @@ main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
 }
 /* 一个块:图标 + 文字 —— 图标不再套一层框 */
 .cell img, .cell .ic {
-  width: 60px;
-  height: 60px;
+  width: 76px;
+  height: 76px;
   object-fit: contain;
   display: block;
   margin: 0 auto 10px;
   /* 显示时自动圆角 —— 带底色的方形标识(云厂商那批)看着像 app 图标 */
-  border-radius: 14px;
+  border-radius: 17px;
   overflow: hidden;
+  transition: transform .18s cubic-bezier(.2, .7, .3, 1);
 }
+/* hover:图标自己轻轻长大一点 */
+.cell:hover img, .cell:hover .ic { transform: scale(1.07); }
 /* 单色图形(brand / bootstrap)继承 currentColor —— 深浅两套主题都看得见 */
 .ic.mono { color: var(--ink); fill: currentColor; }
 .cell .id { font-size: 11.5px; color: var(--ink); word-break: break-all; line-height: 1.35; }
@@ -392,5 +395,5 @@ pre {
   .nav-links { gap: 14px; font-size: 13px; }
   .site-title { display: none; }
   main { padding: 28px 16px 56px; }
-  .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
 }
