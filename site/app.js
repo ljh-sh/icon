@@ -489,7 +489,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ---------- 主题 ---------- */
-// 默认浅色 —— 底子偏白,橙作主色;深色那套在开关上
+// 默认暗色
 const themeBtn = $('#theme');
 function applyTheme(v) {
   document.documentElement.setAttribute('data-theme', v === 'dark' ? 'dark' : 'light');
@@ -502,9 +502,9 @@ themeBtn.addEventListener('click', () => {
   applyTheme(cur === 'dark' ? 'light' : 'dark');
 });
 try {
-  applyTheme(localStorage.getItem('icon-theme') || 'light');
+  applyTheme(localStorage.getItem('icon-theme') || 'dark');
 } catch {
-  applyTheme('light');
+  applyTheme('dark');
 }
 
 /* ---------- 启动 ---------- */

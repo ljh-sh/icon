@@ -17,6 +17,9 @@
     "base": "#f59e0b",
     "deep": "#b45309"
   },
+  "cream": {
+    "base": "#f2e0c2"
+  },
   "success": {
     "base": "#22c55e",
     "deep": "#16a34a"
