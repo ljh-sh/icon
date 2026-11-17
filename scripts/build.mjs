@@ -58,7 +58,7 @@ const MIME = { svg: 'image/svg+xml', png: 'image/png' };
 function checkOneLine(file) {
   const raw = readFileSync(file, 'utf8');
   if (raw.replace(/\n$/, '').includes('\n')) {
-    console.error(`${file.replace(`${ROOT}/`, '')}: 图标文件必须单行(sprite 一行一个 symbol)`);
+    console.error(`${file.replace(`${ROOT}/`, '')}: 图标文件必须单行(sprite 一行一个 symbol)—— 跑 npm run fmt`);
     process.exit(1);
   }
 }

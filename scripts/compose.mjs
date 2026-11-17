@@ -49,6 +49,11 @@ function inner(file) {
     process.exit(1);
   }
   const s = readFileSync(path, 'utf8');
+  // 符号文件也得单行 —— sprite 一行一个 symbol
+  if (s.replace(/\n$/, '').includes('\n')) {
+    console.error(`${file}.svg: 符号文件必须单行 —— 跑 npm run fmt`);
+    process.exit(1);
+  }
   const m = s.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
   // 符号文件都是单行的 —— 拼出来的图标也必须是单行(sprite 一行一个 symbol)
   let body = (m ? m[1] : s).trim().replace(/\s*\n\s*/g, ' ');

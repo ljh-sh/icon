@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/compose.mjs && node scripts/build.mjs",
+    "fmt": "node scripts/normalize-svg.mjs",
     "dev": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",
     "check": "tsc --noEmit",
