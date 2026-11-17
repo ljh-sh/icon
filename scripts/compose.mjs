@@ -38,8 +38,21 @@ if (!existsSync(RECIPES)) {
 const SLOTS = {
   obj: { box: 14, transform: 'translate(1.2 6.2)' },
   mod: { box: 12, transform: 'translate(8.8 1.8)' },
+  // 框里的内容 —— 位置由框的开口方向决定(见 kindOf)
+  in: { box: 9, transform: 'translate(7.5 7.5)' },
+  'in@top': { box: 9, transform: 'translate(7.5 2.5)' },
+  'in@right': { box: 9, transform: 'translate(12.5 7.5)' },
+  'in@left': { box: 9, transform: 'translate(2.5 7.5)' },
 };
 const SOLO = 17.4; // 单元素放大到多少(24 的画布里占多大)
+
+// 包围结构 —— 跟汉字的间架结构一样:
+//   frame/full/<n>   全包围:框在外,内容居中
+//   frame/left/<n>   左包围:框在左,内容靠右
+//   frame/right/<n>  右包围:框在右,内容靠左
+//   frame/bottom/<n> 下包围:框在下(地图/湖),内容靠上
+// 框是满画布画的(不带变换),里面留的地方要放得下 9×9 的内容框。
+const FRAME_KIND = { full: 'in', left: 'in@right', right: 'in@left', bottom: 'in@top' };
 
 // 取一个符号文件的内部内容(剥掉 <svg> 外壳),并把 @role.key 换成色板里的颜色
 function inner(file) {
@@ -71,8 +84,21 @@ function inner(file) {
 // 把一个 part 变成 SVG 片段
 //   obj/<name> / mod/<name> 走槽位
 //   obj/<name>@solo / mod/<name>@solo 单元素 —— 居中放大
+//   frame/<kind>/<name>      包围的框 —— 满画布,原样贴上
+//   in/<name>                框里的内容 —— 位置由框的 kind 决定
 //   其它前缀原样拼进去(旧规则的 glyph/… / corner/…)
-function part(src) {
+function part(src, innerSlot) {
+  const fm = src.match(/^frame\/(full|left|right|bottom)\/([a-z0-9-]+)$/);
+  if (fm) return inner(src); // 框:满画布,原样
+  const im = src.match(/^in\/([a-z0-9-]+)(@(solo))?$/);
+  if (im) {
+    const solo = im[2] === '@solo';
+    src = `in/${im[1]}`; // @solo 是摆法,不是文件名的一部分
+    const transform = solo
+      ? `translate(${((24 - SOLO) / 2).toFixed(3)} ${((24 - SOLO) / 2).toFixed(3)}) scale(${(SOLO / SLOTS.in.box).toFixed(4)})`
+      : SLOTS[innerSlot || 'in'].transform;
+    return `<g transform="${transform}">${inner(src)}</g>`;
+  }
   const m = src.match(/^(obj|mod)\/([a-z0-9-]+)(@(solo))?$/);
   if (!m) return inner(src);
   const [, kind, name, , solo] = m;
@@ -101,7 +127,10 @@ for (const line of readFileSync(RECIPES, 'utf8').split('\n')) {
   }
   const dir = join(ROOT, 'icons', cat, version);
   mkdirSync(dir, { recursive: true });
-  const body = parts.map(part).join('');
+  // 框的 kind 决定里面内容的落点
+  const frameKind = parts.map((p) => p.match(/^frame\/(full|left|right|bottom)\//)?.[1]).find(Boolean);
+  const innerSlot = frameKind ? FRAME_KIND[frameKind] : 'in';
+  const body = parts.map((p) => part(p, innerSlot)).join('');
   // 单行 —— 合并成 sprite 时一行就是一个 symbol
   writeFileSync(
     join(dir, `${concept}.svg`),

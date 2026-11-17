@@ -39,6 +39,7 @@ const CATS = {
   circuit: { title: '电路', titleEn: 'Circuits', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '电子与电路', noteEn: 'Electronics and circuits' },
   music: { title: '音乐', titleEn: 'Music', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '音乐与音频', noteEn: 'Music and audio' },
   food: { title: '食物', titleEn: 'Food', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '食物与饮品', noteEn: 'Food and drink' },
+  frame: { title: '框架', titleEn: 'Frames', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '框在外、内容在里面的框架型图标 —— 屏 / 白板 / 门 / 云 / 地图', noteEn: 'Containers with room inside — screens, boards, doors, clouds, maps' },
   common: { title: '通用符号', titleEn: 'Common Symbols', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步', noteEn: 'Basic symbols shared across the library — lock, clock, check, sync' },
 };
 

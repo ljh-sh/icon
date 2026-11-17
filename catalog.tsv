@@ -343,3 +343,28 @@ github/v0:workflow	工作流	Workflow
 github/v0:runner	执行器	Runner
 github/v0:package	包	Package
 github/v0:milestone	里程碑	Milestone
+frame/v0:display	显示屏	Display
+frame/v0:laptop	笔记本	Laptop
+frame/v0:phone	手机	Phone
+frame/v0:tablet	平板	Tablet
+frame/v0:window	应用窗口	App Window
+frame/v0:terminal	终端	Terminal
+frame/v0:browser	浏览器	Browser
+frame/v0:whiteboard	白板	Whiteboard
+frame/v0:blackboard	黑板	Blackboard
+frame/v0:door	门	Door
+frame/v0:cloud	云	Cloud
+frame/v0:sun	太阳	Sun
+frame/v0:digitizer	数位板	Graphics Tablet
+frame/v0:map	地图	Map
+frame/v0:country	国家地图	Country Map
+frame/v0:lake	湖	Lake
+frame/v0:display-chart	显示屏上的图表	Chart on a Display
+frame/v0:board-atom	白板上的原子	Atom on a Whiteboard
+frame/v0:lake-data	湖里的数据	Data in a Lake
+frame/v0:terminal-code	终端里的代码	Code in a Terminal
+common/v0:atom	原子	Atom
+common/v0:gear	齿轮	Gear
+common/v0:chart	图表	Chart
+common/v0:bulb	灯泡	Light Bulb
+common/v0:code	代码	Code

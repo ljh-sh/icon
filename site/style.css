@@ -99,15 +99,21 @@ button { font: inherit; cursor: pointer; }
 /* 站名跟在品牌后面 —— 标题就在 nav bar 上 */
 .site-title { color: var(--muted); font-size: 14px; }
 
-.nav-links { display: flex; align-items: center; gap: 22px; font-size: 14px; }
-.nav-links a {
-  color: var(--muted);
-  text-decoration: none;
+/* 右侧动作区:GitHub + 语言 + 主题(跟 draw 的站一个次序) */
+.gh-link {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
 }
-.nav-links a:hover { color: var(--ink); }
+.gh-link:hover { background: var(--surface-2); color: var(--ink); }
+.gh-logo { width: 16px; height: 16px; }
 
 .lang-toggle {
   display: inline-flex;
@@ -392,7 +398,6 @@ pre {
 @media (max-width: 720px) {
   .top-inner { padding: 0 16px; gap: 12px; }
   .nav-left { gap: 16px; }
-  .nav-links { gap: 14px; font-size: 13px; }
   .site-title { display: none; }
   main { padding: 28px 16px 56px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }

@@ -55,9 +55,16 @@ export default {
     const base = mounts.find((m) => path === m || path.startsWith(`${m}/`)) || '';
     if (base) path = path.slice(base.length) || '/';
 
-    // 图标清单与图标文件是静态资源(public/icon/**),边缘直接发;
+    // 图标文件是静态资源(public/icon/i/**),边缘直接发;
     // 这里的分支只是 workers.dev 直连时的兜底。
-    if (path === '/manifest.json' || path.startsWith('/i/') || path === '/sprite.svg') {
+    if (path.startsWith('/i/')) {
+      const res = await env.ASSETS.fetch(new URL(`${ASSET_ROOT}${path}`, url.origin));
+      if (res.status === 200) return res;
+      return new Response('not found', { status: 404 });
+    }
+
+    // 清单与 sprite 是静态资源,边缘直接发;这里是 workers.dev 直连时的兜底。
+    if (path === '/manifest.json' || path === '/sprite.svg') {
       const res = await env.ASSETS.fetch(new URL(`${ASSET_ROOT}${path}`, url.origin));
       if (res.status === 200) return res;
       return new Response('not found', { status: 404 });

@@ -76,3 +76,29 @@ github/v0	runner	glyph/gh-runner	corner/github
 github/v0	package	glyph/gh-package	corner/github
 github/v0	milestone	glyph/gh-milestone	corner/github
 
+# 框架型 —— 框在外,内容在里面(全包围/下包围,见 issue #8)
+frame/v0	display	frame/full/display
+frame/v0	laptop	frame/full/laptop
+frame/v0	phone	frame/full/phone
+frame/v0	tablet	frame/full/tablet
+frame/v0	window	frame/full/window
+frame/v0	terminal	frame/full/terminal
+frame/v0	browser	frame/full/browser
+frame/v0	whiteboard	frame/full/whiteboard
+frame/v0	blackboard	frame/full/blackboard
+frame/v0	door	frame/full/door
+frame/v0	cloud	frame/full/cloud
+frame/v0	sun	frame/full/sun
+frame/v0	digitizer	frame/full/digitizer
+frame/v0	map	frame/bottom/map
+frame/v0	country	frame/bottom/country
+frame/v0	lake	frame/bottom/lake
+frame/v0	display-chart	frame/full/display	in/chart
+frame/v0	board-atom	frame/full/whiteboard	in/atom
+frame/v0	lake-data	frame/bottom/lake	in/data
+frame/v0	terminal-code	frame/full/terminal	in/code
+common/v0	atom	in/atom@solo
+common/v0	gear	in/gear@solo
+common/v0	chart	in/chart@solo
+common/v0	bulb	in/bulb@solo
+common/v0	code	in/code@solo
