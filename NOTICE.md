@@ -69,11 +69,13 @@ Copyright the mingrammer/diagrams contributors)的 `resources/` 目录下的 PNG
 这些图形的商标权归各自权利人所有;上面那份著作权许可只覆盖素材本身的著作权,
 不构成商标授权。使用限制逐条见各自的记录文件。
 
-`icons/github/` 的每个图标右上角有一枚 GitHub 官方 mark(黑猫),作次要位置,
-表示"这是 GitHub 的概念"。GitHub 商标政策(https://github.com/logos)明确允许
-这种"表示集成"的用法(Show integration / Secondary placement),且要求不得改色改形 ——
-所以那枚 mark 原样输出黑色,其余部分是本仓自绘。依据见
-`brands/bootstrap-github.md`。
+`icons/github/` 的每个图标右上角有一枚**猫头**,作次要位置,表示"这是 GitHub 的概念"。
 
-那枚 mark 的图形取自 [Simple Icons](https://simpleicons.org)(CC0)的 `github` 图标
-(实心轮廓 + 不透明的白色内腔 —— 不能让底下的彩色对象透上来)。
+那枚猫头是**本仓自绘的**(曲线画的:椭圆头 + 两只尖耳朵,纯白不透明),
+不是 GitHub 的官方 mark —— 官方 mark 不得改形改色,而我们要的恰恰是
+"压在彩色对象上、底下的颜色一点都不能透过来"。
+
+GitHub 商标政策(https://github.com/logos)允许用官方 mark 表示"集成关系",
+但只限原样使用;本仓这一类改用自绘的抽象猫头,跟 `icons/org/` 一样是
+与任何公司无商标关联的抽象图形。`icons/bootstrap/github` 仍是官方那份
+(Bootstrap Icons,MIT),按 `brands/bootstrap-github.md` 的记录使用。
