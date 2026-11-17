@@ -3,13 +3,18 @@
 # 格式:<cat>/<version>	<concept>	<part>	<part>…
 #   part 是 symbols/ 下的相对路径(不含 .svg),按顺序叠放。
 #   主体:symbols/db.svg(数据库圆柱)、symbols/db-b.svg(第二个库,给"两个 db"的概念用)
-#   角标底:symbols/badge.svg(右下角统一底)
+#   角标底:symbols/badge.svg(中性角标底 —— 行为用中性色)
 #   修饰符:symbols/mod/*.svg —— 全库共用,一个符号只画一次
 #
 # 键名天然就是会意结构:db:lock = 数据库 + 锁,db:backup = 数据库 + 时钟。
+#
+# 两套角标:
+#   行为(锁 / 时钟 / 对勾 …)—— 中性深色底,全库一个样
+#   身份(产品徽章)—— 品牌色底 + 白色自绘字形。图形是自绘的抽象符号,
+#     不是官方标识;配色取接近该品牌的颜色,浅色品牌色压深一档保证白字可读。
 db/v1	check	db	badge	mod/check
 db/v1	lock	db	badge	mod/lock
-db/v1	redis	db	badge	mod/bolt
+db/v1	kv	db	badge	mod/bolt
 db/v1	cluster	db	badge	mod/branch
 db/v1	backup	db	badge	mod/clock
 db/v1	replication	db	db-b	badge	mod/sync
@@ -18,3 +23,13 @@ db/v1	index	db	badge	mod/index
 db/v1	migration	db	badge	mod/arrow
 db/v1	transaction	db	badge	mod/cycle
 db/v1	failover	db	db-b	badge	mod/switch
+db/v1	redis	db	mod/redis
+db/v1	pg	db	mod/pg
+db/v1	mysql	db	mod/mysql
+db/v1	clickhouse	db	mod/clickhouse
+db/v1	duckdb	db	mod/duckdb
+db/v1	mongo	db	mod/mongo
+db/v1	influx	db	mod/influx
+db/v1	neo4j	db	mod/neo4j
+db/v1	milvus	db	mod/milvus
+db/v1	tidb	db	mod/tidb

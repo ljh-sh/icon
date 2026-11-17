@@ -78,9 +78,12 @@
 ```
 icons/<cat>/<concept>.<ext>     图标原文件(svg 或 png)—— 平铺分类
 icons/<cat>/v<n>/<concept>.<ext> 图标原文件 —— 版本化分类(自绘那批)
-catalog.tsv                      索引:<id>\t<desc>,一行一个(只写具体版本)
+symbols/                         基本符号 —— 会意组合的唯一出处
+symbols/recipes.tsv              配方表:哪个概念 = 哪些符号叠起来
+catalog.tsv                      索引:<id>\t<中文>\t<English>,一行一个(只写具体版本)
 versions.json                    每个分类当前推荐哪个版本
 brands/<cat>-<concept>.md        品牌图形的许可记录(brand / bootstrap 必须有)
+scripts/compose.mjs              按配方组装图标
 scripts/build.mjs                校验 + 生成(src/gen.ts、src/page.ts、dist/)
 scripts/serve.mjs                本地静态预览
 site/                            查询页(index.html / style.css / app.js)
@@ -88,6 +91,29 @@ src/index.ts                     Worker:把库挂在 po6.sh/icon 上
 src/gen.ts                       生成物:图标字节 + 元数据
 src/page.ts                      生成物:CSS/JS 内联后的页面
 ```
+
+## 基本符号:会意组合,不是象形图
+
+自绘的图标不该一个概念画一张插画 —— 那样没有共同的视觉词汇,改一次画风要翻
+几百个文件。做法是先定**基本符号**,概念由符号**会意**出来(像会意字):
+
+```
+db:lock       =  数据库(主体) + 挂锁(右下角角标)
+db:backup     =  数据库(主体) + 时钟
+db:replication = 两个数据库 + 双向箭头
+```
+
+- `symbols/` —— 基本符号的唯一出处:主体(`db.svg`、`db-b.svg`)、角标底
+  (`badge.svg`)、修饰符(`mod/*.svg`)。一个符号全库只画一次。
+- `symbols/recipes.tsv` —— 配方表,写"哪个概念 = 哪些符号叠起来"
+- `scripts/compose.mjs` —— 按配方拼出 SVG,写进 `icons/<cat>/<version>/`。
+  `npm run build` 先跑它 —— 改一个符号,全库跟着变,不会走样。
+
+角标分两套:**行为**(锁 / 时钟 / 对勾 …)用中性深色底,全库一个样;
+**身份**(产品徽章)用品牌色底 + 白色自绘字形 —— 图形是自绘的抽象符号,
+不是官方标识,配色取接近该品牌的颜色。
+
+> 键名天然就是会意结构:`db:lock` 字面上就是"数据库 + 锁"。
 
 ## 品牌图形:逐个按许可分析
 
