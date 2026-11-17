@@ -15,30 +15,31 @@ const OUT = join(ROOT, 'src/gen.ts');
 const PUBLIC = join(ROOT, 'public/icon');
 
 // 每个分类的出处与许可 —— 图标库的"血缘",页面上要显示
+// title/note 是中文,titleEn/noteEn 是英文 —— 页面按语言取其一
 const CATS = {
-  aws: { title: 'AWS', source: 'AWS 官方架构图标包', license: '厂商图标包(商标归 AWS)', note: 'AWS 官方服务标识,原样 SVG' },
-  azure: { title: 'Azure', source: 'Microsoft Azure 官方图标包', license: '厂商图标包(商标归 Microsoft)', note: 'Azure 官方服务标识,原样 SVG' },
-  gcp: { title: 'GCP', source: 'Google Cloud 官方图标集', license: '厂商图标包(商标归 Google)', note: 'Google Cloud 官方产品标识,原样 SVG' },
-  infra: { title: '通用基础设施', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '通用概念,彩色填充' },
-  org: { title: '公司与机构', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '自绘抽象符号,不含任何商标图形' },
+  aws: { title: 'AWS', titleEn: 'AWS', source: 'AWS 官方架构图标包', license: '厂商图标包(商标归 AWS)', note: 'AWS 官方服务标识,原样 SVG', noteEn: 'Official AWS service icons, SVG as published' },
+  azure: { title: 'Azure', titleEn: 'Azure', source: 'Microsoft Azure 官方图标包', license: '厂商图标包(商标归 Microsoft)', note: 'Azure 官方服务标识,原样 SVG', noteEn: 'Official Azure service icons, SVG as published' },
+  gcp: { title: 'GCP', titleEn: 'GCP', source: 'Google Cloud 官方图标集', license: '厂商图标包(商标归 Google)', note: 'Google Cloud 官方产品标识,原样 SVG', noteEn: 'Official Google Cloud product icons, SVG as published' },
+  infra: { title: '通用基础设施', titleEn: 'Infrastructure', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '通用概念,彩色填充', noteEn: 'Generic concepts, filled in colour' },
+  org: { title: '公司与机构', titleEn: 'Organizations', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '自绘抽象符号,不含任何商标图形', noteEn: 'Self-drawn abstract symbols, no trademark artwork' },
   // 品牌图形:许可逐个分析,记在 brands/ 里 —— 分类只给个默认说法
-  brand: { title: '品牌标识', source: '官方渠道 / Simple Icons(CC0) / Wikimedia Commons', license: '按各品牌条款', note: '常用品牌图形 —— 官方优先,拿不到用 CC0 图标库;逐个按许可记录', mono: true },
-  bootstrap: { title: '第三方图标库', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '整库搬入;画了品牌的那几十个另见许可记录', bulk: true, mono: true },
-  db: { title: '数据库', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '数据库的概念与形态' },
-  ai: { title: 'AI', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'AI 架构里的通用概念' },
-  k8s: { title: 'Kubernetes', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'K8s 组件概念(非官方标识)' },
-  sec: { title: '安全', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '安全概念' },
-  obs: { title: '可观测性', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '指标 / 日志 / 链路' },
-  cat: { title: '猫', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '猫' },
-  dog: { title: '狗', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '狗' },
-  animal: { title: '动物', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '动物' },
-  chem: { title: '化学', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '化学:实验器材 / 试剂 / 结构' },
+  brand: { title: '品牌标识', titleEn: 'Brand Marks', source: '官方渠道 / Simple Icons(CC0) / Wikimedia Commons', license: '按各品牌条款', note: '常用品牌图形 —— 官方优先,拿不到用 CC0 图标库;逐个按许可记录', noteEn: 'Official sources first, then CC0 or public-domain templates; each one reviewed', mono: true },
+  bootstrap: { title: 'Bootstrap', titleEn: 'Bootstrap', source: 'Bootstrap Icons', license: 'MIT(著作权)', note: '整库搬入;画了品牌的那几十个另见许可记录', noteEn: 'Bootstrap Icons, imported whole; the branded ones are reviewed separately', bulk: true, mono: true },
+  db: { title: '数据库', titleEn: 'Databases', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '数据库的概念与形态', noteEn: 'Database concepts and shapes' },
+  ai: { title: 'AI', titleEn: 'AI', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'AI 架构里的通用概念', noteEn: 'Common concepts in AI architectures' },
+  k8s: { title: 'Kubernetes', titleEn: 'Kubernetes', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'K8s 组件概念(非官方标识)', noteEn: 'K8s component concepts (not official marks)' },
+  sec: { title: '安全', titleEn: 'Security', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '安全概念', noteEn: 'Security concepts' },
+  obs: { title: '可观测性', titleEn: 'Observability', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '指标 / 日志 / 链路', noteEn: 'Metrics, logs and traces' },
+  cat: { title: '猫', titleEn: 'Cats', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '猫', noteEn: 'Cats' },
+  dog: { title: '狗', titleEn: 'Dogs', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '狗', noteEn: 'Dogs' },
+  animal: { title: '动物', titleEn: 'Animals', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '动物', noteEn: 'Animals' },
+  chem: { title: '化学', titleEn: 'Chemistry', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '化学:实验器材 / 试剂 / 结构', noteEn: 'Chemistry: lab equipment, reagents and structures' },
+  dev: { title: '开发流程', titleEn: 'Development', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '开发项目流程 —— 通用阶段 / 软件 / 硬件', noteEn: 'Development workflow — phases, software and hardware' },
+  github: { title: 'GitHub', titleEn: 'GitHub', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'GitHub 的概念与流程 —— 右下角是 GitHub 官方 mark(次要位置)', noteEn: 'GitHub concepts and flows — official mark in a secondary position' },
+  circuit: { title: '电路', titleEn: 'Circuits', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '电子与电路', noteEn: 'Electronics and circuits' },
+  music: { title: '音乐', titleEn: 'Music', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '音乐与音频', noteEn: 'Music and audio' },
+  food: { title: '食物', titleEn: 'Food', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '食物与饮品', noteEn: 'Food and drink' },
   common: { title: '通用符号', titleEn: 'Common Symbols', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步', noteEn: 'Basic symbols shared across the library — lock, clock, check, sync' },
-  dev: { title: '开发流程', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '开发项目流程 —— 通用阶段 / 软件 / 硬件' },
-  github: { title: 'GitHub', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'GitHub 的概念与流程 —— 右下角是 GitHub 官方 mark(次要位置)' },
-  circuit: { title: '电路', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '电子与电路' },
-  music: { title: '音乐', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '音乐与音频' },
-  food: { title: '食物', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '食物与饮品' },
 };
 
 // 整库搬入的分类:catalog.tsv 不强制一行一个(几千个图标不可能手写描述)
@@ -363,9 +364,11 @@ for (const [aid, cid] of [...alias].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
 const cats = Object.entries(CATS).map(([cat, meta]) => ({
   cat,
   title: meta.title,
+  titleEn: meta.titleEn,
   source: meta.source,
   license: meta.license,
   note: meta.note,
+  noteEn: meta.noteEn,
   count: new Set([...found.values()].filter((i) => i.cat === cat).map((i) => i.concept)).size,
   versioned: catVersions.has(cat),
   versions: catVersions.get(cat) || [],
@@ -437,10 +440,16 @@ export interface IconMeta {
 
 export interface CatMeta {
   cat: string;
+  /** 中文名 */
   title: string;
+  /** 英文名 */
+  titleEn: string;
   source: string;
   license: string;
+  /** 中文说明 */
   note: string;
+  /** 英文说明 */
+  noteEn: string;
   count: number;
   /** 有版本目录 */
   versioned: boolean;

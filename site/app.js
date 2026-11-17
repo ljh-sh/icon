@@ -1,6 +1,6 @@
 // x-cmd/icon 查询页。
-// 路由:/            首页 —— 一个过滤页(搜索 + 分类筛选),一边打一边筛
-//      /c/<cat>    某个分类的完整列表(带版本切换)
+// 一个过滤页:搜索 + 分类筛选,一边打一边筛;点图标,右侧滑出一个面板 ——
+// 图标信息 + 相关图标。没有子页,分类只是筛选条件。
 const BASE = new URL('.', document.baseURI).pathname;
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -12,13 +12,10 @@ const LANGS = {
     metaDesc: 'x-cmd 架构图图标库:云厂商官方标识 + 自绘概念图标 + 品牌标识,按 <cat>:<concept> 索引。',
     search: '搜索图标:id / 名称 / 分类',
     heroTitle: '架构图图标库',
-    heroSub: '给 x-cmd/draw 画架构图用的图标 · 键名 <cat>:<concept> · 一边打一边筛',
     all: '全部',
     count: '个图标',
     shown: '已显示',
     more: '显示更多',
-    navAll: '← 全部图标',
-    rec: '推荐',
     lblDesc: '说明',
     lblCat: '分类',
     lblVer: '版本',
@@ -39,7 +36,6 @@ const LANGS = {
     download: '下载',
     close: '关闭',
     empty: '没有匹配的图标。',
-    emptyCat: '这个分类还没有图标。',
     vOk: '可用',
     vCaution: '谨慎 —— 限指示性引用',
     vPending: '未审 —— 商标条款未逐条核对',
@@ -47,8 +43,7 @@ const LANGS = {
     fPending: '未审',
     alias: '别名 → ',
     aliasOf: '别名 {id} 指向这里',
-    footer:
-      '图标版权归各自权利人所有;云厂商标识来自 <a href="https://github.com/mingrammer/diagrams" target="_blank" rel="noopener">mingrammer/diagrams</a>(Apache-2.0),通用概念与公司符号为本仓自绘(不含任何商标图形)。',
+    related: '相关图标',
     langBtn: 'EN',
   },
   en: {
@@ -57,13 +52,10 @@ const LANGS = {
       'Icon library for x-cmd/draw: cloud vendor marks, self-drawn concepts and brand logos, keyed by <cat>:<concept>.',
     search: 'Search icons: id / name / category',
     heroTitle: 'Icon library for architecture diagrams',
-    heroSub: 'Icons for x-cmd/draw · key format <cat>:<concept> · filters as you type',
     all: 'All',
     count: 'icons',
     shown: 'shown',
     more: 'Show more',
-    navAll: '← All icons',
-    rec: 'Recommended',
     lblDesc: 'Description',
     lblCat: 'Category',
     lblVer: 'Version',
@@ -84,7 +76,6 @@ const LANGS = {
     download: 'Download',
     close: 'Close',
     empty: 'No matching icons.',
-    emptyCat: 'This category has no icons yet.',
     vOk: 'OK',
     vCaution: 'Caution — indicative use only',
     vPending: 'Unreviewed — trademark terms not checked one by one',
@@ -92,8 +83,7 @@ const LANGS = {
     fPending: 'Unreviewed',
     alias: 'Alias → ',
     aliasOf: 'Alias {id} points here',
-    footer:
-      'Icon copyrights belong to their respective owners; cloud vendor marks come from <a href="https://github.com/mingrammer/diagrams" target="_blank" rel="noopener">mingrammer/diagrams</a> (Apache-2.0); general concepts and company symbols are self-drawn (no trademark artwork).',
+    related: 'Related icons',
     langBtn: '中',
   },
 };
@@ -107,13 +97,12 @@ const el = (tag, cls, text) => {
 };
 
 let DATA = { cats: [], icons: [] };
-let q = '';
-let ver = ''; // 版本化分类里当前看的版本;空 = 推荐版本
-let catFilter = ''; // 首页的分类筛选;空 = 全部
+let q = ''; // 搜索词
+let cat = ''; // 分类筛选;空 = 全部
 let lang = 'zh';
 let limit = 240; // 一次渲染多少个(两三千个节点一起铺会卡)
-let hitId = null;
 let V = ''; // 构建号:URL 上带上,重新部署后不会顶着旧缓存
+let current = null; // 面板里正在看的图标
 
 const byId = new Map();
 const t = (key) => (LANGS[lang] && LANGS[lang][key]) || key;
@@ -155,8 +144,12 @@ function descOf(m) {
   return lang === 'en' ? m.descEn || m.desc : m.desc || m.descEn;
 }
 
+// 分类名与说明:中英文分开,英文版不能还挂着中文
+const catTitle = (c) => (c ? (lang === 'en' ? c.titleEn || c.title : c.title) : '');
+const catNote = (c) => (c ? (lang === 'en' ? c.noteEn || c.note : c.note) : '');
+
 function match(m) {
-  if (catFilter && m.cat !== catFilter) return false;
+  if (cat && m.cat !== cat) return false;
   // 空查询:只显示推荐版本(别名),别把每一版都摆出来;打了字才把各版本都放出来
   if (!q) return !m.version || m.alias;
   const hay = `${m.id} ${m.desc} ${m.descEn} ${m.cat} ${m.concept}`.toLowerCase();
@@ -172,7 +165,7 @@ function cell(m) {
   if (m.verdict === 'caution') c.append(el('span', 'vflag caution', t('fCaution')));
   if (m.verdict === 'pending') c.append(el('span', 'vflag pending', t('fPending')));
   c.append(el('div', 'desc', descOf(m)));
-  c.addEventListener('click', () => onCell(m));
+  c.addEventListener('click', () => openPanel(m));
   return c;
 }
 
@@ -193,189 +186,110 @@ function grid(host, list) {
   return shown.length;
 }
 
-// ---------- 首页 ----------
+// ---------- 过滤页 ----------
 function renderFilters() {
   const host = $('#filters');
   host.textContent = '';
-  const mk = (label, value, n) => {
-    const b = el('button', 'chip' + (catFilter === value ? ' on' : ''), label);
+  const mk = (label, value) => {
+    const b = el('button', 'chip' + (cat === value ? ' on' : ''), label);
     b.type = 'button';
-    if (n != null) b.append(el('span', 'n', n));
-    b.addEventListener('click', () => {
-      catFilter = value;
-      limit = 240;
-      render();
-    });
+    b.addEventListener('click', () => setCat(value));
     host.append(b);
   };
-  mk(t('all'), '', DATA.icons.length);
-  for (const c of DATA.cats) mk(c.title, c.cat, c.count);
+  mk(t('all'), '');
+  for (const c of DATA.cats) mk(catTitle(c), c.cat);
 }
 
-function renderHome() {
-  $('#filters').hidden = false;
+function render() {
   renderFilters();
   const list = DATA.icons.filter(match);
   const n = grid($('#all'), list);
   $('#all-count').textContent = `${list.length.toLocaleString()} ${t('count')}`;
   $('#empty').hidden = n > 0;
   $('#empty').textContent = t('empty');
-}
-
-// ---------- 分类页 ----------
-function renderVersions(vers) {
-  const host = $('#cat-vers');
-  host.textContent = '';
-  host.hidden = !vers.length;
-  if (!vers.length) return;
-  const mk = (label, value) => {
-    const b = el('button', 'vbtn' + (ver === value ? ' on' : ''), label);
-    b.type = 'button';
-    b.addEventListener('click', () => setVersion(value));
-    host.append(b);
-  };
-  mk(t('rec'), '');
-  for (const v of vers) mk(v, v);
-}
-
-function renderCat(cat) {
-  const meta = DATA.cats.find((c) => c.cat === cat);
-  $('#cat-title').textContent = meta ? meta.title : cat;
-  $('#cat-note').textContent = meta
-    ? `${meta.count} ${t('count')} · ${meta.source} · ${meta.license} · ${meta.note}`
-    : '';
-  const vers = meta?.versions || [];
-  renderVersions(vers);
-  // 「推荐」看别名条目(概念键),具体版本看该版本的条目
-  const list = vers.length
-    ? DATA.icons.filter((m) => m.cat === cat && (ver ? m.version === ver && !m.alias : m.alias))
-    : DATA.icons.filter((m) => m.cat === cat);
-  const n = grid($('#cat-grid'), list);
-  $('#all-count').textContent = `${list.length.toLocaleString()} ${t('count')}`;
-  $('#empty').hidden = n > 0;
-  $('#empty').textContent = list.length ? t('empty') : t('emptyCat');
-}
-
-function setVersion(v) {
-  ver = v;
-  limit = 240;
-  const url = new URL(location.href);
-  if (v) url.searchParams.set('v', v);
-  else url.searchParams.delete('v');
-  history.pushState({}, '', url.pathname + url.search + url.hash);
-  render();
-}
-
-// ---------- 路由 ----------
-function catRoute() {
-  const rel = location.pathname.startsWith(BASE)
-    ? location.pathname.slice(BASE.length)
-    : location.pathname.replace(/^\//, '');
-  const m = rel.match(/^c\/([a-z0-9-]+)/i);
-  return m ? m[1] : null;
-}
-
-function render() {
-  const cat = catRoute();
-  const home = $('#home');
-  const catp = $('#cat');
-  if (cat) {
-    home.hidden = true;
-    catp.hidden = false;
-    document.body.classList.remove('is-home');
-    renderCat(cat);
-  } else {
-    catp.hidden = true;
-    home.hidden = false;
-    document.body.classList.add('is-home');
-    renderHome();
-  }
   locate();
 }
 
-function locate() {
-  for (const c of document.querySelectorAll('.cell.hit')) c.classList.remove('hit');
-  if (!location.hash) return;
-  const id = decodeURIComponent(location.hash.slice(1));
-  const c = document.querySelector(`.cell[data-id="${CSS.escape(id)}"]`);
-  if (!c) return;
-  hitId = id;
-  c.classList.add('hit');
-  c.classList.remove('flash');
-  void c.offsetWidth;
-  c.classList.add('flash');
-  c.scrollIntoView({ block: 'center', behavior: 'smooth' });
-}
-
-function navigate(url) {
-  const u = new URL(url, location.origin);
-  if (q) u.searchParams.set('q', q);
-  history.pushState({}, '', u);
-  ver = u.searchParams.get('v') || '';
+function setCat(value) {
+  cat = value;
+  limit = 240;
+  pushUrl();
   render();
-  window.scrollTo({ top: 0 });
 }
 
-function onCell(m) {
-  const u = new URL(`${BASE}c/${m.cat}`, location.origin);
-  u.hash = encodeURIComponent(m.id);
-  if (q) u.searchParams.set('q', q);
-  if (ver) u.searchParams.set('v', ver);
-  const url = u.pathname + u.search + u.hash;
-  if (catRoute() === m.cat) {
-    history.pushState({}, '', url);
-    locate();
-    openDetail(m);
-  } else {
-    navigate(url);
-  }
+function setQuery(v) {
+  q = v.trim().toLowerCase();
+  for (const e of qEls) e.value = v;
+  $('#clear2').hidden = !q;
+  limit = 240;
+  pushUrl();
+  render();
 }
 
-/* ---------- 详情 ---------- */
-const dlg = $('#detail');
+// 筛选条件进 URL —— 链接能分享,后退也能用
+function pushUrl() {
+  const url = new URL(location.href);
+  if (q) url.searchParams.set('q', q);
+  else url.searchParams.delete('q');
+  if (cat) url.searchParams.set('cat', cat);
+  else url.searchParams.delete('cat');
+  history.replaceState({}, '', url.pathname + url.search + url.hash);
+}
+
+// ---------- 右侧面板 ----------
+const panel = $('#panel');
+const scrim = $('#scrim');
 
 function row(sel, value) {
   const n = $(sel);
   const dd = n.closest('dd');
+  const dt = dd.previousElementSibling; // 这一行的标题 —— 得跟 dd 一起藏,不然配对会错位
   if (value) {
     dd.hidden = false;
+    dt.hidden = false;
     n.textContent = value;
   } else {
     dd.hidden = true;
+    dt.hidden = true;
   }
 }
 
-async function openDetail(m) {
-  $('#dlg-img').replaceWith(withImg(m));
-  $('#dlg-img').id = 'dlg-img';
-  $('#dlg-id').textContent = m.id;
-  $('#dlg-desc').textContent = descOf(m);
-  $('#dlg-cat').textContent = (DATA.cats.find((c) => c.cat === m.cat) || {}).title || m.cat;
-  $('#dlg-source').textContent = m.source;
+async function openPanel(m) {
+  current = m;
+  $('#p-id').textContent = m.id;
+  $('#p-desc').textContent = descOf(m);
+  $('#p-preview').replaceChildren(iconEl(m));
+  $('#p-cat').textContent = catTitle(DATA.cats.find((c) => c.cat === m.cat)) || m.cat;
+  $('#p-source').textContent = m.source;
   // 版本:别名条目指向推荐版本的具体键,具体版本标出指向它的别名
-  if (m.alias) row('#dlg-version', t('alias') + m.aliasOf);
-  else if (m.version) row('#dlg-version', m.aliasFor ? `${m.version} — ${t('aliasOf').replace('{id}', m.aliasFor)}` : m.version);
-  else row('#dlg-version', '');
-  row('#dlg-license', m.license);
-  row('#dlg-trademark', m.trademark);
-  row('#dlg-restrictions', (m.restrictions || '').replace(/;/g, '; '));
-  row('#dlg-reviewed', m.reviewed);
+  if (m.alias) row('#p-version', t('alias') + m.aliasOf);
+  else if (m.version) row('#p-version', m.aliasFor ? `${m.version} — ${t('aliasOf').replace('{id}', m.aliasFor)}` : m.version);
+  else row('#p-version', '');
+  row('#p-license', m.license);
+  row('#p-trademark', m.trademark);
+  row('#p-restrictions', (m.restrictions || '').replace(/;/g, '; '));
+  row('#p-reviewed', m.reviewed);
 
-  const v = $('#dlg-verdict');
+  const v = $('#p-verdict');
   const vdd = v.closest('dd');
+  const vdt = vdd.previousElementSibling;
   if (m.verdict) {
     vdd.hidden = false;
+    vdt.hidden = false;
     v.textContent = { ok: t('vOk'), caution: t('vCaution'), pending: t('vPending') }[m.verdict] || m.verdict;
     v.className = 'verdict ' + m.verdict;
   } else {
     vdd.hidden = true;
+    vdt.hidden = true;
     v.className = '';
   }
 
-  const pol = $('#dlg-policy');
+  const pol = $('#p-policy');
   const pdd = pol.closest('dd');
+  const pdt = pdd.previousElementSibling;
   if (m.trademarkPolicy && /^https?:/.test(m.trademarkPolicy)) {
     pdd.hidden = false;
+    pdt.hidden = false;
     pol.textContent = '';
     const a = document.createElement('a');
     a.href = m.trademarkPolicy;
@@ -385,81 +299,122 @@ async function openDetail(m) {
     pol.append(a);
   } else {
     pdd.hidden = true;
+    pdt.hidden = true;
   }
 
-  const nw = $('#dlg-notes-wrap');
+  const nw = $('#p-notes-wrap');
   if (m.notes) {
     nw.hidden = false;
-    $('#dlg-notes').textContent = m.notes;
+    $('#p-notes').textContent = m.notes;
   } else {
     nw.hidden = true;
   }
 
-  const a = $('#dlg-file');
+  const a = $('#p-file');
   a.href = `${BASE}${m.path}${V}`;
   a.download = m.file.replace(/^.*\//, '');
-  const wrap = $('#dlg-src-wrap');
+
+  const wrap = $('#p-src-wrap');
   if (m.mime === 'image/svg+xml') {
     wrap.hidden = false;
-    $('#dlg-src').textContent = '…';
+    $('#p-src').textContent = '…';
     try {
-      const txt = await (await fetch(`${BASE}${m.path}${V}`)).text();
-      $('#dlg-src').textContent = txt;
+      $('#p-src').textContent = await (await fetch(`${BASE}${m.path}${V}`)).text();
     } catch {
-      $('#dlg-src').textContent = t('srcFail');
+      $('#p-src').textContent = t('srcFail');
     }
   } else {
     wrap.hidden = true;
   }
-  if (!dlg.open) dlg.showModal();
+
+  renderRelated(m);
+
+  panel.hidden = false;
+  scrim.hidden = false;
+  requestAnimationFrame(() => {
+    panel.classList.add('on');
+    scrim.classList.add('on');
+  });
+  panel.querySelector('.panel-body').scrollTop = 0;
+  history.replaceState({}, '', location.pathname + location.search + `#${encodeURIComponent(m.id)}`);
 }
 
-// 详情里的预览:统一成 <svg> 或 <img>,换语言时不用重建
-function withImg(m) {
-  const img = iconEl(m);
-  img.id = 'dlg-img';
-  img.removeAttribute('loading');
-  if (img.tagName === 'img') img.classList.add('preview-img');
-  return img;
+function closePanel() {
+  panel.classList.remove('on');
+  scrim.classList.remove('on');
+  current = null;
+  setTimeout(() => {
+    panel.hidden = true;
+    scrim.hidden = true;
+  }, 220);
+  history.replaceState({}, '', location.pathname + location.search);
 }
 
-dlg.addEventListener('click', (e) => {
-  if (e.target === dlg) dlg.close();
-});
-dlg.querySelector('.dlg-close').addEventListener('click', () => dlg.close());
-dlg.addEventListener('click', async (e) => {
-  const btn = e.target.closest('[data-copy]');
-  if (!btn) return;
-  const id = $('#dlg-id').textContent;
-  try {
-    await navigator.clipboard.writeText(id);
-    btn.textContent = t('copied');
-    setTimeout(() => (btn.textContent = t('copy')), 1200);
-  } catch {
-    btn.textContent = t('copyFail');
+// ---------- 相关图标 ----------
+// 同分类的邻居 + 同名概念 + 描述里共同的词
+function tokens(m) {
+  const set = new Set();
+  const text = `${m.concept} ${m.desc} ${m.descEn}`.toLowerCase();
+  for (const w of text.split(/[^a-z0-9一-龥]+/)) {
+    if (w.length > 1) set.add(w);
   }
-});
+  // 中文按两字一组,粗粒度地算相关
+  for (const run of text.match(/[一-龥]{2,}/g) || []) {
+    for (let i = 0; i + 2 <= run.length; i++) set.add(run.slice(i, i + 2));
+  }
+  return set;
+}
+
+function related(m, n = 12) {
+  const mine = tokens(m);
+  const out = [];
+  for (const o of DATA.icons) {
+    if (o.id === m.id || o.alias) continue;
+    if (o.cat === m.cat && o.concept === m.concept) continue;
+    let s = 0;
+    if (o.concept === m.concept) s += 5;
+    if (o.cat === m.cat) s += 3;
+    for (const w of tokens(o)) if (mine.has(w)) s += 2;
+    if (s) out.push([s, o]);
+  }
+  out.sort((a, b) => b[0] - a[0] || (a[1].id < b[1].id ? -1 : 1));
+  return out.slice(0, n).map((x) => x[1]);
+}
+
+function renderRelated(m) {
+  const host = $('#p-related');
+  host.textContent = '';
+  for (const o of related(m)) {
+    const c = el('div', 'cell small');
+    c.dataset.id = o.id;
+    c.title = descOf(o);
+    c.append(iconEl(o), el('div', 'id', o.id));
+    c.addEventListener('click', () => openPanel(o));
+    host.append(c);
+  }
+}
+
+// ---------- 定位 ----------
+function locate() {
+  for (const c of document.querySelectorAll('.cell.hit')) c.classList.remove('hit');
+  if (!location.hash) return;
+  const id = decodeURIComponent(location.hash.slice(1));
+  const c = document.querySelector(`.cell[data-id="${CSS.escape(id)}"]`);
+  if (!c) return;
+  c.classList.add('hit');
+  c.classList.remove('flash');
+  void c.offsetWidth;
+  c.classList.add('flash');
+  c.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
 
 /* ---------- 搜索 / 语言 ---------- */
-const qEls = [$('#q'), $('#q2')];
-function setQuery(v, push) {
-  q = v.trim().toLowerCase();
-  for (const e of qEls) e.value = v;
-  for (const id of ['#clear', '#clear2']) $(id).hidden = !q;
-  limit = 240;
-  const url = new URL(location.href);
-  if (q) url.searchParams.set('q', q);
-  else url.searchParams.delete('q');
-  history[push ? 'pushState' : 'replaceState']({}, '', url.pathname + url.search + url.hash);
-  render();
-}
-for (const e of qEls) e.addEventListener('input', () => setQuery(e.value, false));
-for (const id of ['#clear', '#clear2']) {
-  $(id).addEventListener('click', () => {
-    setQuery('', false);
-    qEls[0].focus();
-  });
-}
+const qEls = [$('#q2')];
+for (const e of qEls) e.addEventListener('input', () => setQuery(e.value));
+$('#clear2').addEventListener('click', () => {
+  setQuery('');
+  qEls[0].focus();
+});
 $('#lang').addEventListener('click', () => {
   lang = lang === 'zh' ? 'en' : 'zh';
   try {
@@ -467,57 +422,66 @@ $('#lang').addEventListener('click', () => {
   } catch {}
   applyI18n();
   render();
+  if (current) openPanel(current);
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === '/' && document.activeElement !== qEls[0] && document.activeElement !== qEls[1] && !dlg.open) {
+  if (e.key === '/' && document.activeElement !== qEls[0] && !panel.hidden) {
     e.preventDefault();
-    (catRoute() ? qEls[0] : qEls[1]).focus();
-    (catRoute() ? qEls[0] : qEls[1]).select();
+    qEls[0].focus();
+    qEls[0].select();
   }
-  if (e.key === 'Escape' && document.activeElement === qEls[0]) qEls[0].blur();
-  if (e.key === 'Escape' && document.activeElement === qEls[1]) qEls[1].blur();
+  if (e.key === '/' && document.activeElement !== qEls[0]) {
+    e.preventDefault();
+    qEls[0].focus();
+    qEls[0].select();
+  }
+  if (e.key === 'Escape' && !panel.hidden) closePanel();
 });
 
 /* ---------- 主题 ---------- */
+// 默认浅色 —— 底子偏白,橙作主色;深色那套在开关上
 const themeBtn = $('#theme');
 function applyTheme(v) {
-  if (v) document.documentElement.setAttribute('data-theme', v);
-  else document.documentElement.removeAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', v === 'dark' ? 'dark' : 'light');
   try {
-    localStorage.setItem('icon-theme', v || '');
+    localStorage.setItem('icon-theme', document.documentElement.getAttribute('data-theme'));
   } catch {}
 }
 themeBtn.addEventListener('click', () => {
   const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : cur === 'light' ? '' : 'dark';
-  applyTheme(next);
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
 });
 try {
-  const saved = localStorage.getItem('icon-theme');
-  if (saved) applyTheme(saved);
-} catch {}
+  applyTheme(localStorage.getItem('icon-theme') || 'light');
+} catch {
+  applyTheme('light');
+}
 
 /* ---------- 启动 ---------- */
 function syncFromUrl() {
   const p = new URL(location.href).searchParams;
-  const v = p.get('q') || '';
-  q = v.trim().toLowerCase();
-  for (const e of qEls) e.value = v;
-  for (const id of ['#clear', '#clear2']) $(id).hidden = !q;
-  ver = p.get('v') || '';
+  q = (p.get('q') || '').trim().toLowerCase();
+  cat = p.get('cat') || '';
+  for (const e of qEls) e.value = p.get('q') || '';
+  $('#clear2').hidden = !q;
   limit = 240;
   render();
 }
 window.addEventListener('popstate', syncFromUrl);
-window.addEventListener('hashchange', locate);
+window.addEventListener('hashchange', () => {
+  const id = decodeURIComponent(location.hash.slice(1));
+  const m = byId.get(id);
+  if (m && m !== current) openPanel(m);
+  else locate();
+});
 
-// 页内链接(面包屑)走前端路由,别整页刷新
-document.addEventListener('click', (e) => {
-  const a = e.target.closest('[data-nav]');
-  if (!a) return;
-  e.preventDefault();
-  navigate(a.getAttribute('href'));
+$('#p-close').addEventListener('click', closePanel);
+scrim.addEventListener('click', closePanel);
+$('#p-id').addEventListener('click', async (e) => {
+  try {
+    await navigator.clipboard.writeText($('#p-id').textContent);
+  } catch {}
 });
 
 (async () => {
@@ -531,6 +495,10 @@ document.addEventListener('click', (e) => {
     } catch {}
     applyI18n();
     syncFromUrl();
+    // 深链带 #<id> 的,直接开面板
+    const id = decodeURIComponent(location.hash.slice(1));
+    const m = id && byId.get(id);
+    if (m) openPanel(m);
   } catch (err) {
     document.querySelector('main').innerHTML = `<p class="empty">${t('empty')}</p>`;
   }

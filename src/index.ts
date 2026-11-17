@@ -88,7 +88,17 @@ export default {
       return json(out, 300);
     }
 
-    // 其余路径(/c/<cat> 之类的深链)都回查询页,前端自己路由
+    // 老链接 /c/<cat> —— 分类不再是子页,重定向到首页并带上筛选条件
+    const cm = path.match(/^\/c\/([a-z0-9-]+)/i);
+    if (cm) {
+      const to = new URL(url);
+      to.pathname = (base || '') + '/';
+      to.search = `?cat=${encodeURIComponent(cm[1])}`;
+      to.hash = '';
+      return Response.redirect(to.toString(), 302);
+    }
+
+    // 其余路径都回查询页
     return html(PAGE, base);
   },
 };
