@@ -8,7 +8,7 @@
 
 ## 第三方素材
 
-`icons/aws/`、`icons/azure/`、`icons/gcp/` 下的是**云厂商官方图标包**里的服务标识,
+`icons/aws/`、`icons/azure/`、`icons/gcp/`、`icons/aliyun/`、`icons/oci/`、`icons/ibm/` 下的是**厂商官方图标包**里的服务标识,
 直接取原厂的 SVG(矢量),不再经第三方转手:
 
 | 分类 | 来源 | 取用方式 |
@@ -16,6 +16,9 @@
 | `icons/aws/` | [AWS Architecture Icons](https://aws.amazon.com/architecture/icons/) 官方图标包(2026-07 版) | `Architecture-Service-Icons/` 与 `Resource-Icons/` 下的服务/资源标识,SVG 原样 |
 | `icons/azure/` | [Microsoft Azure Public Service Icons](https://learn.microsoft.com/en-us/azure/architecture/icons/) 官方图标包(V25) | `Icons/` 下各分类的服务标识,SVG 原样 |
 | `icons/gcp/` | [Google Cloud 产品图标](https://cloud.google.com/icons) 官方图标集 | 各产品标识,SVG 原样 |
+| `icons/aliyun/` | 阿里云官方矢量图标包(2022 橙) | 官方包的中英双语两套,按图形配对取英文那套,中文名来自官方中文文件名 |
+| `icons/oci/` | Oracle OCI Architecture Icons(V24.2) | 官方包里的服务标识,SVG 原样 |
+| `icons/ibm/` | [IBM Cloud architecture-icons](https://github.com/IBM-Cloud/architecture-icons) | 官方仓里的 drawio 模板,模板内嵌的 SVG 原样取出 |
 
 导入时做的处理(不动图形本身):
 
@@ -24,8 +27,10 @@
 - GCP 的图标用 CSS class 上色,已把 class 规则展开成写死的 `fill` ——
   否则进了 sprite 之后几十条 `.cls-1` 会互相覆盖
 - Azure 的渐变(`url(#…)`)引用同步改过
+- 阿里云那套官方包里每个图标的中英文名分两个目录放,按图形内容配对;
+  IBM 的图标内嵌在 drawio 模板里(base64 的 SVG),取出后补回 `xmlns:xlink`
 
-**商标**:这些是 AWS / Microsoft / Google 的商标,权归各自权利人所有。
+**商标**:这些是 AWS / Microsoft / Google / 阿里云 / Oracle / IBM 的商标,权归各自权利人所有。
 官方图标包本身就是给画架构图用的,本仓的用途(x-cmd/draw 画架构图)落在其许可范围内;
 但**不得**改色改形,也不得暗示与厂商有合作或背书关系。
 
@@ -60,10 +65,22 @@ Copyright the mingrammer/diagrams contributors)的 `resources/` 目录下的 PNG
 | `icons/aws/` | AWS Architecture Icons 官方包 | 厂商商标,见上 |
 | `icons/azure/` | Microsoft Azure Public Service Icons 官方包 | 厂商商标,见上 |
 | `icons/gcp/` | Google Cloud 官方图标集 | 厂商商标,见上 |
+| `icons/aliyun/` | 阿里云官方矢量图标包 | 厂商商标,见上 |
+| `icons/oci/` | Oracle OCI Architecture Icons 官方包 | 厂商商标,见上 |
+| `icons/ibm/` | IBM Cloud architecture-icons 官方仓 | 厂商商标,见上 |
 | `icons/programming/` | [Simple Icons](https://simpleicons.org) | CC0 |
 | `icons/firebase/` | [Simple Icons](https://simpleicons.org) | CC0 |
 | `icons/elastic/` | [Simple Icons](https://simpleicons.org) | CC0 |
 | `icons/digitalocean/` | [Simple Icons](https://simpleicons.org) | CC0 |
+| `icons/iconpark/` | [IconPark](https://github.com/bytedance/IconPark)(字节跳动) | Apache-2.0 |
+
+IconPark 是整库搬入:图形是多色填充风(蓝 + 深色描边),著作权 Apache-2.0,干净。
+**品牌类 83 个图标没收**(Adobe / Apple / 微信 / 支付宝这类商标图形),
+名字里带品牌的也一并排除(weixin-* / bytedance-* / apple-* / ios-*)。
+
+导入时唯一的改动:官方那套的**纯黑描边**换成了 `currentColor` ———
+页面上深浅色主题下描边都得看得见(黑描边在暗色主题里等于没有)。
+图形、颜色搭配、笔触粗细都没动;单独当文件用时 `currentColor` 就是黑色,跟官方一致。
 
 Simple Icons 的图形是 CC0 ✓(著作权干净),但**商标还是各家的** ——
 按各家的品牌指引用,不得暗示背书。

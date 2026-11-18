@@ -24,11 +24,12 @@
 
 | cat | 来源 | 含义 | 许可怎么算 |
 | --- | --- | --- | --- |
-| `aws` `azure` `gcp` | 厂商官方图标包 | 云服务 | 原厂 SVG 原样;商标归各自权利人,见 `NOTICE.md` |
+| `aws` `azure` `gcp` `aliyun` `oci` `ibm` | 厂商官方图标包 | 云服务 | 原厂 SVG 原样;商标归各自权利人,见 `NOTICE.md` |
 | `infra` | 本仓自绘 | 通用基础设施概念 | 本仓 Apache-2.0 |
 | `org` | 本仓自绘 | 公司与机构的**抽象符号** | 本仓 Apache-2.0,不含任何商标图形 |
 | `brand` | 官方渠道 / Simple Icons(CC0) / Wikimedia Commons | 常用品牌图形 | **逐个按该品牌的条款分析**,记在 `brands/` 里 |
 | `bootstrap` | Bootstrap Icons(整库) | 第三方图标库的全部图标 | 著作权 MIT;画了品牌的那五十来个另有登记 |
+| `iconpark` | IconPark(字节跳动,整库) | 多彩填充风的通用概念 | 著作权 Apache-2.0;品牌类不收 |
 | `db` | 本仓自绘 | 数据库的概念与形态 | 本仓 Apache-2.0 |
 | `ai` | 本仓自绘 | AI 架构里的通用概念 | 本仓 Apache-2.0 |
 | `k8s` | 本仓自绘 | K8s 组件概念(非官方标识) | 本仓 Apache-2.0 |
@@ -69,7 +70,7 @@
   这是**人的决定**,不自动取最高版本 —— 新画一版进来,别名先不动;
   等这版真更好了,再改这一行。别名跟着走,老图也还在。
 
-- 外部那五个分类(aws / azure / gcp / brand / bootstrap)不带版本 ——
+- 外部那批平铺分类(aws / azure / gcp / aliyun / oci / ibm / brand / bootstrap / iconpark)不带版本 ——
   `aws:ec2` 既是具体键也是别名。
 - `catalog.tsv` 只写**具体版本**的键;别名由构建生成,写进去构建直接报错。
 - 查询页就一个过滤页:大搜索框 + 分类 chip,一边打一边筛。**没有分类子页** ——

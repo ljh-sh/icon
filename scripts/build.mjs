@@ -53,6 +53,10 @@ const CATS = {
   travel: { title: '旅行', titleEn: 'Travel', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '旅行攻略里用得上的东西 —— 行李 / 证件 / 住宿 / 景点 / 路线', noteEn: 'What a travel guide needs — luggage, documents, stays, sights, routes' },
   nutrition: { title: '营养', titleEn: 'Nutrition', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '营养成分与膳食 —— 热量 / 蛋白质 / 脂肪 / 维生素', noteEn: 'Nutrients and diet — calories, protein, fat, vitamins' },
   transport: { title: '交通工具', titleEn: 'Transport', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '日常出行的交通工具 —— 车 / 船 / 飞机 / 轨道交通', noteEn: 'Everyday vehicles — cars, ships, planes, rail' },
+  aliyun: { title: '阿里云', titleEn: 'Alibaba Cloud', source: '阿里云官方矢量图标包(2022 橙)', license: '厂商图标包(商标归阿里云)', note: '阿里云官方服务标识,原样 SVG', noteEn: 'Official Alibaba Cloud service icons, SVG as published' },
+  oci: { title: 'Oracle 云', titleEn: 'Oracle Cloud', source: 'Oracle OCI 官方架构图标包(V24.2)', license: '厂商图标包(商标归 Oracle)', note: 'Oracle 云基础设施官方服务标识,原样 SVG', noteEn: 'Official Oracle Cloud Infrastructure service icons, SVG as published' },
+  ibm: { title: 'IBM 云', titleEn: 'IBM Cloud', source: 'IBM Cloud 官方架构图标包(architecture-icons)', license: '厂商图标包(商标归 IBM)', note: 'IBM Cloud 官方架构图标,原样 SVG', noteEn: 'Official IBM Cloud architecture icons, SVG as published' },
+  iconpark: { title: 'IconPark', titleEn: 'IconPark', source: 'IconPark(ByteDance)', license: 'Apache-2.0', note: '字节跳动 IconPark 整库搬入 —— 多彩填充风;品牌类(83 个)与带品牌名的图标不收', noteEn: "ByteDance IconPark imported whole — colourful filled style; the brand category and brand-named icons are left out", bulk: true },
   education: { title: '教育', titleEn: 'Education', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '教育场景 —— 小学 / 初中 / 高中 / 大学 等学段,以及校园里的通用概念', noteEn: 'Education — school stages from primary to university, plus everyday campus concepts' },
   weather: { title: '天气', titleEn: 'Weather', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '天气现象与观测要素 —— 晴雨雪雾 / 温度 / 湿度 / 气压', noteEn: 'Weather phenomena and observations — sun, rain, snow, fog, temperature, humidity, pressure' },
 };
