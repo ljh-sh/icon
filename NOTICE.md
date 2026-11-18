@@ -78,6 +78,16 @@ Copyright the mingrammer/diagrams contributors)的 `resources/` 目录下的 PNG
 图形取自 [Bootstrap Icons](https://github.com/twbs/icons) 里的 `github`
 (MIT),跟 `icons/bootstrap/github` 是同一份。
 
-一处处理:mark 底下垫了一块**不透明的白色**。官方 mark 头上那块是镂空的,
-压在彩色对象上会透出底色(黑、紫糊成一块);垫白之后"白色的身体"不受背景影响,
-图形与颜色本身没动。
+两处处理:
+
+- mark 底下垫了一块**白色的实底**。官方 mark 头上那块是镂空的,压在彩色对象上
+  会透出底色(黑、紫糊成一块);垫白之后"白色的身体"不受背景影响,图形与颜色
+  本身没动。
+- 整枚 mark **70% 不透明** —— 要透一点底色,不跟底下的对象抢。
+
+`icons/k8s/` 的每个图标右上角是 Kubernetes 官方 logo(官方蓝 #326ce5):
+取自 [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes) 仓库的
+`logo/logo.svg`,授权 **CC BY 4.0**(商标 © The Kubernetes Authors)。
+同样是底下垫白实底 + 整枚 70% 不透明。
+
+`icons/sec/` 右上角的盾是**本仓自绘的**抽象图形(白底深色描边),与商标无关。
