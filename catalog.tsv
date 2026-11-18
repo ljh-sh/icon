@@ -663,3 +663,12 @@ military/v0:recon	侦察车	侦察车
 military/v0:comms	通信	通信
 military/v0:logistics	运输车	运输车
 military/v0:missile	导弹	导弹
+military/v0:rifle	步枪	步枪
+military/v0:pistol	手枪	手枪
+military/v0:machine-gun	机枪	机枪
+military/v0:sniper	狙击步枪	狙击步枪
+military/v0:shotgun	霰弹枪	霰弹枪
+military/v0:smg	冲锋枪	冲锋枪
+military/v0:grenade	手榴弹	手榴弹
+military/v0:launcher	火箭筒	火箭筒
+military/v0:ammo	弹药	弹药
