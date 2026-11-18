@@ -4003,3 +4003,98 @@ iconpark:zoom	放大	Zoom
 iconpark:zoom-in	放大	Zoom In
 iconpark:zoom-internal	缩放	Zoom Internal
 iconpark:zoom-out	缩小	Zoom Out
+travel/v0:temple	寺庙	Temple
+travel/v0:church	教堂	Church
+travel/v0:sea	海	Sea
+travel/v0:island	岛	Island
+travel/v0:desert	沙漠	Desert
+travel/v0:forest	森林	Forest
+travel/v0:waterfall	瀑布	Waterfall
+travel/v0:volcano	火山	Volcano
+travel/v0:glacier	冰川	Glacier
+travel/v0:lighthouse	灯塔	Lighthouse
+travel/v0:castle	城堡	Castle
+travel/v0:ruins	遗迹	Ruins
+travel/v0:park	公园	Park
+travel/v0:canyon	峡谷	Canyon
+travel/v0:meadow	草原	Meadow
+travel/v0:hot-spring	温泉	Hot Spring
+travel/v0:harbor	港口	Harbor
+travel/v0:airport	机场	Airport
+people/v0:adult	成年人	Adult
+people/v0:artist	艺术家	Artist
+people/v0:baby	婴儿	Baby
+people/v0:chef	厨师	Chef
+people/v0:child	儿童	Child
+people/v0:crowd	人群	Crowd
+people/v0:customer-service	客服	Customer Service
+people/v0:designer	设计师	Designer
+people/v0:doctor	医生	Doctor
+people/v0:driver	司机	Driver
+people/v0:elderly	老人	Elderly
+people/v0:engineer	工程师	Engineer
+people/v0:family	家庭	Family
+people/v0:farmer	农民	Farmer
+people/v0:firefighter	消防员	Firefighter
+people/v0:freelancer	自由职业	Freelancer
+people/v0:hr	人事	Hr
+people/v0:lawyer	律师	Lawyer
+people/v0:manager	管理者	Manager
+people/v0:meeting	会议	Meeting
+people/v0:nurse	护士	Nurse
+people/v0:pilot	飞行员	Pilot
+people/v0:police	警察	Police
+people/v0:sales	销售	Sales
+people/v0:scientist	科学家	Scientist
+people/v0:student	学生	Student
+people/v0:teacher	老师	Teacher
+people/v0:team	团队	Team
+people/v0:worker	工人	Worker
+region/v0:availability-zone	可用区	Availability Zone
+region/v0:border	边界	Border
+region/v0:capital	首都	Capital
+region/v0:city	城市	City
+region/v0:continent	大洲	Continent
+region/v0:coordinate	经纬度	Coordinate
+region/v0:country	国家	Country
+region/v0:cross-region	跨区域	Cross Region
+region/v0:data-center	机房	Data Center
+region/v0:district	区县	District
+region/v0:globe	地球	Globe
+region/v0:industrial-park	工业园区	Industrial Park
+region/v0:map-area	地图区域	Map Area
+region/v0:province	省/州	Province
+region/v0:region-pin	区域定位	Region Pin
+region/v0:suburb	郊区	Suburb
+region/v0:terrain	地形	Terrain
+region/v0:timezone	时区	Timezone
+region/v0:town	城镇	Town
+region/v0:urban	城区	Urban
+region/v0:village	乡村	Village
+filetype/v0:archive	压缩包	Archive
+filetype/v0:audio	音频	Audio
+filetype/v0:config	配置文件	Config
+filetype/v0:css	CSS	Css
+filetype/v0:csv	CSV 表	Csv
+filetype/v0:database	数据文件	Database
+filetype/v0:disc	光盘镜像	Disc
+filetype/v0:doc	文档	Doc
+filetype/v0:executable	可执行文件	Executable
+filetype/v0:font	字体	Font
+filetype/v0:html	HTML	Html
+filetype/v0:image	图片	Image
+filetype/v0:java	Java	Java
+filetype/v0:javascript	JavaScript	Javascript
+filetype/v0:json	JSON	Json
+filetype/v0:log	日志	Log
+filetype/v0:markdown	Markdown	Markdown
+filetype/v0:pdf	PDF 文件	Pdf
+filetype/v0:presentation	演示文稿	Presentation
+filetype/v0:python	Python	Python
+filetype/v0:shell	脚本	Shell
+filetype/v0:spreadsheet	表格	Spreadsheet
+filetype/v0:sql	SQL	Sql
+filetype/v0:text	文本	Text
+filetype/v0:video	视频	Video
+filetype/v0:xml	XML	Xml
+filetype/v0:yaml	配置	Yaml

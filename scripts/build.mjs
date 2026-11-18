@@ -57,6 +57,9 @@ const CATS = {
   oci: { title: 'Oracle 云', titleEn: 'Oracle Cloud', source: 'Oracle OCI 官方架构图标包(V24.2)', license: '厂商图标包(商标归 Oracle)', note: 'Oracle 云基础设施官方服务标识,原样 SVG', noteEn: 'Official Oracle Cloud Infrastructure service icons, SVG as published' },
   ibm: { title: 'IBM 云', titleEn: 'IBM Cloud', source: 'IBM Cloud 官方架构图标包(architecture-icons)', license: '厂商图标包(商标归 IBM)', note: 'IBM Cloud 官方架构图标,原样 SVG', noteEn: 'Official IBM Cloud architecture icons, SVG as published' },
   iconpark: { title: 'IconPark', titleEn: 'IconPark', source: 'IconPark(ByteDance)', license: 'Apache-2.0', note: '字节跳动 IconPark 整库搬入 —— 多彩填充风;品牌类(83 个)与带品牌名的图标不收', noteEn: "ByteDance IconPark imported whole — colourful filled style; the brand category and brand-named icons are left out", bulk: true },
+  people: { title: '人与职业', titleEn: 'People', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '工作类型与人群 —— 只取中性、正面的表达', noteEn: 'Work types and groups of people — neutral, positive depictions only' },
+  region: { title: '地区', titleEn: 'Regions', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '地理与行政层级 —— 国家 / 省 / 市 / 区县 / 可用区 / 机房', noteEn: 'Geography and administrative levels — country, province, city, district, availability zone, data centre' },
+  filetype: { title: '文件类型', titleEn: 'File Types', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '常见的文件类型 —— 文档 / 表格 / 代码 / 图片 / 音视频 / 压缩包', noteEn: 'Common file types — documents, sheets, code, images, media, archives' },
   education: { title: '教育', titleEn: 'Education', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '教育场景 —— 小学 / 初中 / 高中 / 大学 等学段,以及校园里的通用概念', noteEn: 'Education — school stages from primary to university, plus everyday campus concepts' },
   weather: { title: '天气', titleEn: 'Weather', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '天气现象与观测要素 —— 晴雨雪雾 / 温度 / 湿度 / 气压', noteEn: 'Weather phenomena and observations — sun, rain, snow, fog, temperature, humidity, pressure' },
 };

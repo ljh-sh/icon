@@ -26,5 +26,8 @@
   "nutrition": "v0",
   "transport": "v0",
   "weather": "v0",
-  "education": "v0"
+  "education": "v0",
+  "people": "v0",
+  "region": "v0",
+  "filetype": "v0"
 }

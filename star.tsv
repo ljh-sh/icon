@@ -45,3 +45,6 @@ azure	vm,app
 gcp	gce,gcs
 aliyun	ecs,oss
 ibm	vpc,cloud
+people	doctor,team
+region	country,globe
+filetype	pdf,json

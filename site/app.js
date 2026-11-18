@@ -581,6 +581,8 @@ function syncFromUrl() {
   for (const e of qEls) e.value = p.get('q') || '';
   $('#clear2').hidden = !q;
   limit = LIMIT0;
+  // 深链直接带着分类来的 —— 那个分类的包得下
+  if (cat) loadBundle(cat);
   render();
 }
 window.addEventListener('popstate', syncFromUrl);
