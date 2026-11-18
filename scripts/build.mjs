@@ -37,6 +37,7 @@ const CATS = {
   mech: { title: '机械', titleEn: 'Machinery', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '机器上的零件 —— 齿轮 / 轴承 / 阀门 / 泵', noteEn: 'Machine parts — gears, bearings, valves, pumps' },
   phy: { title: '物理', titleEn: 'Physics', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '物理概念与微观结构 —— 原子 / 分子 / 键 / 晶体结构 / 力学 / 电磁 / 光学', noteEn: 'Physics concepts — atoms, molecules, structures, mechanics, EM, optics' },
   mech: { title: '机械', titleEn: 'Machinery', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '机器上的零件 —— 齿轮 / 轴承 / 阀门 / 泵 / 涡轮', noteEn: 'Machine parts — gears, bearings, valves, pumps, turbines' },
+  military: { title: '军事', titleEn: 'Military', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '海军 / 空军 / 陆军的通用装备符号 —— 不指向任何国家的具体部队', noteEn: 'Generic navy, air force and ground force unit symbols' },
   chem: { title: '化学', titleEn: 'Chemistry', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '化学:实验器材 / 试剂 / 结构', noteEn: 'Chemistry: lab equipment, reagents and structures' },
   dev: { title: '开发流程', titleEn: 'Development', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '开发项目流程 —— 通用阶段 / 软件 / 硬件', noteEn: 'Development workflow — phases, software and hardware' },
   github: { title: 'GitHub', titleEn: 'GitHub', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: 'GitHub 的概念与流程 —— 右下角是 GitHub 官方 mark(次要位置)', noteEn: 'GitHub concepts and flows — official mark in a secondary position' },

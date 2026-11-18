@@ -20,5 +20,6 @@
   "network": "v0",
   "base": "v0",
   "phy": "v0",
-  "mech": "v0"
+  "mech": "v0",
+  "military": "v0"
 }
