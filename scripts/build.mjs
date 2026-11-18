@@ -647,9 +647,12 @@ for (const [cat, list] of catMetas) {
 }
 
 // 索引:分类清单 + 每包多大 —— 客户端第一个请求就是它
+// total   —— 全部条目(含各版本的旧版)
+// browsable —— 首页默认能看到的那批(只摆推荐版本)
+const browsable = metas.filter((m) => !m.version || m.alias).length;
 writeFileSync(
   join(PUBLIC, 'index.json'),
-  JSON.stringify({ build: BUILD, cats, bundles, total: metas.length }),
+  JSON.stringify({ build: BUILD, cats, bundles, total: metas.length, browsable }),
 );
 
 // 全量 sprite 也留着(x-cmd/draw 那边要一张就能嵌)
@@ -681,7 +684,7 @@ writeFileSync(
   join(DIST, 'index.html'),
   readFileSync(join(ROOT, 'site', 'index.html'), 'utf8')
     .replace('__ICON_BASE__/', '/')
-    .replace('__ICON_BUILD__', BUILD),
+    .replace('BUILD_SLOT', BUILD),
 );
 console.log(`dist/: 静态站(本地预览用)`);
 

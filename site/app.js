@@ -113,7 +113,8 @@ let BUNDLES = {}; // 包名 → { icons, sprite, manifest }
 const ICONS = new Map(); // id → 图标信息(已加载的)
 const LOADED = new Set(); // 已经拉过的包
 let PENDING = 0; // 还在路上的包
-let TOTAL = 0; // 全库图标总数(index.json 给的)
+let TOTAL = 0; // 首页默认能看到多少个(index.json 的 browsable)
+let ALL = 0; // 全库条目数(含各版本的旧版)
 
 const byId = new Map();
 const t = (key) => (LANGS[lang] && LANGS[lang][key]) || key;
@@ -234,7 +235,7 @@ function grid(host, list) {
   host.textContent = '';
   for (const m of shown) host.append(cell(m));
   const left = list.length - shown.length;
-  const rest = left + (TOTAL - ICONS.size);
+  const rest = left + (ALL - ICONS.size);
   for (const more of document.querySelectorAll('.more')) {
     more.hidden = rest <= 0;
     more.textContent = `${t('more')} (${rest})`;
@@ -264,10 +265,12 @@ function renderFilters() {
 function render() {
   renderFilters();
   const list = DATA.icons.filter(match);
-  const n = grid($('#all'), list);
+  const shown = grid($('#all'), list);
+  // 没打搜索词就报总数 —— 搜索框里那个数字是"库里有多少",不是"眼下摆了多少"
+  const n = q ? list.length : TOTAL;
   $('#all-count').textContent =
-    `${list.length.toLocaleString()} ${t('count')}` + (PENDING ? ` · ${t('loading')}` : '');
-  $('#empty').hidden = n > 0;
+    `${n.toLocaleString()} ${t('count')}` + (PENDING ? ` · ${t('loading')}` : '');
+  $('#empty').hidden = shown > 0;
   $('#empty').textContent = t('empty');
   locate();
 }
@@ -609,7 +612,8 @@ $('#p-id').addEventListener('click', async (e) => {
     const starP = loadBundle('star');
     const idx = await idxP;
     BUNDLES = idx.bundles || {};
-    TOTAL = idx.total || 0;
+    TOTAL = idx.browsable || idx.total || 0;
+    ALL = idx.total || 0;
     DATA.cats = idx.cats || [];
     renderFilters();
     await starP;
