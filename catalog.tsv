@@ -175,12 +175,12 @@ animal/v0:rabbit	兔子	Rabbit
 animal/v0:turtle	乌龟	Turtle
 animal/v0:bee	蜜蜂	Bee
 animal/v0:butterfly	蝴蝶	Butterfly
-chem/v0:molecule	分子	Molecule
-chem/v0:atom	原子	Atom
+phy/v0:molecule	分子	Molecule
+phy/v0:atom	原子	Atom
 chem/v0:flask	烧瓶	Flask
-chem/v0:bond	化学键	Bond
-chem/v0:reaction	化学反应	Reaction
-chem/v0:catalyst	催化剂	Catalyst
+phy/v0:bond	化学键	Bond
+phy/v0:reaction	化学反应	Reaction
+phy/v0:catalyst	催化剂	Catalyst
 chem/v0:solvent	溶剂	Solvent
 chem/v0:balance	天平	Balance
 chem/v0:beaker	烧杯	Beaker
@@ -235,11 +235,11 @@ chem/v0:respirator	防毒面具	Respirator
 chem/v0:flammable	易燃	Flammable
 chem/v0:toxic	有毒试剂	Toxic Reagent
 chem/v0:radioactive	放射性	Radioactive
-chem/v0:atomic-structure	原子结构	Atomic Structure
-chem/v0:molecular-structure	分子结构	Molecular Structure
-chem/v0:crystal-structure	晶体结构	Crystal Structure
-chem/v0:equation	化学反应式	Chemical Equation
-chem/v0:molecular-model	分子模型	Molecular Model
+phy/v0:atomic-structure	原子结构	Atomic Structure
+phy/v0:molecular-structure	分子结构	Molecular Structure
+phy/v0:crystal-structure	晶体结构	Crystal Structure
+phy/v0:equation	化学反应式	Chemical Equation
+phy/v0:molecular-model	分子模型	Molecular Model
 circuit/v0:chip	芯片	Chip
 circuit/v0:resistor	电阻	Resistor
 circuit/v0:capacitor	电容	Capacitor
@@ -615,3 +615,24 @@ elastic:metricbeat	Metricbeat	Metricbeat
 elastic:heartbeat	Heartbeat	Heartbeat
 digitalocean:digitalocean	DigitalOcean	DigitalOcean
 digitalocean:droplet	Droplet	Droplet
+phy/v0:lever	杠杆	杠杆
+phy/v0:spring	弹簧	弹簧
+phy/v0:magnet	磁铁	磁铁
+phy/v0:lens	透镜	透镜
+phy/v0:prism	棱镜	棱镜
+phy/v0:ray	光线	光线
+phy/v0:gravity	重力	重力
+phy/v0:heat	热量	热量
+phy/v0:field	电磁场	电磁场
+phy/v0:wavelength	波长	波长
+mech/v0:gear	齿轮	齿轮
+mech/v0:bearing	轴承	轴承
+mech/v0:belt	皮带	皮带
+mech/v0:valve	阀门	阀门
+mech/v0:pump	泵	泵
+mech/v0:turbine	涡轮	涡轮
+mech/v0:piston	活塞	活塞
+mech/v0:screw	螺丝	螺丝
+mech/v0:wrench	扳手	扳手
+mech/v0:pipeline	管道	管道
+mech/v0:motor	电机	电机

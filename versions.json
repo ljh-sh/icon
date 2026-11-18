@@ -18,5 +18,7 @@
   "common": "v0",
   "frame": "v0",
   "network": "v0",
-  "base": "v0"
+  "base": "v0",
+  "phy": "v0",
+  "mech": "v0"
 }
