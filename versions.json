@@ -21,5 +21,10 @@
   "base": "v0",
   "phy": "v0",
   "mech": "v0",
-  "military": "v0"
+  "military": "v0",
+  "travel": "v0",
+  "nutrition": "v0",
+  "transport": "v0",
+  "weather": "v0",
+  "education": "v0"
 }

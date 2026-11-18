@@ -33,8 +33,6 @@ const CATS = {
   cat: { title: '猫', titleEn: 'Cats', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '猫', noteEn: 'Cats' },
   dog: { title: '狗', titleEn: 'Dogs', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '狗', noteEn: 'Dogs' },
   animal: { title: '动物', titleEn: 'Animals', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '动物', noteEn: 'Animals' },
-  phy: { title: '物理', titleEn: 'Physics', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '物理概念与微观结构 —— 原子 / 分子 / 键 / 晶体结构', noteEn: 'Physics concepts and microstructures' },
-  mech: { title: '机械', titleEn: 'Machinery', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '机器上的零件 —— 齿轮 / 轴承 / 阀门 / 泵', noteEn: 'Machine parts — gears, bearings, valves, pumps' },
   phy: { title: '物理', titleEn: 'Physics', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '物理概念与微观结构 —— 原子 / 分子 / 键 / 晶体结构 / 力学 / 电磁 / 光学', noteEn: 'Physics concepts — atoms, molecules, structures, mechanics, EM, optics' },
   mech: { title: '机械', titleEn: 'Machinery', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '机器上的零件 —— 齿轮 / 轴承 / 阀门 / 泵 / 涡轮', noteEn: 'Machine parts — gears, bearings, valves, pumps, turbines' },
   military: { title: '军事', titleEn: 'Military', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '海军 / 空军 / 陆军的通用装备符号 —— 不指向任何国家的具体部队', noteEn: 'Generic navy, air force and ground force unit symbols' },
@@ -52,6 +50,11 @@ const CATS = {
   base: { title: '底座', titleEn: 'Bases', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '上面放东西的台面 —— 内容区在底座之上', noteEn: 'Pedestals and slabs — content sits on top' },
   frame: { title: '框架', titleEn: 'Frames', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '框在外、内容在里面的框架型图标 —— 屏 / 白板 / 门 / 云 / 地图', noteEn: 'Containers with room inside — screens, boards, doors, clouds, maps' },
   common: { title: '通用符号', titleEn: 'Common Symbols', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步', noteEn: 'Basic symbols shared across the library — lock, clock, check, sync' },
+  travel: { title: '旅行', titleEn: 'Travel', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '旅行攻略里用得上的东西 —— 行李 / 证件 / 住宿 / 景点 / 路线', noteEn: 'What a travel guide needs — luggage, documents, stays, sights, routes' },
+  nutrition: { title: '营养', titleEn: 'Nutrition', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '营养成分与膳食 —— 热量 / 蛋白质 / 脂肪 / 维生素', noteEn: 'Nutrients and diet — calories, protein, fat, vitamins' },
+  transport: { title: '交通工具', titleEn: 'Transport', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '日常出行的交通工具 —— 车 / 船 / 飞机 / 轨道交通', noteEn: 'Everyday vehicles — cars, ships, planes, rail' },
+  education: { title: '教育', titleEn: 'Education', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '教育场景 —— 小学 / 初中 / 高中 / 大学 等学段,以及校园里的通用概念', noteEn: 'Education — school stages from primary to university, plus everyday campus concepts' },
+  weather: { title: '天气', titleEn: 'Weather', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '天气现象与观测要素 —— 晴雨雪雾 / 温度 / 湿度 / 气压', noteEn: 'Weather phenomena and observations — sun, rain, snow, fog, temperature, humidity, pressure' },
 };
 
 // 整库搬入的分类:catalog.tsv 不强制一行一个(几千个图标不可能手写描述)
