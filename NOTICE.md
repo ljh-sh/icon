@@ -51,6 +51,25 @@ azure/blob       同上,没有 Blob Storage 服务标识(Storage-Accounts 是另
 Copyright the mingrammer/diagrams contributors)的 `resources/` 目录下的 PNG,
 缩到 48×48 并量化了调色板。那批 PNG 已经从本仓移除,历史里仍可取回。
 
+## 按厂家分的分类
+
+每个厂家一个独立分类,方便管理:
+
+| 分类 | 来源 | 授权 |
+| --- | --- | --- |
+| `icons/aws/` | AWS Architecture Icons 官方包 | 厂商商标,见上 |
+| `icons/azure/` | Microsoft Azure Public Service Icons 官方包 | 厂商商标,见上 |
+| `icons/gcp/` | Google Cloud 官方图标集 | 厂商商标,见上 |
+| `icons/programming/` | [Simple Icons](https://simpleicons.org) | CC0 |
+| `icons/firebase/` | [Simple Icons](https://simpleicons.org) | CC0 |
+| `icons/elastic/` | [Simple Icons](https://simpleicons.org) | CC0 |
+| `icons/digitalocean/` | [Simple Icons](https://simpleicons.org) | CC0 |
+
+Simple Icons 的图形是 CC0 ✓(著作权干净),但**商标还是各家的** ——
+按各家的品牌指引用,不得暗示背书。
+
+**只收 SVG**:构建时发现非 SVG 的图标文件直接报错(其它格式不接受)。
+
 ## 品牌图形(icons/brand/、icons/bootstrap/)
 
 这两类目录里的图标是**第三方品牌的图形**:

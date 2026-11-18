@@ -495,3 +495,123 @@ frame/v0:whiteboard-professor	女教授与白板	Professor at a Whiteboard
 frame/v0:whiteboard-doctor	医生与白板	Doctor at a Whiteboard
 frame/v0:whiteboard-teacher	老师与白板	Teacher at a Whiteboard
 frame/v0:blackboard-engineer	工程师与黑板	Engineer at a Blackboard
+aws:ami	机器学习镜像	Deep Learning AMIs
+aws:backup	备份	Backup
+aws:storagegateway	存储网关	Storage Gateway
+aws:globalaccelerator	全球加速	Global Accelerator
+aws:shield	DDoS 防护	Shield
+aws:detective	安全调查	Detective
+aws:config	配置审计	Config
+aws:ssm	系统管理器	Systems Manager
+aws:trustedadvisor	可信顾问	Trusted Advisor
+aws:resourcegroups	资源浏览器	Resource Explorer
+aws:servicecatalog	服务目录	Service Catalog
+aws:ram	资源访问管理	Resource Access Manager
+aws:timestream	时序数据库	Timestream
+aws:cloudsearch	云搜索	CloudSearch
+aws:databrew	数据湖构建	DataBrew
+aws:managedprometheus	托管 Prometheus	Managed Prometheus
+aws:iotdeviceinsights	物联网设备防护	IoT Device Defender
+aws:iotfleetwise2	车队管理	IoT FleetWise
+aws:iotsitewise	站点智能	IoT SiteWise
+aws:iottwinmaker	数字孪生	IoT TwinMaker
+aws:groundstation	地面站	Ground Station
+aws:iotgreentech	边缘物联网	IoT Greengrass
+aws:bedrockagent	智能体内核	Bedrock AgentCore
+aws:sagemakergroundtruth	数据标注	SageMaker Ground Truth
+aws:sagemakerstudio	笔记本环境	SageMaker Studio Lab
+aws:ecsanywhere	边缘容器	ECS Anywhere
+aws:eksanywhere	边缘 Kubernetes	EKS Anywhere
+aws:eksdistro	Kubernetes 发行版	EKS Distro
+aws:bottlerocket	容器操作系统	Bottlerocket
+aws:datasync	数据同步	DataSync
+aws:firewallmanager	防火墙管理	Firewall Manager
+aws:clientvpn	客户端 VPN	Client VPN
+aws:computeoptimizer	计算优化	Compute Optimizer
+aws:marketplace	应用市场	Marketplace
+aws:support	支持	Support
+aws:imagebuilder	镜像构建	EC2 Image Builder
+aws:cloudcontrol	云控制接口	Cloud Control API
+aws:codewhisperer	AI 编程助手	CodeWhisperer
+aws:codeguru	代码审查助手	CodeGuru
+aws:devopsguru	DevOps 助手	DevOps Guru
+aws:connect	联络中心	Connect
+aws:chime	音视频会议	Chime
+aws:keyspaces	Cassandra 数据库	Keyspaces
+aws:elasticache	内存缓存	ElastiCache
+aws:apigatewayv2	API 网关	API Gateway
+azure:storage-accounts	存储账户	Storage Accounts
+azure:data-lake	数据湖存储	Data Lake Storage
+azure:defender	 Defender	Defender for Cloud
+azure:vpn-gateway	VPN 网关	Virtual Network Gateways
+azure:load-balancer	负载均衡	Load Balancers
+azure:app-gateway	应用网关	Application Gateway
+azure:traffic-manager	流量管理器	Traffic Manager Profiles
+azure:private-link	私有链接	Private Link
+azure:vnet	虚拟网络	Virtual Networks
+azure:resource-groups	资源组	Resource Groups
+azure:signalr	实时通信	Signal R
+azure:notification-hubs	通知中心	Notification Hubs
+azure:spring-apps	Spring 应用	Spring Apps
+azure:app-insights	应用洞察	Application Insights
+azure:log-analytics	日志分析	Log Analytics Workspaces
+azure:data-share	数据共享	Data Shares
+azure:cognitive	认知服务	Cognitive Services
+gcp:cloud-build	云构建	Cloud Build
+gcp:cloudsql	关系型数据库	Cloud SQL
+gcp:cloudfunctions	函数	Cloud Functions
+programming:react	React	React
+programming:vue	Vue	Vue
+programming:svelte	Svelte	Svelte
+programming:angular	Angular	Angular
+programming:nextjs	Next.js	Next.js
+programming:nuxt	Nuxt	Nuxt
+programming:django	Django	Django
+programming:flask	Flask	Flask
+programming:fastapi	FastAPI	FastAPI
+programming:laravel	Laravel	Laravel
+programming:rails	Ruby on Rails	Ruby on Rails
+programming:spring	Spring	Spring
+programming:quarkus	Quarkus	Quarkus
+programming:phoenix	Phoenix	Phoenix
+programming:elixir	Elixir	Elixir
+programming:erlang	Erlang	Erlang
+programming:dotnet	.NET	.NET
+programming:nodejs	Node.js	Node.js
+programming:typescript	TypeScript	TypeScript
+programming:javascript	JavaScript	JavaScript
+programming:python	Python	Python
+programming:go	Go	Go
+programming:rust	Rust	Rust
+programming:java	Java	Java
+programming:kotlin	Kotlin	Kotlin
+programming:swift	Swift	Swift
+programming:ruby	Ruby	Ruby
+programming:php	PHP	PHP
+programming:csharp	C#	C#
+programming:cpp	C++	C++
+programming:c	C	C
+programming:dart	Dart	Dart
+programming:flutter	Flutter	Flutter
+programming:bash	Bash	Bash
+programming:latex	LaTeX	LaTeX
+programming:matlab	MATLAB	MATLAB
+programming:graphql	GraphQL	GraphQL
+programming:apache	Apache	Apache
+firebase:firebase	Firebase	Firebase
+firebase:auth	身份认证	身份认证
+firebase:functions	云函数	云函数
+firebase:hosting	托管	托管
+firebase:storage	存储	存储
+firebase:realtime-database	实时数据库	实时数据库
+firebase:ml-kit	ML Kit	ML Kit
+elastic:elasticsearch	Elasticsearch	Elasticsearch
+elastic:kibana	Kibana	Kibana
+elastic:logstash	Logstash	Logstash
+elastic:apm	APM	APM
+elastic:alerting	告警	告警
+elastic:filebeat	Filebeat	Filebeat
+elastic:metricbeat	Metricbeat	Metricbeat
+elastic:heartbeat	Heartbeat	Heartbeat
+digitalocean:digitalocean	DigitalOcean	DigitalOcean
+digitalocean:droplet	Droplet	Droplet

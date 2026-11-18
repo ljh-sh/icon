@@ -39,6 +39,10 @@ const CATS = {
   circuit: { title: '电路', titleEn: 'Circuits', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '电子与电路', noteEn: 'Electronics and circuits' },
   music: { title: '音乐', titleEn: 'Music', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '音乐与音频', noteEn: 'Music and audio' },
   food: { title: '食物', titleEn: 'Food', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '食物与饮品', noteEn: 'Food and drink' },
+  programming: { title: '语言与框架', titleEn: 'Languages & Frameworks', source: 'Simple Icons', license: 'CC0', note: '编程语言与 Web 框架的标识', noteEn: 'Programming languages and web frameworks' },
+  firebase: { title: 'Firebase', titleEn: 'Firebase', source: 'Simple Icons', license: 'CC0', note: 'Firebase 的产品标识', noteEn: 'Firebase product marks' },
+  elastic: { title: 'Elastic', titleEn: 'Elastic', source: 'Simple Icons', license: 'CC0', note: 'Elastic Stack 的产品标识', noteEn: 'Elastic Stack product marks' },
+  digitalocean: { title: 'DigitalOcean', titleEn: 'DigitalOcean', source: 'Simple Icons', license: 'CC0', note: 'DigitalOcean 的产品标识', noteEn: 'DigitalOcean product marks' },
   network: { title: '网络设备', titleEn: 'Network Devices', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '交换机 / 路由器 / 防火墙 / 机架 这类设备与符号 —— 自绘的抽象图形', noteEn: 'Switches, routers, firewalls, racks — self-drawn abstract shapes' },
   base: { title: '底座', titleEn: 'Bases', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '上面放东西的台面 —— 内容区在底座之上', noteEn: 'Pedestals and slabs — content sits on top' },
   frame: { title: '框架', titleEn: 'Frames', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '框在外、内容在里面的框架型图标 —— 屏 / 白板 / 门 / 云 / 地图', noteEn: 'Containers with room inside — screens, boards, doors, clouds, maps' },
@@ -54,7 +58,7 @@ const NEEDS_RECORD = new Set(['brand', 'bootstrap']);
 const BRANDISH =
   /^(alipay|amazon|android|anthropic|apple|behance|bing|bootstrap|chatgpt|discord|dribbble|dropbox|facebook|github|gitlab|google|grok|instagram|javascript|linkedin|markdown|meta|microsoft|openai|paypal|pinterest|reddit|sina-weibo|slack|snapchat|spotify|stack-overflow|stripe|telegram|tencent|tiktok|trello|twitter|typescript|unity|vimeo|wechat|whatsapp|wikipedia|windows|wordpress|youtube)/;
 
-const MIME = { svg: 'image/svg+xml', png: 'image/png' };
+const MIME = { svg: 'image/svg+xml' }; // 只收 SVG —— 其它格式不接受
 
 // 图标文件一律单行 —— sprite 一行一个 symbol,合并、grep、diff 都靠这个
 // (页面上看源码时再展开成缩进的可读格式)
@@ -232,7 +236,7 @@ for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => 
       for (const f of readdirSync(join(dir, vd)).sort()) {
         const ext = f.split('.').pop();
         if (!MIME[ext]) {
-          console.error(`icons/${catName}/${vd}/${f}: 不支持的格式 .${ext}`);
+          console.error(`icons/${catName}/${vd}/${f}: 只接受 SVG(.${ext} 不要)`);
           process.exit(1);
         }
         const concept = f.slice(0, -(ext.length + 1));
@@ -250,7 +254,7 @@ for (const cat of readdirSync(ICONS_DIR, { withFileTypes: true }).filter((d) => 
     for (const f of flat) {
       const ext = f.split('.').pop();
       if (!MIME[ext]) {
-        console.error(`icons/${catName}/${f}: 不支持的格式 .${ext}`);
+        console.error(`icons/${catName}/${f}: 只接受 SVG(.${ext} 不要)`);
         process.exit(1);
       }
       const concept = f.slice(0, -(ext.length + 1));
