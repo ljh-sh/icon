@@ -24,7 +24,11 @@ interface Env {
 }
 
 function html(body: string, base: string): Response {
-  return new Response(body.replace('__ICON_BASE__/', base ? `${base}/` : '/'), {
+  const page = body
+    .replace('__ICON_BASE__/', base ? `${base}/` : '/')
+    // 构建号填进去 —— 页面里就能知道该拉哪一版的包,索引和 star 可以并行拉
+    .replace('__ICON_BUILD__', BUILD);
+  return new Response(page, {
     headers: {
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'public, max-age=600',

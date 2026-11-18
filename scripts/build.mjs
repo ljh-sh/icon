@@ -679,7 +679,9 @@ for (const f of readdirSync(PUBLIC)) {
 for (const f of ['style.css', 'app.js']) copyFileSync(join(ROOT, 'site', f), join(DIST, f));
 writeFileSync(
   join(DIST, 'index.html'),
-  readFileSync(join(ROOT, 'site', 'index.html'), 'utf8').replace('__ICON_BASE__/', '/'),
+  readFileSync(join(ROOT, 'site', 'index.html'), 'utf8')
+    .replace('__ICON_BASE__/', '/')
+    .replace('__ICON_BUILD__', BUILD),
 );
 console.log(`dist/: 静态站(本地预览用)`);
 

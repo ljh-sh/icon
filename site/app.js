@@ -102,7 +102,8 @@ let DATA = { cats: [], icons: [] };
 let q = ''; // 搜索词
 let cat = ''; // 分类筛选;空 = 全部
 let lang = 'zh';
-let limit = 240; // 一次渲染多少个(两三千个节点一起铺会卡)
+const LIMIT0 = 60; // 默认只显示前 60 个 —— 要更多点「显示更多」,那才会去下载
+let limit = LIMIT0;
 let V = ''; // 构建号:URL 上带上,重新部署后不会顶着旧缓存
 let current = null; // 面板里正在看的图标
 
@@ -112,6 +113,7 @@ let BUNDLES = {}; // 包名 → { icons, sprite, manifest }
 const ICONS = new Map(); // id → 图标信息(已加载的)
 const LOADED = new Set(); // 已经拉过的包
 let PENDING = 0; // 还在路上的包
+let TOTAL = 0; // 全库图标总数(index.json 给的)
 
 const byId = new Map();
 const t = (key) => (LANGS[lang] && LANGS[lang][key]) || key;
@@ -226,17 +228,20 @@ function cell(m) {
 }
 
 // 渲染前 limit 个,其余给「显示更多」
+// 没下载的那部分也算进"还剩多少" —— 点了「显示更多」才去把剩下的包拉下来
 function grid(host, list) {
   const shown = list.slice(0, limit);
   host.textContent = '';
   for (const m of shown) host.append(cell(m));
   const left = list.length - shown.length;
+  const rest = left + (TOTAL - ICONS.size);
   for (const more of document.querySelectorAll('.more')) {
-    more.hidden = left <= 0;
-    more.textContent = `${t('more')} (${left})`;
+    more.hidden = rest <= 0;
+    more.textContent = `${t('more')} (${rest})`;
     more.onclick = () => {
       limit += 240;
       render();
+      loadRest(true); // 边下边显示:包到了就合并,列表跟着长
     };
   }
   return shown.length;
@@ -271,8 +276,8 @@ function render() {
 // 一个包 = 一份清单 + 一张 sprite。清单和 sprite 都要到齐,图标才画得出来。
 async function loadBundle(name) {
   if (LOADED.has(name)) return;
-  const b = BUNDLES[name];
-  if (!b) return;
+  // star 的文件名是固定的 —— 索引还没回来也能先拉
+  const b = BUNDLES[name] || { manifest: `manifest.${name}.json`, sprite: `sprite.${name}.svg` };
   LOADED.add(name);
   PENDING++;
   try {
@@ -313,10 +318,10 @@ async function loadRest(includeBulk) {
 
 function setCat(value) {
   cat = value;
-  limit = 240;
+  limit = LIMIT0;
   pushUrl();
-  // 整库搬进来的两个大包,点进去才拉
-  if (value === 'bootstrap' || value === 'iconpark') loadBundle(value);
+  // 点哪个分类就下哪个包
+  if (value) loadBundle(value);
   render();
 }
 
@@ -324,7 +329,7 @@ function setQuery(v) {
   q = v.trim().toLowerCase();
   for (const e of qEls) e.value = v;
   $('#clear2').hidden = !q;
-  limit = 240;
+  limit = LIMIT0;
   pushUrl();
   // 搜索要跨全库 —— 大包也得拉上
   if (q) loadRest(true);
@@ -572,7 +577,7 @@ function syncFromUrl() {
   cat = p.get('cat') || '';
   for (const e of qEls) e.value = p.get('q') || '';
   $('#clear2').hidden = !q;
-  limit = 240;
+  limit = LIMIT0;
   render();
 }
 window.addEventListener('popstate', syncFromUrl);
@@ -596,22 +601,24 @@ $('#p-id').addEventListener('click', async (e) => {
     try {
       lang = localStorage.getItem('icon-lang') || lang;
     } catch {}
-    // 索引最小:分类清单 + 每包多大。拿到就知道该去拉哪些包。
-    const idx = await (await fetch(`${BASE}index.json`)).json();
-    V = idx.build ? `?v=${idx.build}` : '';
-    BUNDLES = idx.bundles || {};
-    DATA.cats = idx.cats || [];
+    // 构建号是 Worker 注入的 —— 不用等索引回来就能带上版本号
+    V = window.__ICON_BUILD__ ? `?v=${window.__ICON_BUILD__}` : '';
     applyI18n();
+    // 索引和精选那一小包并行拉 —— 首页马上有东西看
+    const idxP = fetch(`${BASE}index.json${V}`).then((r) => r.json());
+    const starP = loadBundle('star');
+    const idx = await idxP;
+    BUNDLES = idx.bundles || {};
+    TOTAL = idx.total || 0;
+    DATA.cats = idx.cats || [];
     renderFilters();
-    // 先把精选那一小包画出来 —— 首页马上有东西看
-    await loadBundle('star');
+    await starP;
     syncFromUrl();
     // 深链带 #<id> 的,直接开面板
     const id = decodeURIComponent(location.hash.slice(1));
     const m = id && byId.get(id);
     if (m) openPanel(m);
-    // 其余分类在后台慢慢拉,来了就合并
-    loadRest(false);
+    // 其余分类不自动下 —— 等用户点「显示更多」或者搜索
   } catch (err) {
     document.querySelector('main').innerHTML = `<p class="empty">${t('empty')}</p>`;
   }
