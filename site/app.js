@@ -36,6 +36,7 @@ const LANGS = {
     download: '下载',
     close: '关闭',
     empty: '没有匹配的图标。',
+    loading: '加载中',
     vOk: '可用',
     vCaution: '谨慎 —— 限指示性引用',
     vPending: '未审 —— 商标条款未逐条核对',
@@ -76,6 +77,7 @@ const LANGS = {
     download: 'Download',
     close: 'Close',
     empty: 'No matching icons.',
+    loading: 'loading',
     vOk: 'OK',
     vCaution: 'Caution — indicative use only',
     vPending: 'Unreviewed — trademark terms not checked one by one',
@@ -104,6 +106,13 @@ let limit = 240; // 一次渲染多少个(两三千个节点一起铺会卡)
 let V = ''; // 构建号:URL 上带上,重新部署后不会顶着旧缓存
 let current = null; // 面板里正在看的图标
 
+// 图标是分包装的:首页先拿 star(精选)那一小包,其余分类在后台一个一个拉,
+// 到了就合并进来 —— 客户端融合,不用一次把五 MB 的 sprite 全拉下来。
+let BUNDLES = {}; // 包名 → { icons, sprite, manifest }
+const ICONS = new Map(); // id → 图标信息(已加载的)
+const LOADED = new Set(); // 已经拉过的包
+let PENDING = 0; // 还在路上的包
+
 const byId = new Map();
 const t = (key) => (LANGS[lang] && LANGS[lang][key]) || key;
 
@@ -119,7 +128,7 @@ function applyI18n() {
 }
 
 // ---------- 图标 ----------
-// 矢量图标走 sprite:一次请求拿全,页面用 <use> 引用
+// 矢量图标走 sprite:符号在哪个包里就从哪个包里引用
 // PNG(云厂商那批)进不了 sprite,还是单独文件
 function iconEl(m) {
   if (m.spriteId) {
@@ -129,7 +138,7 @@ function iconEl(m) {
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', m.id);
     const use = document.createElementNS(SVGNS, 'use');
-    use.setAttribute('href', `${BASE}sprite.svg${V}#${m.spriteId}`);
+    use.setAttribute('href', `${BASE}sprite.${m.bundle || 'star'}.svg${V}#${m.spriteId}`);
     svg.append(use);
     return svg;
   }
@@ -251,16 +260,63 @@ function render() {
   renderFilters();
   const list = DATA.icons.filter(match);
   const n = grid($('#all'), list);
-  $('#all-count').textContent = `${list.length.toLocaleString()} ${t('count')}`;
+  $('#all-count').textContent =
+    `${list.length.toLocaleString()} ${t('count')}` + (PENDING ? ` · ${t('loading')}` : '');
   $('#empty').hidden = n > 0;
   $('#empty').textContent = t('empty');
   locate();
+}
+
+// ---------- 分包加载 ----------
+// 一个包 = 一份清单 + 一张 sprite。清单和 sprite 都要到齐,图标才画得出来。
+async function loadBundle(name) {
+  if (LOADED.has(name)) return;
+  const b = BUNDLES[name];
+  if (!b) return;
+  LOADED.add(name);
+  PENDING++;
+  try {
+    const [mj, sp] = await Promise.all([
+      fetch(`${BASE}${b.manifest}${V}`).then((r) => r.json()),
+      fetch(`${BASE}${b.sprite}${V}`),
+    ]);
+    for (const m of mj.icons) {
+      // 先到先得:star 里的图标已经在包里了,别被分类包顶掉
+      // (顶掉的话符号会指向还没加载的那张 sprite)
+      if (!ICONS.has(m.id)) ICONS.set(m.id, m);
+    }
+    DATA.icons = [...ICONS.values()];
+    for (const m of DATA.icons) byId.set(m.id, m);
+  } catch (err) {
+    LOADED.delete(name);
+  } finally {
+    PENDING--;
+  }
+  render();
+}
+
+// 后台把其余分类一个一个拉下来 —— 到了就合并进列表
+let loading = false;
+async function loadRest(includeBulk) {
+  if (loading) return;
+  loading = true;
+  try {
+    for (const name of Object.keys(BUNDLES)) {
+      if (name === 'star' || LOADED.has(name)) continue;
+      if (!includeBulk && (name === 'bootstrap' || name === 'iconpark')) continue;
+      await loadBundle(name);
+    }
+  } finally {
+    loading = false;
+  }
 }
 
 function setCat(value) {
   cat = value;
   limit = 240;
   pushUrl();
+  // 整库搬进来的两个大包,点进去才拉
+  if (value === 'bootstrap' || value === 'iconpark') loadBundle(value);
   render();
 }
 
@@ -270,6 +326,8 @@ function setQuery(v) {
   $('#clear2').hidden = !q;
   limit = 240;
   pushUrl();
+  // 搜索要跨全库 —— 大包也得拉上
+  if (q) loadRest(true);
   render();
 }
 
@@ -535,19 +593,25 @@ $('#p-id').addEventListener('click', async (e) => {
 
 (async () => {
   try {
-    const res = await fetch(`${BASE}manifest.json`);
-    DATA = await res.json();
-    V = DATA.build ? `?v=${DATA.build}` : '';
-    for (const m of DATA.icons) byId.set(m.id, m);
     try {
       lang = localStorage.getItem('icon-lang') || lang;
     } catch {}
+    // 索引最小:分类清单 + 每包多大。拿到就知道该去拉哪些包。
+    const idx = await (await fetch(`${BASE}index.json`)).json();
+    V = idx.build ? `?v=${idx.build}` : '';
+    BUNDLES = idx.bundles || {};
+    DATA.cats = idx.cats || [];
     applyI18n();
+    renderFilters();
+    // 先把精选那一小包画出来 —— 首页马上有东西看
+    await loadBundle('star');
     syncFromUrl();
     // 深链带 #<id> 的,直接开面板
     const id = decodeURIComponent(location.hash.slice(1));
     const m = id && byId.get(id);
     if (m) openPanel(m);
+    // 其余分类在后台慢慢拉,来了就合并
+    loadRest(false);
   } catch (err) {
     document.querySelector('main').innerHTML = `<p class="empty">${t('empty')}</p>`;
   }

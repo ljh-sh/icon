@@ -530,7 +530,6 @@ export const BUILD = '${BUILD}';
 `;
 writeFileSync(OUT, body);
 console.log(`src/gen.ts: ${metas.length} icons, ${cats.length} categories`);
-
 // ---- public/icon/ 静态资源:图标文件 + manifest(边缘直接发) ----
 rmSync(PUBLIC, { recursive: true, force: true });
 mkdirSync(PUBLIC, { recursive: true });
@@ -539,49 +538,130 @@ for (const m of metas) {
   mkdirSync(join(dest, '..'), { recursive: true });
   copyFileSync(join(ROOT, m.file), dest);
 }
-writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
 
-// ---- sprite:所有矢量图标合成一张,页面用 <use> 引用 ----
+// ---- sprite:矢量图标合成一张,页面用 <use> 引用 ----
 // 一个分类页要显示两千多个图标,逐个请求太碎;合成一张,一次拿完。
 // PNG(云厂商那批)进不了 sprite,还是单独文件。
-const symbols = new Map(); // spriteId → { viewBox, body, ns }
-for (const m of metas) {
-  if (!m.spriteId || symbols.has(m.spriteId)) continue;
-  const raw = readFileSync(join(ROOT, m.file), 'utf8');
-  const open = raw.match(/<svg[^>]*>/)?.[0] || '<svg>';
-  const inner = raw.match(/<svg[^>]*>([\s\S]*)<\/svg>/)?.[1]?.trim();
-  if (!inner) continue;
-  // 根元素上的命名空间声明要搬到 symbol 上 —— 少了 xmlns:xlink 之类的前缀没人声明,
-  // 整个 sprite 的 XML 会在这里断掉,后面的图标全都不渲染。
-  const ns = [...open.matchAll(/xmlns(?::[\w-]+)?="[^"]*"/g)].map((x) => x[0]).join(' ');
-  symbols.set(m.spriteId, { viewBox: m.viewBox, body: inner, ns });
-}
-const sprite = ['<svg xmlns="http://www.w3.org/2000/svg" style="display:none">'];
-for (const [id, s] of symbols) {
-  sprite.push(`<symbol id="${id}" viewBox="${s.viewBox}" ${s.ns}>${s.body}</symbol>`);
-}
-sprite.push('</svg>');
-const spriteText = sprite.join('\n');
+function spriteOf(list) {
+  const symbols = new Map(); // spriteId → { viewBox, body, ns }
+  for (const m of list) {
+    if (!m.spriteId || symbols.has(m.spriteId)) continue;
+    const raw = readFileSync(join(ROOT, m.file), 'utf8');
+    const open = raw.match(/<svg[^>]*>/)?.[0] || '<svg>';
+    const inner = raw.match(/<svg[^>]*>([\s\S]*)<\/svg>/)?.[1]?.trim();
+    if (!inner) continue;
+    // 根元素上的命名空间声明要搬到 symbol 上 —— 少了 xmlns:xlink 之类的前缀没人声明,
+    // 整个 sprite 的 XML 会在这里断掉,后面的图标全都不渲染。
+    const ns = [...open.matchAll(/xmlns(?::[\w-]+)?="[^"]*"/g)].map((x) => x[0]).join(' ');
+    symbols.set(m.spriteId, { viewBox: m.viewBox, body: inner, ns });
+  }
+  const sprite = ['<svg xmlns="http://www.w3.org/2000/svg" style="display:none">'];
+  for (const [id, s] of symbols) {
+    sprite.push(`<symbol id="${id}" viewBox="${s.viewBox}" ${s.ns}>${s.body}</symbol>`);
+  }
+  sprite.push('</svg>');
+  const text = sprite.join('\n');
 
-// 守门:XML 一旦在中间断了,浏览器会从断点往后全不渲染 —— 构建时就得发现
-for (const [id, s] of symbols) {
-  const used = new Set([...s.body.matchAll(/<([a-zA-Z][\w-]*):/g)].map((x) => x[1]));
-  const declared = new Set([...s.ns.matchAll(/xmlns:([\w-]+)=/g)].map((x) => x[1]));
-  for (const u of used) {
-    if (!declared.has(u)) {
-      console.error(`sprite: ${id} 用了没声明的命名空间前缀 ${u}: —— 补上它的 xmlns 声明`);
-      process.exit(1);
+  // 守门:XML 一旦在中间断了,浏览器会从断点往后全不渲染 —— 构建时就得发现
+  for (const [id, s] of symbols) {
+    const used = new Set([...s.body.matchAll(/<([a-zA-Z][\w-]*):/g)].map((x) => x[1]));
+    const declared = new Set([...s.ns.matchAll(/xmlns:([\w-]+)=/g)].map((x) => x[1]));
+    for (const u of used) {
+      if (!declared.has(u)) {
+        console.error(`sprite: ${id} 用了没声明的命名空间前缀 ${u}: —— 补上它的 xmlns 声明`);
+        process.exit(1);
+      }
     }
   }
+  return { text, count: symbols.size };
 }
-writeFileSync(join(PUBLIC, 'sprite.svg'), spriteText);
-console.log(`public/icon/sprite.svg: ${symbols.size} 个符号`);
+
+// ---- 分包:star(精选)+ 每个分类一包 ----
+// 一整张 sprite 是 5 MB 多,页面为显示几十个图标要把它整个拉下来。
+// 拆开:star 是首页先要的那一小撮(star.tsv 里挑的),其余按分类各打包,
+// 客户端按需拉 —— bootstrap / iconpark 这种整库搬进来的大包也各是各的。
+const STAR_FILE = join(ROOT, 'star.tsv');
+const starIds = new Set(); // 别名形式的 id:<cat>:<concept>
+if (existsSync(STAR_FILE)) {
+  for (const line of readFileSync(STAR_FILE, 'utf8').split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const [cat, list] = t.split('\t');
+    if (!cat || !list) continue;
+    if (BULK.has(cat)) {
+      console.error(`star.tsv: ${cat} 是整库搬进来的分类 —— 不进 star`);
+      process.exit(1);
+    }
+    for (const c of list.split(',').map((x) => x.trim()).filter(Boolean)) starIds.add(`${cat}:${c}`);
+  }
+}
+// 别名 → 具体版本;找不到就是没这个概念
+const starMetas = [];
+for (const id of starIds) {
+  // 平铺分类(brand 那些)没有别名条目,id 本身就是键
+  const concrete = alias.get(id) || (metaById.has(id) ? id : null);
+  if (!concrete || !metaById.has(concrete)) {
+    console.error(`star.tsv: ${id} 没有对应的图标`);
+    process.exit(1);
+  }
+  starMetas.push(metaById.get(concrete));
+}
+// star 里的图标,别名那份也带上(页面上别名才是推荐入口)
+const starAll = new Set(starMetas.map((m) => m.id));
+for (const m of metas) {
+  if (m.alias && starAll.has(m.aliasOf)) starAll.add(m.id);
+}
+const starList = metas.filter((m) => starAll.has(m.id));
+for (const m of starList) m.bundle = 'star';
+
+const catMetas = new Map(); // cat → metas
+for (const m of metas) {
+  if (m.bundle) continue; // star 里的图标归 star 包
+  if (!catMetas.has(m.cat)) catMetas.set(m.cat, []);
+  catMetas.get(m.cat).push(m);
+}
+for (const [cat, list] of catMetas) for (const m of list) m.bundle = cat;
+
+// 全量 manifest 也要带上 bundle(客户端才知道符号在哪张 sprite 里)
+writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
+
+const bundles = {
+  star: { icons: starList.length, sprite: 'sprite.star.svg', manifest: 'manifest.star.json' },
+};
+const starSprite = spriteOf(starList);
+writeFileSync(join(PUBLIC, 'sprite.star.svg'), starSprite.text);
+writeFileSync(
+  join(PUBLIC, 'manifest.star.json'),
+  JSON.stringify({ build: BUILD, cats, icons: starList }),
+);
+console.log(`public/icon/sprite.star.svg: ${starSprite.count} 个符号(star)`);
+
+for (const [cat, list] of catMetas) {
+  const s = spriteOf(list);
+  writeFileSync(join(PUBLIC, `sprite.${cat}.svg`), s.text);
+  writeFileSync(
+    join(PUBLIC, `manifest.${cat}.json`),
+    JSON.stringify({ build: BUILD, cats: cats.filter((c) => c.cat === cat), icons: list }),
+  );
+  bundles[cat] = { icons: list.length, sprite: `sprite.${cat}.svg`, manifest: `manifest.${cat}.json` };
+}
+
+// 索引:分类清单 + 每包多大 —— 客户端第一个请求就是它
+writeFileSync(
+  join(PUBLIC, 'index.json'),
+  JSON.stringify({ build: BUILD, cats, bundles, total: metas.length }),
+);
+
+// 全量 sprite 也留着(x-cmd/draw 那边要一张就能嵌)
+const full = spriteOf(metas);
+writeFileSync(join(PUBLIC, 'sprite.svg'), full.text);
+console.log(`public/icon/sprite.svg: ${full.count} 个符号(全量)`);
 // 缓存策略:图标文件长缓存(URL 上带构建号,重新部署即失效),清单短缓存
 writeFileSync(
   join(ROOT, 'public/_headers'),
-  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/sprite.svg\n  Cache-Control: public, max-age=3600\n\n/icon/manifest.json\n  Cache-Control: public, max-age=0, must-revalidate\n`,
+  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/sprite*.svg\n  Cache-Control: public, max-age=3600\n\n/icon/manifest*.json\n  Cache-Control: public, max-age=0, must-revalidate\n\n/icon/index.json\n  Cache-Control: public, max-age=0, must-revalidate\n`,
 );
-console.log(`public/icon/: ${metas.length} 个文件 + manifest.json`);
+console.log(`public/icon/: ${metas.length} 个文件 + ${Object.keys(bundles).length} 个包`);
 
 // ---- dist/:本地预览用的静态站 ----
 const DIST = join(ROOT, 'dist');
@@ -593,11 +673,13 @@ for (const m of metas) {
   mkdirSync(join(dest, '..'), { recursive: true });
   copyFileSync(join(ROOT, m.file), dest);
 }
-copyFileSync(join(PUBLIC, 'sprite.svg'), join(DIST, 'sprite.svg'));
+for (const f of readdirSync(PUBLIC)) {
+  if (f.endsWith('.svg') || f.endsWith('.json')) copyFileSync(join(PUBLIC, f), join(DIST, f));
+}
 for (const f of ['style.css', 'app.js']) copyFileSync(join(ROOT, 'site', f), join(DIST, f));
 writeFileSync(
   join(DIST, 'index.html'),
-  readFileSync(join(ROOT, 'site/index.html'), 'utf8').replace('__ICON_BASE__/', '/'),
+  readFileSync(join(ROOT, 'site', 'index.html'), 'utf8').replace('__ICON_BASE__/', '/'),
 );
 console.log(`dist/: 静态站(本地预览用)`);
 

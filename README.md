@@ -80,6 +80,35 @@
   具体版本的格子带版本角标,面板里标出"别名 → infra/v0:gui"。
 - 空查询时只摆推荐版本(别名条目);打了字才把全库各版本都放出来。
 
+## 分包:star 先行,其余在客户端合并
+
+整库六千多个图标,合成一张 sprite 是 5 MB 多 —— 页面为了显示几十个图标
+得把它整个拉下来,首屏白等几秒。所以**按包发**:
+
+| 包 | 内容 | 什么时候拉 |
+| --- | --- | --- |
+| `star` | 精选 —— 每类挑 2 个(`star.tsv` 里挑) | 首页第一个 |
+| `<cat>` | 一个分类的图标,一个分类一包 | 后台一个一个拉,到了就合并 |
+| `bootstrap` `iconpark` | 整库搬进来的两个大包,各是各的 | 点进那两个分类、或搜索跨全库时 |
+
+发出去的文件:
+
+```
+index.json               索引:分类清单 + 每包多大(客户端第一个请求)
+manifest.star.json       精选那一包的清单
+manifest.<cat>.json      各分类的清单
+sprite.star.svg          精选那一包的符号
+sprite.<cat>.svg         各分类的符号
+manifest.json / sprite.svg   全量(给 draw 那边一次嵌完用的)
+```
+
+页面先拿 `index.json` + `star` 那两包,马上就有东西看;其余分类在后台
+慢慢拉,**到了就合并进列表** —— 客户端融合,不用一次把五 MB 拉下来。
+整库搬进来的两个大包不参与后台合并:它们是素材池,点进去才拉。
+
+想改精选:`star.tsv` 一行一个分类,后面跟概念名(逗号分隔)。
+`bootstrap` / `iconpark` 不许进 star(构建时会拦)。
+
 画一版新的:复制一份到 `icons/<cat>/v1/`,在 `catalog.tsv` 补上 `<cat>/v1:<concept>` 的行,
 再把 `versions.json` 里那个分类改成 `"v1"` —— 别名就跟着走了,`v0` 还在。
 
@@ -92,6 +121,7 @@ symbols/                         基本符号 —— 会意组合的唯一出处
 symbols/recipes.tsv              配方表:哪个概念 = 哪些符号叠起来
 catalog.tsv                      索引:<id>\t<中文>\t<English>,一行一个(只写具体版本)
 versions.json                    每个分类当前推荐哪个版本
+star.tsv                         精选:每类挑 2 个 —— 首页先加载这一小包
 brands/<cat>-<concept>.md        品牌图形的许可记录(brand / bootstrap 必须有)
 scripts/compose.mjs              按配方组装图标
 scripts/build.mjs                校验 + 生成(src/gen.ts、src/page.ts、dist/)

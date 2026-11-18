@@ -5,7 +5,9 @@
 //
 // 路由(去掉挂载前缀之后):
 //   /                → 查询页(深链 /c/<cat> 也走这里,前端路由)
-//   /manifest.json   → 图标清单 —— 静态资源,边缘直接发
+//   /index.json      → 索引:分类清单 + 每包多大 —— 客户端第一个请求
+//   /manifest.*.json → 图标清单(按包:star / 每个分类一包)
+//   /sprite.*.svg    → 图标符号(按包)
 //   /i/<cat>/<file>  → 图标原文件 —— 静态资源,边缘直接发
 //   /api/icons.json?ids=a,b → { id: data URI },给 draw 那侧内嵌用
 import { CATS, ID2FILE, LICENSE, BUILD } from './gen.js';
@@ -64,7 +66,8 @@ export default {
     }
 
     // 清单与 sprite 是静态资源,边缘直接发;这里是 workers.dev 直连时的兜底。
-    if (path === '/manifest.json' || path === '/sprite.svg') {
+    // 图标分了包:index.json / manifest.<包>.json / sprite.<包>.svg
+    if (/^\/(index\.json|manifest[^/]*\.json|sprite[^/]*\.svg)$/.test(path)) {
       const res = await env.ASSETS.fetch(new URL(`${ASSET_ROOT}${path}`, url.origin));
       if (res.status === 200) return res;
       return new Response('not found', { status: 404 });

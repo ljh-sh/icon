@@ -1,0 +1,47 @@
+# 精选(star)—— 首页先加载这一包,其余分类在客户端按需合并。
+#
+# 一行一个分类,后面跟这一类挑出来的概念(逗号分隔)。
+# 每类只挑 2 个 —— 挑的是"画架构图时最常用到的那几个"。
+# bootstrap / iconpark 不在里面:那两个是整库搬进来的大包,当素材池用,
+# 不该占着首页的位置(它们的图标风格也跟本库自绘那批不一样)。
+#
+# 格式:<cat>\t<concept,concept,...>
+
+infra	server,cloud
+org	openai,anthropic
+db	pg,redis
+ai	llm,agent
+k8s	pod,deployment
+sec	encryption,key
+obs	metrics,logs
+common	lock,check
+frame	browser,laptop
+base	map,lake
+network	switch,router
+phy	atom,molecule
+mech	gear,valve
+chem	flask,test-tube
+circuit	chip,resistor
+music	note,piano
+food	coffee,apple
+dev	code,architecture
+github	commit,pr
+travel	luggage,passport
+nutrition	calories,protein
+transport	car,airplane
+weather	sunny,rain
+education	school,university
+military	tank,fighter
+animal	elephant,bird
+cat	cat,paw
+dog	dog,bone
+brand	kubernetes,openai
+digitalocean	digitalocean,droplet
+firebase	firebase,auth
+elastic	elasticsearch,kibana
+programming	python,react
+aws	ec2,s3
+azure	vm,app
+gcp	gce,gcs
+aliyun	ecs,oss
+ibm	vpc,cloud
