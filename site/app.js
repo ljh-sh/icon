@@ -163,6 +163,23 @@ async function cache() {
   return assetCache;
 }
 
+// Cache API **不压缩** —— 存的是你给它的正文。
+// 我们给的是解码后的文本(全部片加起来 50 MB),自己压一遍只占 6.5 MB。
+const GZ = 'X-Icon-Encoding';
+async function gz(text) {
+  try {
+    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+    return await new Response(stream).arrayBuffer();
+  } catch {
+    return null; // 压不了就存原文
+  }
+}
+async function ungz(res) {
+  if (res.headers.get(GZ) !== 'gzip') return await res.text();
+  const stream = res.body.pipeThrough(new DecompressionStream('gzip'));
+  return await new Response(stream).text();
+}
+
 // 取一个资产:本地有就用(一个网络请求都不发),没有就下并存下来
 async function asset(file) {
   const url = `${BASE}${file}${V}`;
@@ -170,17 +187,22 @@ async function asset(file) {
   if (c) {
     try {
       const hit = await c.match(url);
-      if (hit) return await hit.text();
+      if (hit) return await ungz(hit);
     } catch {}
   }
   const res = await fetch(url);
   if (!res.ok) return null;
   const text = await res.text();
   if (c) {
-    try {
-      // 存解码后的正文 —— 别把 Content-Encoding 一起存进去(会双解压)
-      await c.put(url, new Response(text, { headers: { 'Content-Type': 'text/plain' } }));
-    } catch {}
+    // 存的时候压一遍,后台慢慢压,不挡着渲染
+    gz(text).then(async (buf) => {
+      try {
+        await c.put(
+          url,
+          new Response(buf || text, { headers: { 'Content-Type': 'text/plain', [GZ]: buf ? 'gzip' : '' } }),
+        );
+      } catch {}
+    });
   }
   return text;
 }
