@@ -179,6 +179,19 @@ function cachePut(file, text) {
     // 配额满了就算了 —— 只是缓存,没有它照样能用
   }
 }
+// 片取回来之后,把里面的 <symbol> 注入页面上的一个隐藏 svg ——
+// 图标用 <use href="#符号id"> 引用本地符号:
+// 不再每个图标都去解析一次 blob(那会在网络面板里刷出几十条记录),也只解析一次。
+let spriteHost = null;
+function host() {
+  if (!spriteHost) {
+    spriteHost = document.createElementNS(SVGNS, 'svg');
+    spriteHost.setAttribute('style', 'display:none');
+    spriteHost.setAttribute('aria-hidden', 'true');
+    document.body.append(spriteHost);
+  }
+  return spriteHost;
+}
 async function shardURL(file) {
   if (shardURLs.has(file)) return shardURLs.get(file);
   let text = cacheGet(file);
@@ -188,9 +201,14 @@ async function shardURL(file) {
     text = await res.text();
     cachePut(file, text);
   }
-  const url = URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
-  shardURLs.set(file, url);
-  return url;
+  try {
+    const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+    const symbols = doc.documentElement.querySelectorAll('symbol');
+    const h = host();
+    for (const sym of symbols) h.append(document.importNode(sym, true));
+  } catch {}
+  shardURLs.set(file, true);
+  return true;
 }
 // 清单也缓存一份(小的那些)
 async function loadManifest(name) {
@@ -226,8 +244,7 @@ function iconEl(m) {
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', m.id);
     const use = document.createElementNS(SVGNS, 'use');
-    const u = m.shard ? shardURLs.get(m.shard) : null;
-    use.setAttribute('href', `${u || `${BASE}${m.shard || 'sprite.star.svg'}${V}`}#${sid}`);
+    use.setAttribute('href', `#${sid}`);
     svg.append(use);
     return svg;
   }
