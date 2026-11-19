@@ -119,6 +119,70 @@ let ALL = 0; // 全库条目数(含各版本的旧版)
 const byId = new Map();
 const t = (key) => (LANGS[lang] && LANGS[lang][key]) || key;
 
+// ---------- 片:一页的图形按片下,片的本体缓存在本地 ----------
+// 一片 = 一个 sprite 文件(≤300 个符号)。页面只下看得见的那几片,
+// 下过的片存在 localStorage 里,下次直接用 —— 十万个图标也是同一套。
+const SHARD_MAX = 4 * 1024 * 1024; // 本地缓存上限(localStorage 大约 5 MB)
+const shardURLs = new Map(); // 片 → blob URL
+let shardIndex = {}; // 片 → { t: 时间, s: 字节 }
+
+function cacheLoad() {
+  try {
+    shardIndex = JSON.parse(localStorage.getItem('icon-shards') || '{}');
+  } catch {
+    shardIndex = {};
+  }
+}
+function cacheGet(file) {
+  try {
+    return localStorage.getItem('icon-shard:' + file);
+  } catch {
+    return null;
+  }
+}
+function cachePut(file, text) {
+  try {
+    localStorage.setItem('icon-shard:' + file, text);
+    shardIndex[file] = { t: Date.now(), s: text.length };
+    let total = Object.values(shardIndex).reduce((a, b) => a + b.s, 0);
+    if (total > SHARD_MAX) {
+      // 淘汰最老的片
+      for (const k of Object.keys(shardIndex).sort((a, b) => shardIndex[a].t - shardIndex[b].t)) {
+        if (total <= SHARD_MAX) break;
+        localStorage.removeItem('icon-shard:' + k);
+        total -= shardIndex[k].s;
+        delete shardIndex[k];
+      }
+    }
+    localStorage.setItem('icon-shards', JSON.stringify(shardIndex));
+  } catch {
+    // 配额满了就算了 —— 只是缓存,没有它照样能用
+  }
+}
+async function shardURL(file) {
+  if (shardURLs.has(file)) return shardURLs.get(file);
+  let text = cacheGet(file);
+  if (!text) {
+    const res = await fetch(`${BASE}${file}${V}`);
+    if (!res.ok) return null;
+    text = await res.text();
+    cachePut(file, text);
+  }
+  const url = URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
+  shardURLs.set(file, url);
+  return url;
+}
+// 清单也缓存一份(小的那些)
+async function loadManifest(name) {
+  const res = await fetch(`${BASE}${name}${V}`);
+  if (!res.ok) return;
+  const j = await res.json();
+  for (const m of j.icons) {
+    if (!ICONS.has(m.id)) ICONS.set(m.id, m);
+  }
+  DATA.icons = [...ICONS.values()];
+}
+
 function applyI18n() {
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   for (const n of document.querySelectorAll('[data-i18n]')) n.textContent = t(n.dataset.i18n);
@@ -141,7 +205,8 @@ function iconEl(m) {
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', m.id);
     const use = document.createElementNS(SVGNS, 'use');
-    use.setAttribute('href', `${BASE}sprite.${m.bundle || 'star'}.svg${V}#${m.spriteId}`);
+    const u = m.shard ? shardURLs.get(m.shard) : null;
+    use.setAttribute('href', `${u || `${BASE}${m.shard || 'sprite.star.svg'}${V}`}#${m.spriteId}`);
     svg.append(use);
     return svg;
   }
@@ -210,8 +275,8 @@ const catNote = (c) => (c ? (lang === 'en' ? c.noteEn || c.note : c.note) : '');
 function match(m) {
   if (cat && m.cat !== cat) return false;
   // 空查询:只显示推荐版本(别名),别把每一版都摆出来;打了字才把各版本都放出来
-  if (!q) return !m.version || m.alias;
-  const hay = `${m.id} ${m.desc} ${m.descEn} ${m.cat} ${m.concept}`.toLowerCase();
+  if (!q) return !m.version || m.recommended;
+  const hay = `${m.id} ${m.aliasFor || ''} ${m.desc} ${m.descEn} ${m.cat} ${m.concept}`.toLowerCase();
   return hay.includes(q);
 }
 
@@ -219,8 +284,8 @@ function cell(m) {
   const c = el('div', 'cell');
   c.dataset.id = m.id;
   c.title = descOf(m);
-  c.append(iconEl(m), el('div', 'id', m.id));
-  if (m.version && !m.alias) c.append(el('span', 'vbadge', m.version));
+  c.append(iconEl(m), el('div', 'id', m.aliasFor || m.id));
+  if (m.version && !m.recommended) c.append(el('span', 'vbadge', m.version));
   if (m.verdict === 'caution') c.append(el('span', 'vflag caution', t('fCaution')));
   if (m.verdict === 'pending') c.append(el('span', 'vflag pending', t('fPending')));
   c.append(el('div', 'desc', descOf(m)));
@@ -262,9 +327,13 @@ function renderFilters() {
   for (const c of DATA.cats) mk(catTitle(c), c.cat);
 }
 
-function render() {
+async function render() {
   renderFilters();
   const list = DATA.icons.filter(match);
+  // 先把要用的片取回来(本地有就直接用,没有就下)—— 十万个图标也只下看得见的几片
+  const need = new Set();
+  for (const m of list.slice(0, limit)) if (m.shard) need.add(m.shard);
+  await Promise.all([...need].map(shardURL));
   const shown = grid($('#all'), list);
   // 没打搜索词就报总数 —— 搜索框里那个数字是"库里有多少",不是"眼下摆了多少"
   const n = q ? list.length : TOTAL;
@@ -279,25 +348,31 @@ function render() {
 // 一个包 = 一份清单 + 一张 sprite。清单和 sprite 都要到齐,图标才画得出来。
 async function loadBundle(name) {
   if (LOADED.has(name)) return;
-  // star 的文件名是固定的 —— 索引还没回来也能先拉
-  const b = BUNDLES[name] || { manifest: `manifest.${name}.json`, sprite: `sprite.${name}.svg` };
+  const b = BUNDLES[name];
+  if (!b) return;
   LOADED.add(name);
   PENDING++;
   try {
-    // 没有 sprite 的包(emoji 太大)直接引文件,不拉 sprite
-    const [mj, sp] = await Promise.all([
-      fetch(`${BASE}${b.manifest}${V}`).then((r) => r.json()),
-      b.sprite ? fetch(`${BASE}${b.sprite}${V}`) : Promise.resolve(null),
-    ]);
-    for (const m of mj.icons) {
-      // 先到先得:star 里的图标已经在包里了,别被分类包顶掉
-      // (顶掉的话符号会指向还没加载的那张 sprite)
-      if (!ICONS.has(m.id)) ICONS.set(m.id, m);
-    }
-    DATA.icons = [...ICONS.values()];
+    await loadManifest(b.manifest);
     for (const m of DATA.icons) byId.set(m.id, m);
   } catch (err) {
     LOADED.delete(name);
+  } finally {
+    PENDING--;
+  }
+  render();
+}
+
+// 搜索要跨全库 —— 一次把全名单下下来过滤
+async function loadAll() {
+  if (LOADED.has('*')) return;
+  LOADED.add('*');
+  PENDING++;
+  try {
+    await loadManifest('manifest.json');
+    for (const m of DATA.icons) byId.set(m.id, m);
+  } catch (err) {
+    LOADED.delete('*');
   } finally {
     PENDING--;
   }
@@ -335,8 +410,8 @@ function setQuery(v) {
   $('#clear2').hidden = !q;
   limit = LIMIT0;
   pushUrl();
-  // 搜索要跨全库 —— 大包也得拉上
-  if (q) loadRest(true);
+  // 搜索要跨全库 —— 全名单下下来过滤
+  if (q) loadAll();
   render();
 }
 
@@ -370,15 +445,18 @@ function row(sel, value) {
 
 async function openPanel(m) {
   current = m;
-  $('#p-id').textContent = m.id;
+  $('#p-id').textContent = m.aliasFor || m.id;
   $('#p-desc').textContent = descOf(m);
   $('#p-preview').replaceChildren(iconEl(m));
   $('#p-cat').textContent = catTitle(DATA.cats.find((c) => c.cat === m.cat)) || m.cat;
   $('#p-source').textContent = m.source;
   // 版本:别名条目指向推荐版本的具体键,具体版本标出指向它的别名
-  if (m.alias) row('#p-version', t('alias') + m.aliasOf);
-  else if (m.version) row('#p-version', m.aliasFor ? `${m.version} — ${t('aliasOf').replace('{id}', m.aliasFor)}` : m.version);
-  else row('#p-version', '');
+  if (m.version) {
+    // 推荐版:概念键就是它;别的版本:说明概念键指向哪一版
+    row('#p-version', m.recommended
+      ? `${m.version}(推荐)`
+      : `${m.version} — ${t('aliasOf').replace('{id}', m.aliasFor || m.id)}`);
+  } else row('#p-version', '');
   row('#p-license', m.license);
   row('#p-trademark', m.trademark);
   row('#p-restrictions', (m.restrictions || '').replace(/;/g, '; '));
@@ -485,7 +563,7 @@ function related(m, n = 12) {
   const mine = tokens(m);
   const out = [];
   for (const o of DATA.icons) {
-    if (o.id === m.id || o.alias) continue;
+    if (o.id === m.id) continue;
     let s = 0;
     // 同一个概念的另一个版本(emoji 的 Twemoji / Fluent 两版)—— 排在最前
     if (o.concept === m.concept) s += 5;
@@ -582,8 +660,9 @@ function syncFromUrl() {
   for (const e of qEls) e.value = p.get('q') || '';
   $('#clear2').hidden = !q;
   limit = LIMIT0;
-  // 深链直接带着分类来的 —— 那个分类的包得下
+  // 深链直接带着分类/搜索词来的 —— 对应的包得下
   if (cat) loadBundle(cat);
+  if (q) loadAll(); // 搜索要跨全库
   render();
 }
 window.addEventListener('popstate', syncFromUrl);
@@ -610,16 +689,19 @@ $('#p-id').addEventListener('click', async (e) => {
     // 构建号是 Worker 注入的 —— 不用等索引回来就能带上版本号
     V = window.__ICON_BUILD__ ? `?v=${window.__ICON_BUILD__}` : '';
     applyI18n();
+    cacheLoad();
     // 索引和精选那一小包并行拉 —— 首页马上有东西看
     const idxP = fetch(`${BASE}index.json${V}`).then((r) => r.json());
-    const starP = loadBundle('star');
+    const starP = Promise.all([shardURL('sprite.star.svg'), loadManifest('manifest.star.json')]);
     const idx = await idxP;
     BUNDLES = idx.bundles || {};
     TOTAL = idx.browsable || idx.total || 0;
     ALL = idx.total || 0;
     DATA.cats = idx.cats || [];
     renderFilters();
+    for (const m of DATA.icons) byId.set(m.id, m);
     await starP;
+    render();
     syncFromUrl();
     // 深链带 #<id> 的,直接开面板
     const id = decodeURIComponent(location.hash.slice(1));

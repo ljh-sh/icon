@@ -46,5 +46,6 @@ gcp	gce,gcs
 aliyun	ecs,oss
 ibm	vpc,cloud
 people	doctor,team
+aviation	drone,satellite
 region	country,globe
 filetype	pdf,json

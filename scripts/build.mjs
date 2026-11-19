@@ -60,7 +60,8 @@ const CATS = {
   people: { title: '人与职业', titleEn: 'People', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '工作类型与人群 —— 只取中性、正面的表达', noteEn: 'Work types and groups of people — neutral, positive depictions only' },
   region: { title: '地区', titleEn: 'Regions', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '地理与行政层级 —— 国家 / 省 / 市 / 区县 / 可用区 / 机房', noteEn: 'Geography and administrative levels — country, province, city, district, availability zone, data centre' },
   filetype: { title: '文件类型', titleEn: 'File Types', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '常见的文件类型 —— 文档 / 表格 / 代码 / 图片 / 音视频 / 压缩包', noteEn: 'Common file types — documents, sheets, code, images, media, archives' },
-  emoji: { title: 'Emoji', titleEn: 'Emoji', source: 'Twemoji(v0) / Microsoft Fluent Emoji(v1)', license: 'MIT(两个集都是)', note: 'emoji —— v0 是 Twemoji 画的(推荐版),v1 是微软 Fluent 的同一批概念画的;整库搬入,不进 sprite,按文件引', noteEn: 'Emoji — v0 drawn by Twemoji (the recommended version), v1 the same concepts drawn by Microsoft Fluent; imported whole, served as files, not a sprite', noSprite: true },
+  emoji: { title: 'Emoji', titleEn: 'Emoji', source: 'Twemoji(v0) / Microsoft Fluent Emoji(v1)', license: 'MIT(两个集都是)', note: 'emoji —— v0 是 Twemoji 画的(推荐版),v1 是微软 Fluent 的同一批概念画的;整库搬入,不进 sprite,按文件引', noteEn: 'Emoji — v0 drawn by Twemoji (the recommended version), v1 the same concepts drawn by Microsoft Fluent; imported whole, served as files, not a sprite' },
+  aviation: { title: '航空', titleEn: 'Aviation', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '航空与航天 —— 客机 / 无人机 / 卫星 / 地面站 / 塔台 / 空域', noteEn: 'Aviation and spaceflight — airliners, drones, satellites, ground stations, towers, airspace' },
   education: { title: '教育', titleEn: 'Education', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '教育场景 —— 小学 / 初中 / 高中 / 大学 等学段,以及校园里的通用概念', noteEn: 'Education — school stages from primary to university, plus everyday campus concepts' },
   weather: { title: '天气', titleEn: 'Weather', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '天气现象与观测要素 —— 晴雨雪雾 / 温度 / 湿度 / 气压', noteEn: 'Weather phenomena and observations — sun, rain, snow, fog, temperature, humidity, pressure' },
 };
@@ -386,8 +387,7 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     mime: MIME[ext],
     bytes: raw.length,
     // sprite 用的 id 与 viewBox(PNG 进不了 sprite,还是单独文件)
-    // noSprite 的分类太大(emoji 一家就 40 MB),不进 sprite —— 页面按文件引
-    spriteId: ext === 'svg' && !CATS[info.cat].noSprite ? spriteId(id) : undefined,
+    spriteId: ext === 'svg' ? spriteId(id) : undefined,
     viewBox: ext === 'svg' ? viewBoxOf(raw) : undefined,
     source: rec?.meta.source || CATS[info.cat].source,
     license: rec?.meta.license || CATS[info.cat].license,
@@ -413,11 +413,12 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
   metaById.set(id, m);
 }
 
-// 别名条目:概念键指向推荐版本的具体键
+// 别名:概念键指向推荐版本 —— **不单开一条清单项**
+// (同一个图标两个键而已;单开一条的话,搜索结果里同一个图会出现两次)
 for (const [aid, cid] of [...alias].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
   const c = metaById.get(cid);
-  metas.push({ ...c, id: aid, alias: true, aliasOf: cid });
-  c.aliasFor = aid;
+  c.aliasFor = aid; // 用户平时写的那个键
+  c.recommended = true; // 这是该概念推荐的那一版
 }
 
 const cats = Object.entries(CATS).map(([cat, meta]) => ({
@@ -443,7 +444,10 @@ const manifest = { build: BUILD, cats, icons: metas };
 
 // ---- src/gen.ts:Worker 用的精简数据(不嵌字节,图标走静态资源) ----
 const id2file = {};
-for (const m of metas) id2file[m.id] = m.path;
+for (const m of metas) {
+  id2file[m.id] = m.path;
+  if (m.aliasFor) id2file[m.aliasFor] = m.path; // 别名键也是这个图标
+}
 const licMeta = {};
 for (const m of metas) {
   if (!m.verdict) continue;
@@ -465,7 +469,7 @@ export interface IconMeta {
   /** 具体版本(v0 / v1)—— 版本化分类才有 */
   version?: string;
   /** 别名条目:概念键指向推荐版本 */
-  alias?: boolean;
+  recommended?: boolean;
   /** 别名指向的具体键 */
   aliasOf?: string;
   /** 指向本条的具体键的别名(只有推荐版本有) */
@@ -611,13 +615,12 @@ for (const id of starIds) {
   }
   starMetas.push(metaById.get(concrete));
 }
-// star 里的图标,别名那份也带上(页面上别名才是推荐入口)
 const starAll = new Set(starMetas.map((m) => m.id));
-for (const m of metas) {
-  if (m.alias && starAll.has(m.aliasOf)) starAll.add(m.id);
-}
 const starList = metas.filter((m) => starAll.has(m.id));
-for (const m of starList) m.bundle = 'star';
+for (const m of starList) {
+  m.bundle = 'star';
+  m.shard = 'sprite.star.svg'; // star 自己一片
+}
 
 const catMetas = new Map(); // cat → metas
 for (const m of metas) {
@@ -627,8 +630,6 @@ for (const m of metas) {
 }
 for (const [cat, list] of catMetas) for (const m of list) m.bundle = cat;
 
-// 全量 manifest 也要带上 bundle(客户端才知道符号在哪张 sprite 里)
-writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
 
 const bundles = {
   star: { icons: starList.length, sprite: 'sprite.star.svg', manifest: 'manifest.star.json' },
@@ -641,10 +642,18 @@ writeFileSync(
 );
 console.log(`public/icon/sprite.star.svg: ${starSprite.count} 个符号(star)`);
 
+// 分片:一片一个 sprite 文件,页面按需取片 ——
+// 十万个图标也只下看得见的那几片,不用整包拉
+const SHARD_MAX = 300; // 一片最多多少个符号
 for (const [cat, list] of catMetas) {
-  const s = spriteOf(list);
-  const noSprite = CATS[cat].noSprite;
-  if (!noSprite) writeFileSync(join(PUBLIC, `sprite.${cat}.svg`), s.text);
+  const shards = [];
+  for (let i = 0; i < list.length; i += SHARD_MAX) {
+    const chunk = list.slice(i, i + SHARD_MAX);
+    const file = `sprite.${cat}.${shards.length}.svg`;
+    writeFileSync(join(PUBLIC, file), spriteOf(chunk).text);
+    for (const m of chunk) m.shard = file;
+    shards.push({ file, icons: chunk.length });
+  }
   writeFileSync(
     join(PUBLIC, `manifest.${cat}.json`),
     JSON.stringify({ build: BUILD, cats: cats.filter((c) => c.cat === cat), icons: list }),
@@ -652,24 +661,25 @@ for (const [cat, list] of catMetas) {
   bundles[cat] = {
     icons: list.length,
     manifest: `manifest.${cat}.json`,
-    // noSprite 的包没有 sprite —— 页面直接引文件
-    ...(noSprite ? {} : { sprite: `sprite.${cat}.svg` }),
+    shards: shards.map((x) => x.file),
   };
 }
+
+// 全量 manifest(客户端搜索时下的那份"全名单")—— 要在分片之后写:
+// 分片会给每个图标标上它住在哪一片
+writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
 
 // 索引:分类清单 + 每包多大 —— 客户端第一个请求就是它
 // total   —— 全部条目(含各版本的旧版)
 // browsable —— 首页默认能看到的那批(只摆推荐版本)
-const browsable = metas.filter((m) => !m.version || m.alias).length;
+const browsable = metas.filter((m) => !m.version || m.recommended).length;
 writeFileSync(
   join(PUBLIC, 'index.json'),
   JSON.stringify({ build: BUILD, cats, bundles, total: metas.length, browsable }),
 );
 
-// 全量 sprite 也留着(x-cmd/draw 那边要一张就能嵌)
-const full = spriteOf(metas);
-writeFileSync(join(PUBLIC, 'sprite.svg'), full.text);
-console.log(`public/icon/sprite.svg: ${full.count} 个符号(全量)`);
+// 不再生成整张 sprite —— 片就是它的替代品:
+// 十万个图标合成一张是几十 MB,没人下得起;片按需取,每片 ≤300 个。
 // 缓存策略:图标文件长缓存(URL 上带构建号,重新部署即失效),清单短缓存
 writeFileSync(
   join(ROOT, 'public/_headers'),
