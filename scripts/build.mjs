@@ -721,7 +721,7 @@ writeFileSync(
   join(ROOT, 'public/_headers'),
   // 静态资源:浏览器 HTTP 缓存留一天(URL 上带 ?v=构建号,内容变了 URL 就变)。
   // 长期的那份在 Cache API 里(不受"清除缓存的图片和文件"影响)。
-  `/icon/i/*\n  Cache-Control: public, max-age=86400\n\n/icon/sprite*.svg\n  Cache-Control: public, max-age=86400\n\n/icon/manifest*.json\n  Cache-Control: public, max-age=86400\n\n/icon/index.json\n  Cache-Control: public, max-age=86400\n`,
+  `/icon/i/*\n  Cache-Control: public, max-age=86400\n\n/icon/sprite*.svg\n  Cache-Control: public, max-age=31536000, immutable\n\n/icon/manifest*.json\n  Cache-Control: public, max-age=31536000, immutable\n\n/icon/index.json\n  Cache-Control: public, max-age=31536000, immutable\n`,
 );
 console.log(`public/icon/: ${metas.length} 个文件 + ${Object.keys(bundles).length} 个包`);
 

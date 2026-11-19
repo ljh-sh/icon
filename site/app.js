@@ -150,7 +150,6 @@ const catOf = (cat) => DATA.cats.find((c) => c.cat === cat) || {};
 const cacheName = () => 'icon-assets-' + BUILD; // BUILD 要等页面注入,所以不能是常量
 let assetCache = null;
 let noCache = false; // 这个浏览器没有 Cache API(老 Safari、非 https 的局域网地址)
-const loadedShards = new Set(); // 已经注进页面的片
 async function cache() {
   if (noCache) return null;
   if (!assetCache) {
@@ -228,29 +227,14 @@ async function dropOldCaches() {
   } catch {}
 }
 
-let spriteHost = null;
-function host() {
-  if (!spriteHost) {
-    spriteHost = document.createElementNS(SVGNS, 'svg');
-    spriteHost.setAttribute('style', 'display:none');
-    spriteHost.setAttribute('aria-hidden', 'true');
-    document.body.append(spriteHost);
-  }
-  return spriteHost;
-}
-async function shardURL(file) {
-  if (loadedShards.has(file)) return true;
-  const text = await asset(file);
-  if (!text) return null;
-  try {
-    const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
-    const symbols = doc.documentElement.querySelectorAll('symbol');
-    const h = host();
-    for (const sym of symbols) h.append(document.importNode(sym, true));
-  } catch {}
-  loadedShards.add(file);
-  return true;
-}
+// 一片 = 一个 sprite 文件,图标用 <use href="sprite.<分类>.<片号>.svg#符号id"> 直接引它。
+//
+// 为什么是"外部引用"而不是把符号注进页面:
+//   注进页面(内联 <symbol>)的话,Chrome 解析 userSpaceOnUse 渐变会用错坐标系 ——
+//   Noto 里 1939 个文件带这种渐变,渐变部分整块消失(键帽那类直接看不见)。
+//   外部引用是另一个文档,渐变解析正确 ✓
+// 片由浏览器自己的 HTTP 缓存存着(URL 带 ?v=构建号,天然按版本分开);
+// 我们自己的 Cache API 存清单(全名单那份 3 MB,搜索时才下)。
 // 清单也缓存一份(小的那些)
 async function loadManifest(name) {
   const text = await asset(name);
@@ -290,7 +274,7 @@ function iconEl(m) {
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', m.id);
     const use = document.createElementNS(SVGNS, 'use');
-    use.setAttribute('href', `#${sid}`);
+    use.setAttribute('href', `${BASE}${m.shard || 'sprite.star.svg'}${V}#${sid}`);
     svg.append(use);
     return svg;
   }
@@ -379,20 +363,22 @@ function cell(m) {
 }
 
 // 渲染前 limit 个,其余给「显示更多」
-// 没下载的那部分也算进"还剩多少" —— 点了「显示更多」才去把剩下的包拉下来
 function grid(host, list) {
   const shown = list.slice(0, limit);
   host.textContent = '';
   for (const m of shown) host.append(cell(m));
   const left = list.length - shown.length;
-  const rest = left + (ALL - ICONS.size);
+  // 选了分类的话,能显示的就是这个分类里的那些 —— 别的分类还没下载也算不进来
+  // (不然一个只有 28 个图标的分类也会冒出「显示更多 (6000)」,点了什么都没有)
+  const rest = cat ? left : left + (ALL - ICONS.size);
   for (const more of document.querySelectorAll('.more')) {
     more.hidden = rest <= 0;
     more.textContent = `${t('more')} (${rest})`;
     more.onclick = () => {
       limit += 240;
       render();
-      loadRest(true); // 边下边显示:包到了就合并,列表跟着长
+      // 全部视图:把没下载的分类拉下来,列表跟着长;选分类时没什么可拉的了
+      if (!cat) loadRest(true);
     };
   }
   return shown.length;
@@ -420,13 +406,8 @@ async function render() {
   // **先画出来**,再去取片 —— 别等片到了才动界面(点分类时片最大 1.5 MB,
   // 等下去界面就是冻着的)。SVG 引用是活的:片到了图标自己会补上。
   const shown = grid($('#all'), list);
-  const need = new Set();
-  for (const m of list.slice(0, limit)) if (m.shard) need.add(m.shard);
-  const want = [...need].filter((f) => !loadedShards.has(f));
-  if (want.length) {
-    await Promise.all(want.map(shardURL));
-    grid($('#all'), list); // 片到了,重画一次 —— 图标出来了
-  }
+  // 片不用等:图标用 <use> 引着,浏览器自己去取,到了图标自己出来
+  // (等的话界面就冻着 —— emoji 的片有几百 KB)
   // 没打搜索词就报总数 —— 搜索框里那个数字是"库里有多少",不是"眼下摆了多少"
   const n = q ? list.length : TOTAL;
   $('#all-count').textContent =
@@ -448,7 +429,7 @@ async function loadBundle(name) {
     // 清单和第一片**并行**拉 —— 首页摆 60 个,第一片(≤80 个符号)正好装得下。
     // 串行的话片要等清单回来才发,白白多一个来回。
     const first = (b.shards || [])[0];
-    const shardP = first ? shardURL(first) : Promise.resolve();
+    const shardP = first ? fetch(`${BASE}${first}${V}`).catch(() => null) : Promise.resolve();
     await loadManifest(b.manifest);
     await shardP;
     for (const m of DATA.icons) byId.set(m.id, m);
@@ -501,7 +482,7 @@ async function prefetch(cat) {
   try {
     // 清单和第一片并行,跟点下去时一样
     const first = (b.shards || [])[0];
-    const shardP = first ? shardURL(first) : Promise.resolve();
+    const shardP = first ? fetch(`${BASE}${first}${V}`).catch(() => null) : Promise.resolve();
     const txt = await asset(b.manifest).catch(() => null);
     if (txt) {
       // asset() 给的是文本,得自己解析
@@ -838,7 +819,10 @@ $('#p-id').addEventListener('click', async (e) => {
     dropOldCaches();
     // 索引和精选那一小包并行拉 —— 首页马上有东西看
     const idxP = asset('index.json').then((t) => JSON.parse(t));
-    const starP = Promise.all([shardURL('sprite.star.svg'), loadManifest('manifest.star.json')]);
+    const starP = Promise.all([
+      fetch(`${BASE}sprite.star.svg${V}`).catch(() => null), // 星片先入浏览器缓存
+      loadManifest('manifest.star.json'),
+    ]);
     const idx = await idxP;
     BUNDLES = idx.bundles || {};
     TOTAL = idx.browsable || idx.total || 0;
