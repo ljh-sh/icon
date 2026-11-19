@@ -125,6 +125,10 @@
 再把 `versions.json` 里那个分类改成 `"v1"` —— 别名就跟着走了,`v0` 还在。
 
 
+## 加载与缓存
+
+分片、按需下载、本地缓存的做法与实测 → [`docs/loading-and-cache.md`](docs/loading-and-cache.md)
+
 ## 资产统计
 
 发出去的东西 —— 一共多少文件、多大、什么时候会被下。
@@ -208,6 +212,7 @@ catalog.tsv                      索引:<id>\t<中文>\t<English>,一行一个(�
 versions.json                    每个分类当前推荐哪个版本
 star.tsv                         精选:每类挑 2 个 —— 首页先加载这一小包
 brands/<cat>-<concept>.md        品牌图形的许可记录(brand / bootstrap 必须有)
+docs/                            文档 —— 图标来源、加载与缓存
 scripts/compose.mjs              按配方组装图标
 scripts/build.mjs                校验 + 生成(src/gen.ts、src/page.ts、dist/)
 scripts/serve.mjs                本地静态预览
