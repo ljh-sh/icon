@@ -486,8 +486,8 @@ function related(m, n = 12) {
   const out = [];
   for (const o of DATA.icons) {
     if (o.id === m.id || o.alias) continue;
-    if (o.cat === m.cat && o.concept === m.concept) continue;
     let s = 0;
+    // 同一个概念的另一个版本(emoji 的 Twemoji / Fluent 两版)—— 排在最前
     if (o.concept === m.concept) s += 5;
     if (o.cat === m.cat) s += 3;
     for (const w of tokens(o)) if (mine.has(w)) s += 2;
