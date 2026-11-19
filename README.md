@@ -124,6 +124,65 @@
 画一版新的:复制一份到 `icons/<cat>/v1/`,在 `catalog.tsv` 补上 `<cat>/v1:<concept>` 的行,
 再把 `versions.json` 里那个分类改成 `"v1"` —— 别名就跟着走了,`v0` 还在。
 
+
+## 资产统计
+
+发出去的东西 —— 一共多少文件、多大、什么时候会被下。
+数字是当前这版构建(15,187 个图标 / 48 个分类)实测的,重跑 `node scripts/stats.mjs` 更新。
+
+### 按资产类型
+
+| 资产 | 是什么 | 文件数 | 原始 | 压后(brotli) | 什么时候下 |
+| --- | --- | ---: | ---: | ---: | --- |
+| `index.json` | 索引:分类清单 + 每片多大 | 1 | 19 KB | **4 KB** | 第一个请求 |
+| `manifest.star.json` | 精选那部分的清单 | 1 | 34 KB | **6 KB** | 首页 |
+| `sprite.star.svg` | 精选那一片的符号 | 1 | 82 KB | **17 KB** | 首页 |
+| `manifest.json` | 全名单(英文原版 + 结构信息) | 1 | 3.0 MB | **160 KB** | 用户一搜索 |
+| `manifest.zh.json` | 中文翻译包 | 1 | 766 KB | **86 KB** | 切到中文 |
+| `manifest.<cat>.json` | 各分类的清单 | 47 | 3.0 MB | 183 KB | 点那个分类 |
+| `sprite.<cat>.<k>.svg` | **片** —— ≤300 个符号,压后 ≤1 MB | 76 | 50.1 MB | 5.6 MB | 结果用到哪片 |
+| `i/<cat>/**/*.svg` | 图标原文件 | 15,187 | 50.0 MB | 15.8 MB | 下载单个 / 看源码 |
+| **合计** | | **15,315** | **107 MB** | **22 MB** | |
+
+### 一次访问实际下载多少
+
+| 场景 | 下什么 | 压后 |
+| --- | --- | ---: |
+| 首页(不碰 emoji) | index + star 清单 + star 片 | **27 KB** |
+| 切到中文 | + 中文翻译包 | +86 KB |
+| 搜索 | + 全名单 | +160 KB |
+| 点一个分类 | + 该分类的清单 | +约 4 KB |
+| 看搜索结果 | + 用到的那几片 | 每片 ≤438 KB |
+| 下载单个图标 | 那一个文件 | 约 1 KB |
+
+**用户从头到尾只用 27 KB** —— 剩下的按需来,来了缓存在本地(localStorage,4 MB 上限)。
+
+### 各分类的规模
+
+| 分类 | 图标 | 原始 | 压后 | 片数 |
+| --- | ---: | ---: | ---: | ---: |
+| `noto` | 3750 | 32.0 MB | 8.8 MB | 22 |
+| `twemoji` | 4009 | 9.7 MB | 3.8 MB | 7 |
+| `fluent` | 1231 | 2.8 MB | 1.0 MB | 2 |
+| `iconpark` | 2555 | 1.9 MB | 686 KB | 2 |
+| `bootstrap` | 2078 | 1.2 MB | 608 KB | 1 |
+| `oci` | 232 | 637 KB | 245 KB | 1 |
+| `aliyun` | 306 | 543 KB | 208 KB | 1 |
+| `aws` | 154 | 514 KB | 183 KB | 1 |
+| `ibm` | 122 | 260 KB | 91 KB | 1 |
+| `azure` | 51 | 103 KB | 37 KB | 1 |
+| `k8s` | 8 | 67 KB | 29 KB | 1 |
+| `programming` | 38 | 48 KB | 22 KB | 1 |
+| `gcp` | 41 | 43 KB | 15 KB | 1 |
+| `chem` | 55 | 25 KB | 13 KB | 1 |
+| `dev` | 49 | 19 KB | 10 KB | 1 |
+| `brand` | 10 | 22 KB | 10 KB | 1 |
+| 其余 32 个分类 | 498 | — | — | 31 |
+
+三个 emoji 分类占了将近六成 —— Noto 一个就 32 MB 原始 / 8.8 MB 压后
+(它的渐变多,单个图形最重)。`iconpark` / `bootstrap` 是整库搬进来的两个大包,
+各自分片、按需取。
+
 ## 目录
 
 ```
@@ -138,6 +197,7 @@ brands/<cat>-<concept>.md        品牌图形的许可记录(brand / bootstrap �
 scripts/compose.mjs              按配方组装图标
 scripts/build.mjs                校验 + 生成(src/gen.ts、src/page.ts、dist/)
 scripts/serve.mjs                本地静态预览
+scripts/stats.mjs               资产统计 —— 各类型文件多大、什么时候会被下
 site/                            查询页(index.html / style.css / app.js)
 src/index.ts                     Worker:把库挂在 po6.sh/icon 上
 src/gen.ts                       生成物:图标字节 + 元数据
