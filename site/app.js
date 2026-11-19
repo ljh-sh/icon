@@ -574,15 +574,23 @@ async function openPanel(m) {
   a.href = `${BASE}${pathOf(m.id)}${V}`;
   a.download = m.id.split(':')[1].replace(/^.*\//, '') + '.svg';
 
+  // SVG 源码:那片已经在页面上了(符号都注入了)—— 直接从 DOM 里取,不用下载
   const wrap = $('#p-src-wrap');
   wrap.hidden = false;
-  $('#p-src').textContent = '…';
-  try {
-    const txt = await (await fetch(`${BASE}${pathOf(m.id)}${V}`)).text();
-    // 文件是单行的,展开成缩进的可读格式再上色
+  const sym = document.getElementById(spriteIdOf(m.id));
+  if (sym) {
+    const attrs = [...sym.attributes].map((a) => ` ${a.name}="${a.value}"`).join('');
+    const inner = sym.innerHTML.replace(/\s*\n\s*/g, '\n').trim();
+    const txt = `<svg xmlns="http://www.w3.org/2000/svg"${attrs}>\n${inner}\n</svg>`;
     $('#p-src').innerHTML = highlightSvg(prettySvg(txt) ?? escHtml(txt));
-  } catch {
-    $('#p-src').textContent = t('srcFail');
+  } else {
+    $('#p-src').textContent = '…';
+    try {
+      const txt = await (await fetch(`${BASE}${pathOf(m.id)}${V}`)).text();
+      $('#p-src').innerHTML = highlightSvg(prettySvg(txt) ?? escHtml(txt));
+    } catch {
+      $('#p-src').textContent = t('srcFail');
+    }
   }
 
   renderRelated(m);
@@ -623,20 +631,35 @@ function tokens(m) {
   return set;
 }
 
+// 候选只从"同概念"和"同分类"里找 ——
+// 原来每次点击都遍历全库一万五千个图标、每个都重算一遍 tokens(17–31 ms,直接掉帧)。
+// 索引在图标进来的时候建好,点的时候只查表。
+const BY_CONCEPT = new Map(); // concept → [图标]
+const BY_CAT = new Map(); // cat → [图标]
+function indexIcons(list) {
+  for (const m of list) {
+    if (!BY_CONCEPT.has(m.concept)) BY_CONCEPT.set(m.concept, []);
+    BY_CONCEPT.get(m.concept).push(m);
+    if (!BY_CAT.has(m.cat)) BY_CAT.set(m.cat, []);
+    BY_CAT.get(m.cat).push(m);
+  }
+}
 function related(m, n = 12) {
   const mine = tokens(m);
-  const out = [];
-  for (const o of DATA.icons) {
-    if (o.id === m.id) continue;
-    let s = 0;
-    // 同一个概念的另一个版本(emoji 的 Twemoji / Fluent 两版)—— 排在最前
-    if (o.concept === m.concept) s += 5;
-    if (o.cat === m.cat) s += 3;
+  const cand = new Map(); // 图标 → 分数
+  const add = (o, base) => {
+    if (o.id === m.id) return;
+    let s = cand.get(o) || 0;
+    s += base;
     for (const w of tokens(o)) if (mine.has(w)) s += 2;
-    if (s) out.push([s, o]);
-  }
-  out.sort((a, b) => b[0] - a[0] || (a[1].id < b[1].id ? -1 : 1));
-  return out.slice(0, n).map((x) => x[1]);
+    if (s > 0) cand.set(o, s);
+  };
+  // 同一个概念的另一个版本(emoji 的 Twemoji / Fluent / Noto 三版)—— 排在最前
+  for (const o of BY_CONCEPT.get(m.concept) || []) add(o, 5);
+  // 同分类的邻居
+  for (const o of BY_CAT.get(m.cat) || []) add(o, 3);
+  const out = [...cand.entries()].sort((a, b) => b[1] - a[1] || (a[0].id < b[0].id ? -1 : 1));
+  return out.slice(0, n).map((x) => x[0]);
 }
 
 function renderRelated(m) {
