@@ -125,9 +125,9 @@ async function loadZh() {
   if (ZH.size || ZHloading) return;
   ZHloading = true;
   try {
-    const res = await fetch(`${BASE}manifest.zh.json${V}`);
-    if (!res.ok) return;
-    const j = await res.json();
+    const text = await asset('manifest.zh.json');
+    if (!text) return;
+    const j = JSON.parse(text);
     for (const k in j) ZH.set(k, j[k]);
   } catch {}
   ZHloading = false;
@@ -139,49 +139,72 @@ const spriteIdOf = (id) => id.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
 const pathOf = (id) => `i/${id.replace(':', '/')}.svg`;
 const catOf = (cat) => DATA.cats.find((c) => c.cat === cat) || {};
 
-// ---------- 片:一页的图形按片下,片的本体缓存在本地 ----------
-// 一片 = 一个 sprite 文件(≤300 个符号)。页面只下看得见的那几片,
-// 下过的片存在 localStorage 里,下次直接用 —— 十万个图标也是同一套。
-const SHARD_MAX = 4 * 1024 * 1024; // 本地缓存上限(localStorage 大约 5 MB)
-const shardURLs = new Map(); // 片 → blob URL
-let shardIndex = {}; // 片 → { t: 时间, s: 字节 }
+// ---------- 资产缓存:下过的都留在本地,下次直接用 ----------
+// 一片 = 一个 sprite 文件(≤300 个符号);清单、翻译包同理。
+// 全部按"构建号 + 文件名"存在 localStorage 里 ——
+// 新版发出来构建号就变了,旧的那批自动作废(顺带清掉)。
+// 十万个图标也是同一套:只下看得见的那几片,其余的不碰。
+const CACHE_MAX = 4 * 1024 * 1024; // 本地缓存上限(localStorage 大约 5 MB)
+const CACHE_PREFIX = 'icon-asset:';
+let cacheIdx = {}; // 键 → { t: 时间, s: 字节 }
+const loadedShards = new Set(); // 已经注进页面的片
 
 function cacheLoad() {
   try {
-    shardIndex = JSON.parse(localStorage.getItem('icon-shards') || '{}');
+    cacheIdx = JSON.parse(localStorage.getItem('icon-assets') || '{}');
   } catch {
-    shardIndex = {};
+    cacheIdx = {};
   }
-}
-function cacheGet(file) {
-  try {
-    return localStorage.getItem('icon-shard:' + file);
-  } catch {
-    return null;
-  }
-}
-function cachePut(file, text) {
-  try {
-    localStorage.setItem('icon-shard:' + file, text);
-    shardIndex[file] = { t: Date.now(), s: text.length };
-    let total = Object.values(shardIndex).reduce((a, b) => a + b.s, 0);
-    if (total > SHARD_MAX) {
-      // 淘汰最老的片
-      for (const k of Object.keys(shardIndex).sort((a, b) => shardIndex[a].t - shardIndex[b].t)) {
-        if (total <= SHARD_MAX) break;
-        localStorage.removeItem('icon-shard:' + k);
-        total -= shardIndex[k].s;
-        delete shardIndex[k];
-      }
+  // 别的构建号留下的缓存已经作废(发过新版了)—— 顺手清掉,别占地方
+  const prefix = CACHE_PREFIX + V + ':';
+  for (const k of Object.keys(cacheIdx)) {
+    if (k.startsWith(CACHE_PREFIX) && !k.startsWith(prefix)) {
+      try {
+        localStorage.removeItem(k);
+      } catch {}
+      delete cacheIdx[k];
     }
-    localStorage.setItem('icon-shards', JSON.stringify(shardIndex));
-  } catch {
-    // 配额满了就算了 —— 只是缓存,没有它照样能用
   }
 }
-// 片取回来之后,把里面的 <symbol> 注入页面上的一个隐藏 svg ——
-// 图标用 <use href="#符号id"> 引用本地符号:
-// 不再每个图标都去解析一次 blob(那会在网络面板里刷出几十条记录),也只解析一次。
+const cacheKey = (file) => CACHE_PREFIX + V + ':' + file;
+
+function cachePut(file, text) {
+  const key = cacheKey(file);
+  try {
+    localStorage.setItem(key, text);
+  } catch {
+    return; // 配额满了 —— 只是缓存,没有它照样能用
+  }
+  cacheIdx[key] = { t: Date.now(), s: text.length };
+  let total = Object.values(cacheIdx).reduce((a, b) => a + b.s, 0);
+  if (total > CACHE_MAX) {
+    // 淘汰最老的(连着别的构建号的一起清 —— 那些已经作废了)
+    for (const k of Object.keys(cacheIdx).sort((a, b) => cacheIdx[a].t - cacheIdx[b].t)) {
+      if (total <= CACHE_MAX) break;
+      localStorage.removeItem(k);
+      total -= cacheIdx[k].s;
+      delete cacheIdx[k];
+    }
+  }
+  try {
+    localStorage.setItem('icon-assets', JSON.stringify(cacheIdx));
+  } catch {}
+}
+
+// 取一个资产:本地有就用(一个网络请求都不发),没有就下并存下来
+async function asset(file) {
+  const key = cacheKey(file);
+  try {
+    const hit = localStorage.getItem(key);
+    if (hit !== null) return hit;
+  } catch {}
+  const res = await fetch(`${BASE}${file}${V}`);
+  if (!res.ok) return null;
+  const text = await res.text();
+  cachePut(file, text);
+  return text;
+}
+
 let spriteHost = null;
 function host() {
   if (!spriteHost) {
@@ -193,28 +216,23 @@ function host() {
   return spriteHost;
 }
 async function shardURL(file) {
-  if (shardURLs.has(file)) return shardURLs.get(file);
-  let text = cacheGet(file);
-  if (!text) {
-    const res = await fetch(`${BASE}${file}${V}`);
-    if (!res.ok) return null;
-    text = await res.text();
-    cachePut(file, text);
-  }
+  if (loadedShards.has(file)) return true;
+  const text = await asset(file);
+  if (!text) return null;
   try {
     const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
     const symbols = doc.documentElement.querySelectorAll('symbol');
     const h = host();
     for (const sym of symbols) h.append(document.importNode(sym, true));
   } catch {}
-  shardURLs.set(file, true);
+  loadedShards.add(file);
   return true;
 }
 // 清单也缓存一份(小的那些)
 async function loadManifest(name) {
-  const res = await fetch(`${BASE}${name}${V}`);
-  if (!res.ok) return;
-  const j = await res.json();
+  const text = await asset(name);
+  if (!text) return;
+  const j = JSON.parse(text);
   for (const m of j.icons) {
     if (!ICONS.has(m.id)) ICONS.set(m.id, m);
   }
@@ -728,7 +746,7 @@ $('#p-id').addEventListener('click', async (e) => {
     applyI18n();
     cacheLoad();
     // 索引和精选那一小包并行拉 —— 首页马上有东西看
-    const idxP = fetch(`${BASE}index.json${V}`).then((r) => r.json());
+    const idxP = asset('index.json').then((t) => JSON.parse(t));
     const starP = Promise.all([shardURL('sprite.star.svg'), loadManifest('manifest.star.json')]);
     const idx = await idxP;
     BUNDLES = idx.bundles || {};
