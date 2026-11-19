@@ -41,6 +41,7 @@
 | `phy` `mech` | 本仓自绘 | 物理(原子/分子/力学/电磁/光学)、机械(齿轮/轴承/阀门/泵) | 本仓 Apache-2.0 |
 | `travel` `nutrition` `transport` `weather` `education` | 本仓自绘 | 旅行 / 营养 / 交通工具 / 天气 / 教育 —— 日常生活与专题用得上的概念 | 本仓 Apache-2.0 |
 | `people` `region` `filetype` | 本仓自绘 | 人与职业(中性表达) / 地区 / 文件类型 | 本仓 Apache-2.0 |
+| `twemoji` `noto` `fluent` | emoji 官方集(整库) | emoji —— Twemoji / Noto / Fluent | MIT / OFL-1.1 / MIT;不进 sprite,按文件引 |
 | `dev` | 本仓自绘 | 开发项目流程 —— 通用阶段 / 软件 / 硬件 | 本仓 Apache-2.0 |
 | `common` | 本仓自绘 | 全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步 | 本仓 Apache-2.0 |
 

@@ -60,6 +60,9 @@ const CATS = {
   people: { title: '人与职业', titleEn: 'People', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '工作类型与人群 —— 只取中性、正面的表达', noteEn: 'Work types and groups of people — neutral, positive depictions only' },
   region: { title: '地区', titleEn: 'Regions', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '地理与行政层级 —— 国家 / 省 / 市 / 区县 / 可用区 / 机房', noteEn: 'Geography and administrative levels — country, province, city, district, availability zone, data centre' },
   filetype: { title: '文件类型', titleEn: 'File Types', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '常见的文件类型 —— 文档 / 表格 / 代码 / 图片 / 音视频 / 压缩包', noteEn: 'Common file types — documents, sheets, code, images, media, archives' },
+  twemoji: { title: 'Emoji(Twemoji)', titleEn: 'Emoji (Twemoji)', source: 'Twemoji', license: 'MIT', note: 'Twitter 的 emoji 集,整库搬入;不进 sprite,按文件引', noteEn: "Twitter's emoji set, imported whole; served as files, not a sprite", noSprite: true },
+  noto: { title: 'Emoji(Noto)', titleEn: 'Emoji (Noto)', source: 'Noto Emoji', license: 'OFL-1.1', note: 'Google Noto Emoji 2D,整库搬入;不进 sprite,按文件引', noteEn: 'Google Noto Emoji 2D, imported whole; served as files, not a sprite', noSprite: true },
+  fluent: { title: 'Emoji(Fluent)', titleEn: 'Emoji (Fluent)', source: 'Microsoft Fluent Emoji', license: 'MIT', note: '微软 Fluent Emoji 的扁平版(Flat),整库搬入;不进 sprite,按文件引', noteEn: "Microsoft Fluent Emoji (Flat), imported whole; served as files, not a sprite", noSprite: true },
   education: { title: '教育', titleEn: 'Education', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '教育场景 —— 小学 / 初中 / 高中 / 大学 等学段,以及校园里的通用概念', noteEn: 'Education — school stages from primary to university, plus everyday campus concepts' },
   weather: { title: '天气', titleEn: 'Weather', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '天气现象与观测要素 —— 晴雨雪雾 / 温度 / 湿度 / 气压', noteEn: 'Weather phenomena and observations — sun, rain, snow, fog, temperature, humidity, pressure' },
 };
@@ -385,7 +388,8 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     mime: MIME[ext],
     bytes: raw.length,
     // sprite 用的 id 与 viewBox(PNG 进不了 sprite,还是单独文件)
-    spriteId: ext === 'svg' ? spriteId(id) : undefined,
+    // noSprite 的分类太大(emoji 一家就 40 MB),不进 sprite —— 页面按文件引
+    spriteId: ext === 'svg' && !CATS[info.cat].noSprite ? spriteId(id) : undefined,
     viewBox: ext === 'svg' ? viewBoxOf(raw) : undefined,
     source: rec?.meta.source || CATS[info.cat].source,
     license: rec?.meta.license || CATS[info.cat].license,
@@ -641,12 +645,18 @@ console.log(`public/icon/sprite.star.svg: ${starSprite.count} 个符号(star)`);
 
 for (const [cat, list] of catMetas) {
   const s = spriteOf(list);
-  writeFileSync(join(PUBLIC, `sprite.${cat}.svg`), s.text);
+  const noSprite = CATS[cat].noSprite;
+  if (!noSprite) writeFileSync(join(PUBLIC, `sprite.${cat}.svg`), s.text);
   writeFileSync(
     join(PUBLIC, `manifest.${cat}.json`),
     JSON.stringify({ build: BUILD, cats: cats.filter((c) => c.cat === cat), icons: list }),
   );
-  bundles[cat] = { icons: list.length, sprite: `sprite.${cat}.svg`, manifest: `manifest.${cat}.json` };
+  bundles[cat] = {
+    icons: list.length,
+    manifest: `manifest.${cat}.json`,
+    // noSprite 的包没有 sprite —— 页面直接引文件
+    ...(noSprite ? {} : { sprite: `sprite.${cat}.svg` }),
+  };
 }
 
 // 索引:分类清单 + 每包多大 —— 客户端第一个请求就是它

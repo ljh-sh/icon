@@ -73,8 +73,18 @@ Copyright the mingrammer/diagrams contributors)的 `resources/` 目录下的 PNG
 | `icons/elastic/` | [Simple Icons](https://simpleicons.org) | CC0 |
 | `icons/digitalocean/` | [Simple Icons](https://simpleicons.org) | CC0 |
 | `icons/iconpark/` | [IconPark](https://github.com/bytedance/IconPark)(字节跳动) | Apache-2.0 |
+| `icons/twemoji/` | [Twemoji](https://github.com/jdecked/twemoji)(Twitter) | MIT |
+| `icons/noto/` | [Noto Emoji](https://github.com/googlefonts/noto-emoji)(Google) | OFL-1.1 |
+| `icons/fluent/` | [Fluent Emoji](https://github.com/microsoft/fluentui-emoji)(微软) | MIT |
+
+emoji 的**名字**另有两处来源(不是图形):英文名取 Unicode 的 `emoji-test.txt`
+(UTS #51),中文名取 CLDR 的 `common/annotations/zh.xml` —— 都是 Unicode 数据,
+Unicode License / Unicode-3.0 许可。
 
 IconPark 是整库搬入:图形是多色填充风(蓝 + 深色描边),著作权 Apache-2.0,干净。
+emoji 那三个集也是整库搬入,同样不进 sprite(加起来 52 MB,一张 sprite 没人下得起),
+页面按文件引。Noto 是 OFL-1.1 —— 许可与版权声明随附:
+<https://github.com/googlefonts/noto-emoji/blob/main/LICENSE>。
 **品牌类 83 个图标没收**(Adobe / Apple / 微信 / 支付宝这类商标图形),
 名字里带品牌的也一并排除(weixin-* / bytedance-* / apple-* / ios-*)。
 

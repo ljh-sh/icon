@@ -284,9 +284,10 @@ async function loadBundle(name) {
   LOADED.add(name);
   PENDING++;
   try {
+    // 没有 sprite 的包(emoji 太大)直接引文件,不拉 sprite
     const [mj, sp] = await Promise.all([
       fetch(`${BASE}${b.manifest}${V}`).then((r) => r.json()),
-      fetch(`${BASE}${b.sprite}${V}`),
+      b.sprite ? fetch(`${BASE}${b.sprite}${V}`) : Promise.resolve(null),
     ]);
     for (const m of mj.icons) {
       // 先到先得:star 里的图标已经在包里了,别被分类包顶掉
