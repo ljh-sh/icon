@@ -646,7 +646,7 @@ console.log(`public/icon/sprite.star.svg: ${starSprite.count} 个符号(star)`);
 //
 // 片的大小按**压后**算:一片压完不超过 1 MB(边缘会自动 brotli)。
 // 先按原始体积粗切,再压一压看超没超,超了就对半切 —— 直到每片都在限额内。
-const SHARD_MAX = 300; // 一片最多多少个符号
+const SHARD_MAX = 80; // 一片最多多少个符号 —— 首页只摆 60 个,一片就够
 const SHARD_BYTES = 900 * 1024; // 一片压后的上限(留一点余量给 1 MB)
 const brSize = (chunk) =>
   brotliCompressSync(Buffer.from(spriteOf(chunk).text), {
@@ -659,7 +659,8 @@ function fitChunks(list) {
   for (const m of list) {
     cur.push(m);
     raw += statSync(metaFile.get(m.id)).size;
-    if (raw >= 1.5 * 1024 * 1024) {
+    // 两条线:符号数(首页只摆 60 个,一片就够)和原始体积
+    if (raw >= 1.5 * 1024 * 1024 || cur.length >= SHARD_MAX) {
       out.push(cur);
       cur = [];
       raw = 0;

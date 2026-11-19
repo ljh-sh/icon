@@ -244,9 +244,14 @@ async function loadManifest(name) {
   const text = await asset(name);
   if (!text) return;
   const j = JSON.parse(text);
+  const fresh = [];
   for (const m of j.icons) {
-    if (!ICONS.has(m.id)) ICONS.set(m.id, m);
+    if (!ICONS.has(m.id)) {
+      ICONS.set(m.id, m);
+      fresh.push(m);
+    }
   }
+  indexIcons(fresh); // 相关图标要用的索引 —— 忘了建,相关就是空的
   DATA.icons = [...ICONS.values()];
 }
 
@@ -389,6 +394,8 @@ function renderFilters() {
     const b = el('button', 'chip' + (cat === value ? ' on' : ''), label);
     b.type = 'button';
     b.addEventListener('click', () => setCat(value));
+    // 鼠标停在上面就把那个分类拉来 —— 点下去时东西已经在了,感觉是即时的
+    b.addEventListener('mouseenter', () => prefetch(value));
     host.append(b);
   };
   mk(t('all'), '');
@@ -398,11 +405,16 @@ function renderFilters() {
 async function render() {
   renderFilters();
   const list = DATA.icons.filter(match);
-  // 先把要用的片取回来(本地有就直接用,没有就下)—— 十万个图标也只下看得见的几片
+  // **先画出来**,再去取片 —— 别等片到了才动界面(点分类时片最大 1.5 MB,
+  // 等下去界面就是冻着的)。SVG 引用是活的:片到了图标自己会补上。
+  const shown = grid($('#all'), list);
   const need = new Set();
   for (const m of list.slice(0, limit)) if (m.shard) need.add(m.shard);
-  await Promise.all([...need].map(shardURL));
-  const shown = grid($('#all'), list);
+  const want = [...need].filter((f) => !loadedShards.has(f));
+  if (want.length) {
+    await Promise.all(want.map(shardURL));
+    grid($('#all'), list); // 片到了,重画一次 —— 图标出来了
+  }
   // 没打搜索词就报总数 —— 搜索框里那个数字是"库里有多少",不是"眼下摆了多少"
   const n = q ? list.length : TOTAL;
   $('#all-count').textContent =
@@ -461,6 +473,18 @@ async function loadRest(includeBulk) {
   } finally {
     loading = false;
   }
+}
+
+// 预取一个分类:清单 + 首页要用的那几片
+async function prefetch(cat) {
+  if (!cat || LOADED.has(cat)) return;
+  const b = BUNDLES[cat];
+  if (!b) return;
+  const j = await (await asset(b.manifest)).catch(() => null);
+  if (!j) return;
+  const want = new Set();
+  for (const m of j.icons.slice(0, LIMIT0)) if (m.shard) want.add(m.shard);
+  await Promise.all([...want].map(shardURL));
 }
 
 function setCat(value) {
@@ -656,8 +680,11 @@ function related(m, n = 12) {
   };
   // 同一个概念的另一个版本(emoji 的 Twemoji / Fluent / Noto 三版)—— 排在最前
   for (const o of BY_CONCEPT.get(m.concept) || []) add(o, 5);
-  // 同分类的邻居
-  for (const o of BY_CAT.get(m.cat) || []) add(o, 3);
+  // 同分类的邻居:清单是按概念族排的,所以就看它前后这一段
+  // (扫全分类是几千个图标,第一次点要十几毫秒 —— 不值)
+  const list = BY_CAT.get(m.cat) || [];
+  const at = list.indexOf(m);
+  for (let i = Math.max(0, at - 30); i < Math.min(list.length, at + 31); i++) add(list[i], 3);
   const out = [...cand.entries()].sort((a, b) => b[1] - a[1] || (a[0].id < b[0].id ? -1 : 1));
   return out.slice(0, n).map((x) => x[0]);
 }
