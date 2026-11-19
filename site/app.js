@@ -181,31 +181,42 @@ async function ungz(res) {
   return await new Response(stream).text();
 }
 
-// 取一个资产:本地有就用(一个网络请求都不发),没有就下并存下来
+// 取一个资产:本地有就用(一个网络请求都不发),没有就下并存下来。
+// 同一个文件的请求只发一次 —— 悬停预取还没回来就点下去的话,别再发一遍。
+const INFLIGHT = new Map(); // 文件 → 进行中的 Promise
 async function asset(file) {
-  const url = `${BASE}${file}${V}`;
-  const c = await cache();
-  if (c) {
-    try {
-      const hit = await c.match(url);
-      if (hit) return await ungz(hit);
-    } catch {}
-  }
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  const text = await res.text();
-  if (c) {
-    // 存的时候压一遍,后台慢慢压,不挡着渲染
-    gz(text).then(async (buf) => {
+  if (INFLIGHT.has(file)) return INFLIGHT.get(file);
+  const p = (async () => {
+    const url = `${BASE}${file}${V}`;
+    const c = await cache();
+    if (c) {
       try {
-        await c.put(
-          url,
-          new Response(buf || text, { headers: { 'Content-Type': 'text/plain', [GZ]: buf ? 'gzip' : '' } }),
-        );
+        const hit = await c.match(url);
+        if (hit) return await ungz(hit);
       } catch {}
-    });
+    }
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const text = await res.text();
+    if (c) {
+      // 存的时候压一遍,后台慢慢压,不挡着渲染
+      gz(text).then(async (buf) => {
+        try {
+          await c.put(
+            url,
+            new Response(buf || text, { headers: { 'Content-Type': 'text/plain', [GZ]: buf ? 'gzip' : '' } }),
+          );
+        } catch {}
+      });
+    }
+    return text;
+  })();
+  INFLIGHT.set(file, p);
+  try {
+    return await p;
+  } finally {
+    INFLIGHT.delete(file);
   }
-  return text;
 }
 
 // 别的构建号留下的桶已经作废 —— 顺手删掉,别占磁盘
