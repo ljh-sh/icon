@@ -73,12 +73,15 @@ Copyright the mingrammer/diagrams contributors)的 `resources/` 目录下的 PNG
 | `icons/elastic/` | [Simple Icons](https://simpleicons.org) | CC0 |
 | `icons/digitalocean/` | [Simple Icons](https://simpleicons.org) | CC0 |
 | `icons/iconpark/` | [IconPark](https://github.com/bytedance/IconPark)(字节跳动) | Apache-2.0 |
-| `icons/emoji/v0/` | [Twemoji](https://github.com/jdecked/twemoji)(Twitter) | MIT |
-| `icons/emoji/v1/` | [Fluent Emoji](https://github.com/microsoft/fluentui-emoji)(微软) | MIT |
+| `icons/twemoji/` | [Twemoji](https://github.com/jdecked/twemoji)(Twitter) | MIT |
+| `icons/fluent/` | [Fluent Emoji](https://github.com/microsoft/fluentui-emoji)(微软) | MIT |
+| `icons/noto/` | [Noto Emoji](https://github.com/googlefonts/noto-emoji)(Google) | OFL-1.1 |
 
-emoji 是**一个分类、两个版本**:v0 用 Twemoji 画的(推荐版),v1 用微软 Fluent 的
-扁平版画的 —— 同一批概念、两种画法。`emoji:<concept>` 这个别名指向推荐的那版。
-两个集都是 MIT,不用署名。
+emoji 分**三个平铺分类** —— 同一批概念、三种画法,键名对得上
+(`twemoji:grinning-face` / `fluent:grinning-face` / `noto:grinning-face`),
+打开一个的面板,「相关图标」里就有另外两版。Twemoji 与 Fluent 是 MIT,
+不用署名;Noto 是 OFL-1.1,许可与版权声明随附:
+<https://github.com/googlefonts/noto-emoji/blob/main/LICENSE>。
 
 emoji 的**名字**另有两处来源(不是图形):英文名取 Unicode 的 `emoji-test.txt`
 (UTS #51),中文名取 CLDR 的 `common/annotations/zh.xml` —— 都是 Unicode 数据,
@@ -92,8 +95,8 @@ IconPark 是整库搬入:图形是多色填充风(蓝 + 深色描边),著作权 
 页面上深浅色主题下描边都得看得见(黑描边在暗色主题里等于没有)。
 图形、颜色搭配、笔触粗细都没动;单独当文件用时 `currentColor` 就是黑色,跟官方一致。
 
-emoji 也是整库搬入,同样**不进 sprite**(两个版本加起来 12 MB,一张 sprite 没人下得起),
-页面按文件引。
+emoji 那三个集也是整库搬入,**不进 sprite**(加起来 50 MB,一张 sprite 没人下得起)——
+一片一片地发,页面按需取片。
 
 Simple Icons 的图形是 CC0 ✓(著作权干净),但**商标还是各家的** ——
 按各家的品牌指引用,不得暗示背书。

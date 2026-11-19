@@ -41,7 +41,7 @@
 | `phy` `mech` | 本仓自绘 | 物理(原子/分子/力学/电磁/光学)、机械(齿轮/轴承/阀门/泵) | 本仓 Apache-2.0 |
 | `travel` `nutrition` `transport` `weather` `education` | 本仓自绘 | 旅行 / 营养 / 交通工具 / 天气 / 教育 —— 日常生活与专题用得上的概念 | 本仓 Apache-2.0 |
 | `people` `region` `filetype` `aviation` | 本仓自绘 | 人与职业(中性表达)/ 地区 / 文件类型 / 航空与航天 | 本仓 Apache-2.0 |
-| `emoji` | emoji 官方集(整库) | emoji —— v0 是 Twemoji 画的(推荐版),v1 是微软 Fluent 画的同一批概念 | MIT / MIT;不进 sprite,按文件引 |
+| `twemoji` `fluent` `noto` | emoji 官方集(整库) | emoji —— 同一批概念三种画法(Twemoji / 微软 Fluent / Google Noto) | MIT / MIT / OFL-1.1;不进 sprite,按片发 |
 | `dev` | 本仓自绘 | 开发项目流程 —— 通用阶段 / 软件 / 硬件 | 本仓 Apache-2.0 |
 | `common` | 本仓自绘 | 全库共用的基本符号 —— 锁 / 时钟 / 对勾 / 同步 | 本仓 Apache-2.0 |
 
@@ -92,7 +92,8 @@
 | `index.json` | 索引:分类清单 + 每片多大 | 第一个请求 |
 | `sprite.star.svg` | **精选那一片** —— 每类挑 2 个(`star.tsv` 里挑),≤300 个符号 | 首页,只它 |
 | `manifest.star.json` | 精选的清单 | 首页 |
-| `manifest.json` | **全名单** —— 搜索时过滤用 | 用户一搜索 |
+| `manifest.json` | **全名单** —— 英文(原版)+ 结构信息,搜索时过滤用 | 用户一搜索 |
+| `manifest.zh.json` | **中文翻译包** —— 只有中文名 | 切到中文时(英文区不用下) |
 | `manifest.<cat>.json` | 各分类的清单 | 点那个分类的 chip |
 | `sprite.<cat>.<k>.svg` | **片** —— 一个 sprite 文件,≤300 个符号 | 结果里用到哪片就下哪片 |
 
@@ -102,6 +103,20 @@
 
 搜索时先把全名单下下来本地过滤;点分类 chip 就只下那个分类的清单。
 **片是按需的,不是整包** —— 十万个图标走的是同一套代码。
+
+清单里只放**英文(原版)+ 结构信息**;中文名单独一份在 `manifest.zh.json`,
+切到中文时才下(英文区根本不碰它)。能从 id 或分类推出来的字段
+(路径、sprite 符号 id、出处、许可、单色标记)一律不带 —— 清单是搜索时一次性
+下下来的,每一字节都要省:
+
+| | 原始 | 压后 |
+| --- | --- | --- |
+| `index.json` | 19 KB | 4 KB |
+| `manifest.star.json` | 34 KB | 6 KB |
+| `sprite.star.svg` | 82 KB | 17 KB |
+| **首页合计** | 135 KB | **27 KB** |
+| `manifest.json`(全名单) | 3.1 MB | 160 KB |
+| `manifest.zh.json`(中文包) | 766 KB | 86 KB |
 
 想改精选:`star.tsv` 一行一个分类,后面跟概念名(逗号分隔)。
 `bootstrap` / `iconpark` 不许进 star(构建时会拦)。

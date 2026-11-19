@@ -117,7 +117,27 @@ let TOTAL = 0; // 首页默认能看到多少个(index.json 的 browsable)
 let ALL = 0; // 全库条目数(含各版本的旧版)
 
 const byId = new Map();
+const ZH = new Map(); // id → 中文名(翻译包,切到中文时才下)
 const t = (key) => (LANGS[lang] && LANGS[lang][key]) || key;
+
+// 清单里是英文(原版);中文在单独的翻译包里 —— 英文区不用下它
+async function loadZh() {
+  if (ZH.size || ZHloading) return;
+  ZHloading = true;
+  try {
+    const res = await fetch(`${BASE}manifest.zh.json${V}`);
+    if (!res.ok) return;
+    const j = await res.json();
+    for (const k in j) ZH.set(k, j[k]);
+  } catch {}
+  ZHloading = false;
+}
+let ZHloading = false;
+
+// 从 id 推出来的字段 —— 清单里不带,省体积
+const spriteIdOf = (id) => id.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '');
+const pathOf = (id) => `i/${id.replace(':', '/')}.svg`;
+const catOf = (cat) => DATA.cats.find((c) => c.cat === cat) || {};
 
 // ---------- 片:一页的图形按片下,片的本体缓存在本地 ----------
 // 一片 = 一个 sprite 文件(≤300 个符号)。页面只下看得见的那几片,
@@ -198,27 +218,28 @@ function applyI18n() {
 // 矢量图标走 sprite:符号在哪个包里就从哪个包里引用
 // PNG(云厂商那批)进不了 sprite,还是单独文件
 function iconEl(m) {
-  if (m.spriteId) {
+  const sid = spriteIdOf(m.id);
+  if (sid) {
     const svg = document.createElementNS(SVGNS, 'svg');
     svg.setAttribute('viewBox', m.viewBox || '0 0 24 24');
-    svg.setAttribute('class', 'ic' + (m.mono ? ' mono' : ''));
+    svg.setAttribute('class', 'ic' + (catOf(m.cat).mono ? ' mono' : ''));
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', m.id);
     const use = document.createElementNS(SVGNS, 'use');
     const u = m.shard ? shardURLs.get(m.shard) : null;
-    use.setAttribute('href', `${u || `${BASE}${m.shard || 'sprite.star.svg'}${V}`}#${m.spriteId}`);
+    use.setAttribute('href', `${u || `${BASE}${m.shard || 'sprite.star.svg'}${V}`}#${sid}`);
     svg.append(use);
     return svg;
   }
   const img = el('img');
-  img.src = `${BASE}${m.path}${V}`;
+  img.src = `${BASE}${pathOf(m.id)}${V}`;
   img.alt = m.id;
   img.loading = 'lazy';
   return img;
 }
 
 function descOf(m) {
-  return lang === 'en' ? m.descEn || m.desc : m.desc || m.descEn;
+  return lang === 'en' ? m.descEn : ZH.get(m.id) || m.descEn;
 }
 
 // ---------- SVG 源码:展开 + 高亮 ----------
@@ -276,7 +297,8 @@ function match(m) {
   if (cat && m.cat !== cat) return false;
   // 空查询:只显示推荐版本(别名),别把每一版都摆出来;打了字才把各版本都放出来
   if (!q) return !m.version || m.recommended;
-  const hay = `${m.id} ${m.aliasFor || ''} ${m.desc} ${m.descEn} ${m.cat} ${m.concept}`.toLowerCase();
+  // 中英文都进搜索:中文名在翻译包里,英文名在清单里
+  const hay = `${m.id} ${m.aliasFor || ''} ${m.descEn} ${ZH.get(m.id) || ''} ${m.cat} ${m.concept}`.toLowerCase();
   return hay.includes(q);
 }
 
@@ -449,7 +471,7 @@ async function openPanel(m) {
   $('#p-desc').textContent = descOf(m);
   $('#p-preview').replaceChildren(iconEl(m));
   $('#p-cat').textContent = catTitle(DATA.cats.find((c) => c.cat === m.cat)) || m.cat;
-  $('#p-source').textContent = m.source;
+  $('#p-source').textContent = catOf(m.cat).source || '';
   // 版本:别名条目指向推荐版本的具体键,具体版本标出指向它的别名
   if (m.version) {
     // 推荐版:概念键就是它;别的版本:说明概念键指向哪一版
@@ -457,7 +479,7 @@ async function openPanel(m) {
       ? `${m.version}(推荐)`
       : `${m.version} — ${t('aliasOf').replace('{id}', m.aliasFor || m.id)}`);
   } else row('#p-version', '');
-  row('#p-license', m.license);
+  row('#p-license', catOf(m.cat).license || '');
   row('#p-trademark', m.trademark);
   row('#p-restrictions', (m.restrictions || '').replace(/;/g, '; '));
   row('#p-reviewed', m.reviewed);
@@ -503,22 +525,18 @@ async function openPanel(m) {
   }
 
   const a = $('#p-file');
-  a.href = `${BASE}${m.path}${V}`;
-  a.download = m.file.replace(/^.*\//, '');
+  a.href = `${BASE}${pathOf(m.id)}${V}`;
+  a.download = m.id.split(':')[1].replace(/^.*\//, '') + '.svg';
 
   const wrap = $('#p-src-wrap');
-  if (m.mime === 'image/svg+xml') {
-    wrap.hidden = false;
-    $('#p-src').textContent = '…';
-    try {
-      const txt = await (await fetch(`${BASE}${m.path}${V}`)).text();
-      // 文件是单行的,展开成缩进的可读格式再上色
-      $('#p-src').innerHTML = highlightSvg(prettySvg(txt) ?? escHtml(txt));
-    } catch {
-      $('#p-src').textContent = t('srcFail');
-    }
-  } else {
-    wrap.hidden = true;
+  wrap.hidden = false;
+  $('#p-src').textContent = '…';
+  try {
+    const txt = await (await fetch(`${BASE}${pathOf(m.id)}${V}`)).text();
+    // 文件是单行的,展开成缩进的可读格式再上色
+    $('#p-src').innerHTML = highlightSvg(prettySvg(txt) ?? escHtml(txt));
+  } catch {
+    $('#p-src').textContent = t('srcFail');
   }
 
   renderRelated(m);
@@ -548,7 +566,7 @@ function closePanel() {
 // 同分类的邻居 + 同名概念 + 描述里共同的词
 function tokens(m) {
   const set = new Set();
-  const text = `${m.concept} ${m.desc} ${m.descEn}`.toLowerCase();
+  const text = `${m.concept} ${m.descEn} ${ZH.get(m.id) || ''}`.toLowerCase();
   for (const w of text.split(/[^a-z0-9一-龥]+/)) {
     if (w.length > 1) set.add(w);
   }
@@ -609,12 +627,13 @@ $('#clear2').addEventListener('click', () => {
   setQuery('');
   qEls[0].focus();
 });
-$('#lang').addEventListener('click', () => {
+$('#lang').addEventListener('click', async () => {
   lang = lang === 'zh' ? 'en' : 'zh';
   try {
     localStorage.setItem('icon-lang', lang);
   } catch {}
   applyI18n();
+  if (lang === 'zh') await loadZh(); // 中文名在翻译包里,切过去才下
   render();
   if (current) openPanel(current);
 });
@@ -688,6 +707,7 @@ $('#p-id').addEventListener('click', async (e) => {
     } catch {}
     // 构建号是 Worker 注入的 —— 不用等索引回来就能带上版本号
     V = window.__ICON_BUILD__ ? `?v=${window.__ICON_BUILD__}` : '';
+    if (lang === 'zh') loadZh(); // 中文名在翻译包里
     applyI18n();
     cacheLoad();
     // 索引和精选那一小包并行拉 —— 首页马上有东西看

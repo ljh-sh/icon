@@ -4,8 +4,9 @@
 //   dist/                 —— 本地预览用的静态站
 //
 // 用法:node scripts/build.mjs
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { brotliCompressSync, constants } from 'node:zlib';
 import { join } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -60,7 +61,9 @@ const CATS = {
   people: { title: '人与职业', titleEn: 'People', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '工作类型与人群 —— 只取中性、正面的表达', noteEn: 'Work types and groups of people — neutral, positive depictions only' },
   region: { title: '地区', titleEn: 'Regions', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '地理与行政层级 —— 国家 / 省 / 市 / 区县 / 可用区 / 机房', noteEn: 'Geography and administrative levels — country, province, city, district, availability zone, data centre' },
   filetype: { title: '文件类型', titleEn: 'File Types', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '常见的文件类型 —— 文档 / 表格 / 代码 / 图片 / 音视频 / 压缩包', noteEn: 'Common file types — documents, sheets, code, images, media, archives' },
-  emoji: { title: 'Emoji', titleEn: 'Emoji', source: 'Twemoji(v0) / Microsoft Fluent Emoji(v1)', license: 'MIT(两个集都是)', note: 'emoji —— v0 是 Twemoji 画的(推荐版),v1 是微软 Fluent 的同一批概念画的;整库搬入,不进 sprite,按文件引', noteEn: 'Emoji — v0 drawn by Twemoji (the recommended version), v1 the same concepts drawn by Microsoft Fluent; imported whole, served as files, not a sprite' },
+  twemoji: { title: 'Emoji(Twemoji)', titleEn: 'Emoji (Twemoji)', source: 'Twemoji', license: 'MIT', note: 'Twitter 的 emoji 集,整库搬入;同一批概念在 fluent: / noto: 里另有两版', noteEn: "Twitter's emoji set, imported whole; the same concepts also come in fluent: and noto:" },
+  fluent: { title: 'Emoji(Fluent)', titleEn: 'Emoji (Fluent)', source: 'Microsoft Fluent Emoji', license: 'MIT', note: '微软 Fluent Emoji 的扁平版,整库搬入;键名跟 twemoji: / noto: 对得上,同一概念三种画', noteEn: 'Microsoft Fluent Emoji (Flat), imported whole; keys match twemoji: and noto: — same concept, three drawings' },
+  noto: { title: 'Emoji(Noto)', titleEn: 'Emoji (Noto)', source: 'Noto Emoji', license: 'OFL-1.1', note: 'Google Noto Emoji 2D,整库搬入;键名跟 twemoji: / fluent: 对得上,同一概念三种画', noteEn: 'Google Noto Emoji 2D, imported whole; keys match twemoji: and fluent: — same concept, three drawings' },
   aviation: { title: '航空', titleEn: 'Aviation', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '航空与航天 —— 客机 / 无人机 / 卫星 / 地面站 / 塔台 / 空域', noteEn: 'Aviation and spaceflight — airliners, drones, satellites, ground stations, towers, airspace' },
   education: { title: '教育', titleEn: 'Education', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '教育场景 —— 小学 / 初中 / 高中 / 大学 等学段,以及校园里的通用概念', noteEn: 'Education — school stages from primary to university, plus everyday campus concepts' },
   weather: { title: '天气', titleEn: 'Weather', source: 'x-cmd/icon 自绘', license: 'Apache-2.0', note: '天气现象与观测要素 —— 晴雨雪雾 / 温度 / 湿度 / 气压', noteEn: 'Weather phenomena and observations — sun, rain, snow, fog, temperature, humidity, pressure' },
@@ -357,6 +360,9 @@ if (bad) process.exit(1);
 
 // ---- 生成元数据 ----
 const metas = [];
+const zhNames = {}; // id → 中文名(翻译包用)
+const metaFile = new Map(); // id → 图标原文件(清单里不带,构建自己要用)
+const extOf = (id) => metaFile.get(id).split('.').pop();
 const metaById = new Map();
 for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
   const ext = info.file.split('.').pop();
@@ -380,19 +386,8 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     cat: info.cat,
     concept: info.concept,
     version: info.version || undefined, // 版本化分类才有
-    desc: c ? c.zh : info.concept,
     descEn: c ? c.en : autoEn,
-    file: info.file,
-    path: `i/${info.file.replace(/^icons\//, '')}`,
-    mime: MIME[ext],
-    bytes: raw.length,
-    // sprite 用的 id 与 viewBox(PNG 进不了 sprite,还是单独文件)
-    spriteId: ext === 'svg' ? spriteId(id) : undefined,
     viewBox: ext === 'svg' ? viewBoxOf(raw) : undefined,
-    source: rec?.meta.source || CATS[info.cat].source,
-    license: rec?.meta.license || CATS[info.cat].license,
-    note: rec?.meta.note || CATS[info.cat].note,
-    mono: !!CATS[info.cat].mono,
     type,
     ...(inner ? { inner } : {}),
     ...(rec
@@ -411,6 +406,8 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
   };
   metas.push(m);
   metaById.set(id, m);
+  metaFile.set(id, info.file);
+  zhNames[id] = c ? c.zh : info.concept; // 中文名另存翻译包
 }
 
 // 别名:概念键指向推荐版本 —— **不单开一条清单项**
@@ -436,7 +433,7 @@ const cats = Object.entries(CATS).map(([cat, meta]) => ({
 }));
 
 const BUILD = createHash('sha1')
-  .update(metas.map((m) => `${m.id}:${m.bytes}`).join('\n'))
+  .update(metas.map((m) => `${m.id}:${statSync(metaFile.get(m.id)).size}`).join('\n'))
   .digest('hex')
   .slice(0, 10);
 
@@ -445,8 +442,9 @@ const manifest = { build: BUILD, cats, icons: metas };
 // ---- src/gen.ts:Worker 用的精简数据(不嵌字节,图标走静态资源) ----
 const id2file = {};
 for (const m of metas) {
-  id2file[m.id] = m.path;
-  if (m.aliasFor) id2file[m.aliasFor] = m.path; // 别名键也是这个图标
+  const p = `i/${m.id.replace(':', '/')}.${extOf(m.id)}`;
+  id2file[m.id] = p;
+  if (m.aliasFor) id2file[m.aliasFor] = p; // 别名键也是这个图标
 }
 const licMeta = {};
 for (const m of metas) {
@@ -543,9 +541,9 @@ console.log(`src/gen.ts: ${metas.length} icons, ${cats.length} categories`);
 rmSync(PUBLIC, { recursive: true, force: true });
 mkdirSync(PUBLIC, { recursive: true });
 for (const m of metas) {
-  const dest = join(PUBLIC, m.path);
+  const dest = join(PUBLIC, `i/${m.id.replace(':', '/')}.${extOf(m.id)}`);
   mkdirSync(join(dest, '..'), { recursive: true });
-  copyFileSync(join(ROOT, m.file), dest);
+  copyFileSync(join(ROOT, metaFile.get(m.id)), dest);
 }
 
 // ---- sprite:矢量图标合成一张,页面用 <use> 引用 ----
@@ -554,15 +552,16 @@ for (const m of metas) {
 function spriteOf(list) {
   const symbols = new Map(); // spriteId → { viewBox, body, ns }
   for (const m of list) {
-    if (!m.spriteId || symbols.has(m.spriteId)) continue;
-    const raw = readFileSync(join(ROOT, m.file), 'utf8');
+    const sid = spriteId(m.id); // sprite 里的符号 id(清单里不带,这里算)
+    if (symbols.has(sid)) continue;
+    const raw = readFileSync(join(ROOT, metaFile.get(m.id)), 'utf8');
     const open = raw.match(/<svg[^>]*>/)?.[0] || '<svg>';
     const inner = raw.match(/<svg[^>]*>([\s\S]*)<\/svg>/)?.[1]?.trim();
     if (!inner) continue;
     // 根元素上的命名空间声明要搬到 symbol 上 —— 少了 xmlns:xlink 之类的前缀没人声明,
     // 整个 sprite 的 XML 会在这里断掉,后面的图标全都不渲染。
     const ns = [...open.matchAll(/xmlns(?::[\w-]+)?="[^"]*"/g)].map((x) => x[0]).join(' ');
-    symbols.set(m.spriteId, { viewBox: m.viewBox, body: inner, ns });
+    symbols.set(sid, { viewBox: m.viewBox, body: inner, ns });
   }
   const sprite = ['<svg xmlns="http://www.w3.org/2000/svg" style="display:none">'];
   for (const [id, s] of symbols) {
@@ -642,13 +641,46 @@ writeFileSync(
 );
 console.log(`public/icon/sprite.star.svg: ${starSprite.count} 个符号(star)`);
 
-// 分片:一片一个 sprite 文件,页面按需取片 ——
+// 分片:按清单里的 id 顺序切,一片一个 sprite 文件,页面按需取片 ——
 // 十万个图标也只下看得见的那几片,不用整包拉
+//
+// 片的大小按**压后**算:一片压完不超过 1 MB(边缘会自动 brotli)。
+// 先按原始体积粗切,再压一压看超没超,超了就对半切 —— 直到每片都在限额内。
 const SHARD_MAX = 300; // 一片最多多少个符号
+const SHARD_BYTES = 900 * 1024; // 一片压后的上限(留一点余量给 1 MB)
+const brSize = (chunk) =>
+  brotliCompressSync(Buffer.from(spriteOf(chunk).text), {
+    params: { [constants.BROTLI_PARAM_QUALITY]: 11 },
+  }).length;
+function fitChunks(list) {
+  const out = [];
+  let cur = [];
+  let raw = 0;
+  for (const m of list) {
+    cur.push(m);
+    raw += statSync(metaFile.get(m.id)).size;
+    if (raw >= 1.5 * 1024 * 1024) {
+      out.push(cur);
+      cur = [];
+      raw = 0;
+    }
+  }
+  if (cur.length) out.push(cur);
+  // 压完还超限的,对半再切
+  const fit = [];
+  for (const c of out) {
+    if (c.length <= 1 || brSize(c) <= SHARD_BYTES) {
+      fit.push(c);
+      continue;
+    }
+    const half = Math.ceil(c.length / 2);
+    fit.push(...fitChunks(c.slice(0, half)), ...fitChunks(c.slice(half)));
+  }
+  return fit;
+}
 for (const [cat, list] of catMetas) {
   const shards = [];
-  for (let i = 0; i < list.length; i += SHARD_MAX) {
-    const chunk = list.slice(i, i + SHARD_MAX);
+  for (const chunk of fitChunks(list)) {
     const file = `sprite.${cat}.${shards.length}.svg`;
     writeFileSync(join(PUBLIC, file), spriteOf(chunk).text);
     for (const m of chunk) m.shard = file;
@@ -668,6 +700,9 @@ for (const [cat, list] of catMetas) {
 // 全量 manifest(客户端搜索时下的那份"全名单")—— 要在分片之后写:
 // 分片会给每个图标标上它住在哪一片
 writeFileSync(join(PUBLIC, 'manifest.json'), JSON.stringify(manifest));
+
+// 翻译包:中文名单独一份,英文区不用下 —— 切到中文时才拉
+writeFileSync(join(PUBLIC, 'manifest.zh.json'), JSON.stringify(zhNames));
 
 // 索引:分类清单 + 每包多大 —— 客户端第一个请求就是它
 // total   —— 全部条目(含各版本的旧版)
@@ -693,9 +728,9 @@ rmSync(DIST, { recursive: true, force: true });
 mkdirSync(join(DIST, 'i'), { recursive: true });
 writeFileSync(join(DIST, 'manifest.json'), JSON.stringify(manifest, null, 2));
 for (const m of metas) {
-  const dest = join(DIST, m.path);
+  const dest = join(DIST, `i/${m.id.replace(':', '/')}.${extOf(m.id)}`);
   mkdirSync(join(dest, '..'), { recursive: true });
-  copyFileSync(join(ROOT, m.file), dest);
+  copyFileSync(join(ROOT, metaFile.get(m.id)), dest);
 }
 for (const f of readdirSync(PUBLIC)) {
   if (f.endsWith('.svg') || f.endsWith('.json')) copyFileSync(join(PUBLIC, f), join(DIST, f));
