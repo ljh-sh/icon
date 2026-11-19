@@ -105,6 +105,7 @@ let lang = 'zh';
 const LIMIT0 = 60; // 默认只显示前 60 个 —— 要更多点「显示更多」,那才会去下载
 let limit = LIMIT0;
 let V = ''; // 构建号:URL 上带上,重新部署后不会顶着旧缓存
+let BUILD = 'dev'; // 构建号(本地缓存的键)
 let current = null; // 面板里正在看的图标
 
 // 图标是分包装的:首页先拿 star(精选)那一小包,其余分类在后台一个一个拉,
@@ -156,7 +157,7 @@ function cacheLoad() {
     cacheIdx = {};
   }
   // 别的构建号留下的缓存已经作废(发过新版了)—— 顺手清掉,别占地方
-  const prefix = CACHE_PREFIX + V + ':';
+  const prefix = CACHE_PREFIX + BUILD + ':';
   for (const k of Object.keys(cacheIdx)) {
     if (k.startsWith(CACHE_PREFIX) && !k.startsWith(prefix)) {
       try {
@@ -166,7 +167,7 @@ function cacheLoad() {
     }
   }
 }
-const cacheKey = (file) => CACHE_PREFIX + V + ':' + file;
+const cacheKey = (file) => CACHE_PREFIX + BUILD + ':' + file; // BUILD 是构建号,不带 ?v=
 
 function cachePut(file, text) {
   const key = cacheKey(file);
@@ -741,6 +742,7 @@ $('#p-id').addEventListener('click', async (e) => {
       lang = localStorage.getItem('icon-lang') || lang;
     } catch {}
     // 构建号是 Worker 注入的 —— 不用等索引回来就能带上版本号
+    BUILD = window.__ICON_BUILD__ || 'dev';
     V = window.__ICON_BUILD__ ? `?v=${window.__ICON_BUILD__}` : '';
     if (lang === 'zh') loadZh(); // 中文名在翻译包里
     applyI18n();
