@@ -142,108 +142,43 @@ const catOf = (cat) => DATA.cats.find((c) => c.cat === cat) || {};
 
 // ---------- 资产缓存:下过的都留在本地,下次直接用 ----------
 // 一片 = 一个 sprite 文件(≤300 个符号);清单、翻译包同理。
-// 全部按"构建号 + 文件名"存在 localStorage 里 ——
-// 新版发出来构建号就变了,旧的那批自动作废(顺带清掉)。
-// 十万个图标也是同一套:只下看得见的那几片,其余的不碰。
-const CACHE_MAX = 4 * 1024 * 1024; // 本地缓存上限(localStorage 大约 5 MB)
-const CACHE_PREFIX = 'icon-asset:';
-let cacheIdx = {}; // 键 → { t: 时间, s: 字节 }
+// 用浏览器的 **Cache API**,不是 localStorage ——
+// localStorage 存字符串、只有 5 MB,全名单一个文件就 3.1 MB,片根本存不下;
+// Cache API 存的是 Response,配额跟磁盘走(几百 MB 起),浏览器自己管淘汰。
+// 按构建号分桶:发新版就换一个新桶,旧的顺手删掉。
+const CACHE_NAME = 'icon-assets-' + BUILD;
+let assetCache = null;
 const loadedShards = new Set(); // 已经注进页面的片
-
-function cacheLoad() {
-  try {
-    cacheIdx = JSON.parse(localStorage.getItem('icon-assets') || '{}');
-  } catch {
-    cacheIdx = {};
-  }
-  // 别的构建号留下的缓存已经作废(发过新版了)—— 顺手清掉,别占地方
-  const prefix = CACHE_PREFIX + BUILD + ':';
-  for (const k of Object.keys(cacheIdx)) {
-    if (k.startsWith(CACHE_PREFIX) && !k.startsWith(prefix)) {
-      try {
-        localStorage.removeItem(k);
-      } catch {}
-      delete cacheIdx[k];
-    }
-  }
-  // 旧版本的缓存键(没压缩那套)也清掉
-  for (const k of Object.keys(localStorage)) {
-    if (k.startsWith('icon-shard:') || k === 'icon-shards') {
-      try {
-        localStorage.removeItem(k);
-      } catch {}
-    }
-  }
-}
-const cacheKey = (file) => CACHE_PREFIX + BUILD + ':' + file; // BUILD 是构建号,不带 ?v=
-
-function cachePut(file, text) {
-  const key = cacheKey(file);
-  try {
-    localStorage.setItem(key, text);
-  } catch {
-    return; // 配额满了 —— 只是缓存,没有它照样能用
-  }
-  cacheIdx[key] = { t: Date.now(), s: text.length }; // 存进去的(压过的)大小
-  let total = Object.values(cacheIdx).reduce((a, b) => a + b.s, 0);
-  if (total > CACHE_MAX) {
-    // 淘汰最老的(连着别的构建号的一起清 —— 那些已经作废了)
-    for (const k of Object.keys(cacheIdx).sort((a, b) => cacheIdx[a].t - cacheIdx[b].t)) {
-      if (total <= CACHE_MAX) break;
-      localStorage.removeItem(k);
-      total -= cacheIdx[k].s;
-      delete cacheIdx[k];
-    }
-  }
-  try {
-    localStorage.setItem('icon-assets', JSON.stringify(cacheIdx));
-  } catch {}
-}
-
-// localStorage 存的是字符串 —— 原始文本。全名单一个文件就 3.1 MB,
-// 5 MB 的配额一下就满了。所以**存之前先压一遍**(浏览器原生 gzip,
-// CompressionStream):压后 160 KB,省十几倍,能装下更多片。
-async function pack(text) {
-  if (!text.length) return 'raw:';
-  try {
-    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
-    const buf = new Uint8Array(await new Response(stream).arrayBuffer());
-    let bin = '';
-    for (let i = 0; i < buf.length; i += 8192) {
-      bin += String.fromCharCode(...buf.subarray(i, i + 8192));
-    }
-    return 'gz:' + btoa(bin);
-  } catch {
-    return 'raw:' + text; // 浏览器不支持压缩就存原文
-  }
-}
-async function unpack(v) {
-  if (v.startsWith('gz:')) {
-    try {
-      const bin = atob(v.slice(3));
-      const buf = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-      const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
-      return await new Response(stream).text();
-    } catch {
-      return '';
-    }
-  }
-  return v.slice(4);
+function cache() {
+  if (!assetCache) assetCache = caches.open(CACHE_NAME);
+  return assetCache;
 }
 
 // 取一个资产:本地有就用(一个网络请求都不发),没有就下并存下来
 async function asset(file) {
-  const key = cacheKey(file);
+  const url = `${BASE}${file}${V}`;
+  const c = await cache();
   try {
-    const hit = localStorage.getItem(key);
-    if (hit !== null) return await unpack(hit);
+    const hit = await c.match(url);
+    if (hit) return await hit.text();
   } catch {}
-  const res = await fetch(`${BASE}${file}${V}`);
+  const res = await fetch(url);
   if (!res.ok) return null;
   const text = await res.text();
-  cachePut(file, await pack(text));
+  try {
+    // 存解码后的正文 —— 别把 Content-Encoding 一起存进去(会双解压)
+    await c.put(url, new Response(text, { headers: { 'Content-Type': 'text/plain' } }));
+  } catch {}
   return text;
+}
+
+// 别的构建号留下的桶已经作废 —— 顺手删掉,别占磁盘
+async function dropOldCaches() {
+  try {
+    for (const name of await caches.keys()) {
+      if (name.startsWith('icon-assets-') && name !== CACHE_NAME) await caches.delete(name);
+    }
+  } catch {}
 }
 
 let spriteHost = null;
@@ -786,7 +721,7 @@ $('#p-id').addEventListener('click', async (e) => {
     V = window.__ICON_BUILD__ ? `?v=${window.__ICON_BUILD__}` : '';
     if (lang === 'zh') loadZh(); // 中文名在翻译包里
     applyI18n();
-    cacheLoad();
+    dropOldCaches();
     // 索引和精选那一小包并行拉 —— 首页马上有东西看
     const idxP = asset('index.json').then((t) => JSON.parse(t));
     const starP = Promise.all([shardURL('sprite.star.svg'), loadManifest('manifest.star.json')]);
