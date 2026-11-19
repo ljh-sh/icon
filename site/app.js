@@ -113,6 +113,7 @@ let current = null; // 面板里正在看的图标
 let BUNDLES = {}; // 包名 → { icons, sprite, manifest }
 const ICONS = new Map(); // id → 图标信息(已加载的)
 const LOADED = new Set(); // 已经拉过的包
+const PREFETCHING = new Set(); // 正在预取的包(悬停时)
 let PENDING = 0; // 还在路上的包
 let TOTAL = 0; // 首页默认能看到多少个(index.json 的 browsable)
 let ALL = 0; // 全库条目数(含各版本的旧版)
@@ -433,7 +434,12 @@ async function loadBundle(name) {
   LOADED.add(name);
   PENDING++;
   try {
+    // 清单和第一片**并行**拉 —— 首页摆 60 个,第一片(≤80 个符号)正好装得下。
+    // 串行的话片要等清单回来才发,白白多一个来回。
+    const first = (b.shards || [])[0];
+    const shardP = first ? shardURL(first) : Promise.resolve();
     await loadManifest(b.manifest);
+    await shardP;
     for (const m of DATA.icons) byId.set(m.id, m);
   } catch (err) {
     LOADED.delete(name);
@@ -477,14 +483,24 @@ async function loadRest(includeBulk) {
 
 // 预取一个分类:清单 + 首页要用的那几片
 async function prefetch(cat) {
-  if (!cat || LOADED.has(cat)) return;
+  if (!cat || LOADED.has(cat) || PREFETCHING.has(cat)) return;
   const b = BUNDLES[cat];
   if (!b) return;
-  const j = await (await asset(b.manifest)).catch(() => null);
-  if (!j) return;
-  const want = new Set();
-  for (const m of j.icons.slice(0, LIMIT0)) if (m.shard) want.add(m.shard);
-  await Promise.all([...want].map(shardURL));
+  PREFETCHING.add(cat);
+  try {
+    // 清单和第一片并行,跟点下去时一样
+    const first = (b.shards || [])[0];
+    const shardP = first ? shardURL(first) : Promise.resolve();
+    const j = await (await asset(b.manifest)).catch(() => null);
+    if (j) {
+      const want = new Set();
+      for (const m of j.icons.slice(0, LIMIT0)) if (m.shard) want.add(m.shard);
+      await Promise.all([...want].map(shardURL));
+    }
+    await shardP;
+  } finally {
+    PREFETCHING.delete(cat);
+  }
 }
 
 function setCat(value) {
