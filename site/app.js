@@ -491,7 +491,7 @@ async function prefetch(cat) {
     // 清单和第一片并行,跟点下去时一样
     const first = (b.shards || [])[0];
     const shardP = first ? shardURL(first) : Promise.resolve();
-    const j = await (await asset(b.manifest)).catch(() => null);
+    const j = await asset(b.manifest).catch(() => null);
     if (j) {
       const want = new Set();
       for (const m of j.icons.slice(0, LIMIT0)) if (m.shard) want.add(m.shard);
