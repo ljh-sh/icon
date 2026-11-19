@@ -82,15 +82,18 @@ emoji 的**名字**另有两处来源(不是图形):英文名取 Unicode 的 `em
 Unicode License / Unicode-3.0 许可。
 
 IconPark 是整库搬入:图形是多色填充风(蓝 + 深色描边),著作权 Apache-2.0,干净。
-emoji 那三个集也是整库搬入,同样不进 sprite(加起来 52 MB,一张 sprite 没人下得起),
-页面按文件引。Noto 是 OFL-1.1 —— 许可与版权声明随附:
-<https://github.com/googlefonts/noto-emoji/blob/main/LICENSE>。
 **品牌类 83 个图标没收**(Adobe / Apple / 微信 / 支付宝这类商标图形),
 名字里带品牌的也一并排除(weixin-* / bytedance-* / apple-* / ios-*)。
 
 导入时唯一的改动:官方那套的**纯黑描边**换成了 `currentColor` ———
 页面上深浅色主题下描边都得看得见(黑描边在暗色主题里等于没有)。
 图形、颜色搭配、笔触粗细都没动;单独当文件用时 `currentColor` 就是黑色,跟官方一致。
+
+emoji 那三个集也是整库搬入,同样**不进 sprite**(加起来 52 MB,一张 sprite 没人下得起),
+页面按文件引。Noto 是 OFL-1.1 —— 许可与版权声明随附:
+<https://github.com/googlefonts/noto-emoji/blob/main/LICENSE>。
+另外 Noto 的 SVG 里渐变 id 都叫 `radial-gradient`,单文件用没事;
+哪天要进 sprite,得先给 id 加前缀。
 
 Simple Icons 的图形是 CC0 ✓(著作权干净),但**商标还是各家的** ——
 按各家的品牌指引用,不得暗示背书。
