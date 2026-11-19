@@ -149,6 +149,20 @@
 下过的资产全部留在 `localStorage`(按「构建号 + 文件名」),下次直接用 ——
 发新版构建号就变了,旧的那批自动作废清掉。
 
+存之前**先 gzip 一遍**(浏览器原生的 `CompressionStream`):localStorage 存的是
+字符串,不压的话全名单一个文件就 3.1 MB,5 MB 的配额一下就满,片几乎存不下。
+压过之后同样 4 MB 能装下四倍的东西:
+
+| 资产 | 原始 | 存进 localStorage |
+| --- | ---: | ---: |
+| `index.json` | 19 KB | 7 KB |
+| `manifest.star.json` | 34 KB | 11 KB |
+| `sprite.star.svg` | 82 KB | 33 KB |
+| `manifest.zh.json` | 766 KB | 204 KB |
+| `manifest.json`(全名单) | 3.1 MB | 1.2 MB |
+
+一次会话(首页 + 搜索 + 点一个 emoji 分类)本地占 **1.5 MB**。
+
 | 场景 | 下什么 | 压后 | 实测(线上) |
 | --- | --- | ---: | --- |
 | 第一次来 | index + star 清单 + star 片 + 中文包 | 27 KB | 0.92 s / 5 个请求 |
