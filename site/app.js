@@ -146,11 +146,11 @@ const catOf = (cat) => DATA.cats.find((c) => c.cat === cat) || {};
 // localStorage 存字符串、只有 5 MB,全名单一个文件就 3.1 MB,片根本存不下;
 // Cache API 存的是 Response,配额跟磁盘走(几百 MB 起),浏览器自己管淘汰。
 // 按构建号分桶:发新版就换一个新桶,旧的顺手删掉。
-const CACHE_NAME = 'icon-assets-' + BUILD;
+const cacheName = () => 'icon-assets-' + BUILD; // BUILD 要等页面注入,所以不能是常量
 let assetCache = null;
 const loadedShards = new Set(); // 已经注进页面的片
 function cache() {
-  if (!assetCache) assetCache = caches.open(CACHE_NAME);
+  if (!assetCache) assetCache = caches.open(cacheName());
   return assetCache;
 }
 
@@ -176,7 +176,7 @@ async function asset(file) {
 async function dropOldCaches() {
   try {
     for (const name of await caches.keys()) {
-      if (name.startsWith('icon-assets-') && name !== CACHE_NAME) await caches.delete(name);
+      if (name.startsWith('icon-assets-') && name !== cacheName()) await caches.delete(name);
     }
   } catch {}
 }
