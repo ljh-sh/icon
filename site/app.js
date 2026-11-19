@@ -166,6 +166,14 @@ function cacheLoad() {
       delete cacheIdx[k];
     }
   }
+  // 旧版本的缓存键(没压缩那套)也清掉
+  for (const k of Object.keys(localStorage)) {
+    if (k.startsWith('icon-shard:') || k === 'icon-shards') {
+      try {
+        localStorage.removeItem(k);
+      } catch {}
+    }
+  }
 }
 const cacheKey = (file) => CACHE_PREFIX + BUILD + ':' + file; // BUILD 是构建号,不带 ?v=
 
@@ -176,7 +184,7 @@ function cachePut(file, text) {
   } catch {
     return; // 配额满了 —— 只是缓存,没有它照样能用
   }
-  cacheIdx[key] = { t: Date.now(), s: text.length };
+  cacheIdx[key] = { t: Date.now(), s: text.length }; // 存进去的(压过的)大小
   let total = Object.values(cacheIdx).reduce((a, b) => a + b.s, 0);
   if (total > CACHE_MAX) {
     // 淘汰最老的(连着别的构建号的一起清 —— 那些已经作废了)
@@ -192,17 +200,49 @@ function cachePut(file, text) {
   } catch {}
 }
 
+// localStorage 存的是字符串 —— 原始文本。全名单一个文件就 3.1 MB,
+// 5 MB 的配额一下就满了。所以**存之前先压一遍**(浏览器原生 gzip,
+// CompressionStream):压后 160 KB,省十几倍,能装下更多片。
+async function pack(text) {
+  if (!text.length) return 'raw:';
+  try {
+    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+    const buf = new Uint8Array(await new Response(stream).arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < buf.length; i += 8192) {
+      bin += String.fromCharCode(...buf.subarray(i, i + 8192));
+    }
+    return 'gz:' + btoa(bin);
+  } catch {
+    return 'raw:' + text; // 浏览器不支持压缩就存原文
+  }
+}
+async function unpack(v) {
+  if (v.startsWith('gz:')) {
+    try {
+      const bin = atob(v.slice(3));
+      const buf = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return await new Response(stream).text();
+    } catch {
+      return '';
+    }
+  }
+  return v.slice(4);
+}
+
 // 取一个资产:本地有就用(一个网络请求都不发),没有就下并存下来
 async function asset(file) {
   const key = cacheKey(file);
   try {
     const hit = localStorage.getItem(key);
-    if (hit !== null) return hit;
+    if (hit !== null) return await unpack(hit);
   } catch {}
   const res = await fetch(`${BASE}${file}${V}`);
   if (!res.ok) return null;
   const text = await res.text();
-  cachePut(file, text);
+  cachePut(file, await pack(text));
   return text;
 }
 
