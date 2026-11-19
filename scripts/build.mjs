@@ -718,7 +718,9 @@ writeFileSync(
 // 缓存策略:图标文件长缓存(URL 上带构建号,重新部署即失效),清单短缓存
 writeFileSync(
   join(ROOT, 'public/_headers'),
-  `/icon/i/*\n  Cache-Control: public, max-age=3600\n\n/icon/sprite*.svg\n  Cache-Control: public, max-age=3600\n\n/icon/manifest*.json\n  Cache-Control: public, max-age=0, must-revalidate\n\n/icon/index.json\n  Cache-Control: public, max-age=0, must-revalidate\n`,
+  // 静态资源:浏览器 HTTP 缓存留一天(URL 上带 ?v=构建号,内容变了 URL 就变)。
+  // 长期的那份在 Cache API 里(不受"清除缓存的图片和文件"影响)。
+  `/icon/i/*\n  Cache-Control: public, max-age=86400\n\n/icon/sprite*.svg\n  Cache-Control: public, max-age=86400\n\n/icon/manifest*.json\n  Cache-Control: public, max-age=86400\n\n/icon/index.json\n  Cache-Control: public, max-age=86400\n`,
 );
 console.log(`public/icon/: ${metas.length} 个文件 + ${Object.keys(bundles).length} 个包`);
 
