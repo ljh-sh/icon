@@ -148,9 +148,18 @@ const catOf = (cat) => DATA.cats.find((c) => c.cat === cat) || {};
 // 按构建号分桶:发新版就换一个新桶,旧的顺手删掉。
 const cacheName = () => 'icon-assets-' + BUILD; // BUILD 要等页面注入,所以不能是常量
 let assetCache = null;
+let noCache = false; // 这个浏览器没有 Cache API(老 Safari、非 https 的局域网地址)
 const loadedShards = new Set(); // 已经注进页面的片
-function cache() {
-  if (!assetCache) assetCache = caches.open(cacheName());
+async function cache() {
+  if (noCache) return null;
+  if (!assetCache) {
+    try {
+      assetCache = await caches.open(cacheName());
+    } catch {
+      noCache = true; // 用不了就不缓存 —— 只是慢一点,不能整个挂掉
+      return null;
+    }
+  }
   return assetCache;
 }
 
@@ -158,17 +167,21 @@ function cache() {
 async function asset(file) {
   const url = `${BASE}${file}${V}`;
   const c = await cache();
-  try {
-    const hit = await c.match(url);
-    if (hit) return await hit.text();
-  } catch {}
+  if (c) {
+    try {
+      const hit = await c.match(url);
+      if (hit) return await hit.text();
+    } catch {}
+  }
   const res = await fetch(url);
   if (!res.ok) return null;
   const text = await res.text();
-  try {
-    // 存解码后的正文 —— 别把 Content-Encoding 一起存进去(会双解压)
-    await c.put(url, new Response(text, { headers: { 'Content-Type': 'text/plain' } }));
-  } catch {}
+  if (c) {
+    try {
+      // 存解码后的正文 —— 别把 Content-Encoding 一起存进去(会双解压)
+      await c.put(url, new Response(text, { headers: { 'Content-Type': 'text/plain' } }));
+    } catch {}
+  }
   return text;
 }
 
