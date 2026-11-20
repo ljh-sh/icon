@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Icon 合成 —— x-cmd/icon</title>
-<meta name="description" content="把图标库里的图标按需拼成新的:角标、框内内容、图文长条、多枚叠加。调好即得 URL,可直接嵌图,也可给 draw 画架构图用。">
+<title>Icon 合成编辑器 —— x-cmd/icon</title>
+<meta name="description" content="把图标库里的图标按需拼成新的:角标、框内内容、图文长条、多枚叠加。每个模式有自己的工作区与状态,存在本机,调好即得 URL。">
 <base href="__ICON_BASE__/">
 <style>
 :root{
@@ -15,50 +15,40 @@
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg)}
 a{color:var(--accent-ink);text-decoration:none}
 a:hover{text-decoration:underline}
-header{padding:18px 24px 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-header h1{font-size:18px;margin:0;font-weight:650}
-header .sub{color:var(--muted);font-size:13px}
-header .back{margin-left:auto;font-size:13px}
-main{max-width:1180px;margin:0 auto;padding:12px 24px 64px;display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
-@media(max-width:900px){main{grid-template-columns:1fr}}
+/* 顶栏 */
+header{position:sticky;top:0;z-index:30;background:rgba(251,250,248,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--surface-3);padding:9px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:16.5px;margin:0;font-weight:700;letter-spacing:.2px}
+header .sub{color:var(--faint);font-size:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:13.5px;border:0;border-radius:999px;padding:6px 15px;background:var(--surface-2);color:var(--muted);cursor:pointer}
+.tabs button:hover{color:var(--accent-ink)}
+.tabs button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
+.tools{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tools button{font:inherit;font-size:13px;border:1px solid var(--surface-3);background:var(--surface);border-radius:999px;padding:5px 13px;color:var(--muted);cursor:pointer}
+.tools button:hover{border-color:var(--accent);color:var(--accent-ink)}
+#hist-n{background:var(--accent);color:#fff;border-radius:999px;font-size:10.5px;font-weight:700;padding:1px 7px;margin-left:6px}
+#hist-n:empty{display:none}
+main{max-width:1040px;margin:0 auto;padding:14px 24px 64px}
 .card{background:var(--surface-2);border-radius:14px;padding:14px 16px}
 .card h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 10px}
-/* 左:选图器 */
-#picker .row{display:flex;gap:8px;margin-bottom:10px}
-#picker select,#picker input[type=search]{font:inherit;border:0;background:var(--surface);border-radius:9px;padding:7px 10px;font-size:13px;color:var(--ink);outline:none;min-width:0}
-#picker input[type=search]{flex:1}
-#p-target{margin:-4px 0 10px;font-size:12.5px;font-weight:600;color:var(--accent-ink);min-height:1.2em}
-@media(min-width:901px){#picker{position:sticky;top:12px}}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:min(560px,calc(100vh - 250px));overflow:auto;padding:2px}
-#grid button{border:0;background:var(--surface);border-radius:10px;padding:6px 2px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
-#grid button:hover{background:var(--accent-soft)}
-#grid button[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
-#grid img{width:32px;height:32px;object-fit:contain}
-#grid .nm{font-size:9.5px;line-height:1.2;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#grid .grid-empty{grid-column:1/-1;color:var(--faint);font-size:12.5px;padding:20px 4px;text-align:center}
-button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-#picker.pulse{animation:pulse .7s}
-@keyframes pulse{0%,100%{box-shadow:none}40%{box-shadow:0 0 0 4px var(--accent)}}
-/* 右:模式 */
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.tabs button{font:inherit;font-size:13.5px;border:0;border-radius:999px;padding:7px 16px;background:var(--surface);color:var(--muted);cursor:pointer}
-.tabs button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
 /* 槽位芯片 */
 .slots{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;min-height:34px;align-items:center}
+.slots .arrow{color:var(--faint);font-size:15px}
 .chip{display:flex;align-items:center;gap:7px;background:var(--surface);border-radius:10px;padding:4px 8px 4px 6px;cursor:pointer;border:1.5px solid transparent;font:inherit}
 .chip:hover{border-color:var(--accent)}
-.chip.cur{border-color:var(--accent)}
 .chip img{width:22px;height:22px;object-fit:contain;flex:none}
 .chip .id{font:12px/1.3 ui-monospace,"SF Mono",Consolas,monospace;color:var(--ink)}
 .chip .ord{font-size:10.5px;font-weight:700;color:var(--accent-ink);flex:none}
 .chip .x{border:0;background:none;color:var(--faint);cursor:pointer;font-size:16px;line-height:1;padding:4px 8px;margin:-2px -4px -2px 0}
 .chip .x:hover{color:var(--err)}
 .chip.empty{border:1.5px dashed var(--surface-3);background:none;color:var(--faint);font-size:12.5px;padding:6px 12px}
-.chip.empty.cur{border-color:var(--accent);color:var(--accent-ink)}
-.chip.ghost{border:1.5px dashed var(--surface-3);background:none;color:var(--faint);font-size:12px;cursor:default;padding:6px 10px}
+.chip.empty:hover{border-color:var(--accent);color:var(--accent-ink)}
+.chip.ghost{border:1.5px dashed var(--surface-3);background:none;color:var(--faint);font-size:12px;padding:6px 10px}
+.chip.ghost:hover{border-color:var(--accent);color:var(--accent-ink)}
 .chip.clear{border:0;background:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:6px 4px}
 /* 控件 */
 .ctl{display:grid;grid-template-columns:max-content 1fr;gap:9px 10px;align-items:center}
@@ -67,19 +57,37 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .ctl textarea{resize:vertical;min-height:2.6em;line-height:1.45}
 .ctl input:disabled{opacity:.45}
 .seg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.seg button{font:inherit;font-size:12.5px;border:0;border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--muted);cursor:pointer}
+.seg button{font:inherit;font-size:12.5px;border:0;border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--muted);cursor:pointer;display:inline-flex;align-items:center}
+.seg button:hover{color:var(--accent-ink)}
 .seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
 .seg input[type=color]{width:36px;height:30px;border:0;border-radius:8px;background:none;padding:0;cursor:pointer}
 .seg input[type=color]:disabled{opacity:.35;cursor:default}
 .note{font-size:12px;color:var(--faint);margin:10px 0 0}
-/* 预览与产出 */
+/* 位置九宫格(2×2 角点) */
+.posgrid{display:grid;grid-template-columns:repeat(2,38px);gap:4px}
+.posgrid button{position:relative;height:34px;border-radius:9px;background:var(--surface);border:1.5px solid var(--surface-3);padding:0}
+.posgrid button:hover{border-color:var(--accent)}
+.posgrid button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.posgrid .dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--faint)}
+.posgrid button[aria-pressed=true] .dot{background:var(--accent-ink)}
+.dot.lu{top:5px;left:5px}.dot.ru{top:5px;right:5px}.dot.ll{bottom:5px;left:5px}.dot.rl{bottom:5px;right:5px}
+/* 摆法小图示 */
+.mini{position:relative;width:20px;height:15px;display:inline-block;vertical-align:-2px;margin-right:7px;flex:none}
+.mini i{position:absolute;background:currentColor;opacity:.8}
+.mini .d{width:6px;height:6px;border-radius:2px}
+.mini .s{width:7px;height:7px;border-radius:2px}
+.mini .b{width:9px;height:5px;border-radius:2px}
+/* 画布 + 参数 双列 */
+.work{display:grid;grid-template-columns:minmax(300px,2fr) 3fr;gap:18px;align-items:start}
+@media(max-width:980px){.work{grid-template-columns:1fr}}
+@media(min-width:981px){.preview-card{position:sticky;top:64px}}
 .preview-card h2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pvbar{display:flex;gap:3px;margin-left:auto}
 .pvbar .grp{display:flex;gap:3px;padding-left:8px;margin-left:2px;border-left:1px solid var(--surface-3)}
 .pvbar button{font:inherit;font-size:11px;border:0;border-radius:6px;padding:2px 8px;background:var(--surface);color:var(--muted);cursor:pointer}
 .pvbar button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
 #dims{font-size:11px;color:var(--faint);font-weight:400}
-#pv{min-height:210px;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:18px}
+#pv{min-height:240px;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:18px}
 #pv.bg-check{background:repeating-conic-gradient(var(--surface) 0% 25%,var(--surface-3) 0% 50%) 0 0/20px 20px;--pv-line:rgba(28,25,23,.25)}
 #pv.bg-white{background:#ffffff;--pv-line:#e7e5e4}
 #pv.bg-dark{background:#1e293b;--pv-line:rgba(248,250,252,.35)}
@@ -96,49 +104,119 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .out button{font:inherit;font-size:12px;border:0;border-radius:8px;padding:6px 12px;background:var(--accent);color:#fff;cursor:pointer;flex:none}
 .out button:active{transform:translateY(1px)}
 .out .off code{color:var(--faint)}
-footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);font-size:12.5px}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* 选图抽屉(左侧滑出,体系对标首页:大搜索 + 分类 chips + 增量渲染) */
+#pk-scrim{position:fixed;inset:0;background:rgba(28,25,23,.34);z-index:35;opacity:0;pointer-events:none;transition:opacity .2s}
+#pk-scrim.on{opacity:1;pointer-events:auto}
+#picker{position:fixed;top:0;left:0;bottom:0;width:min(620px,94vw);background:var(--surface);z-index:40;display:flex;flex-direction:column;transform:translateX(-102%);transition:transform .24s ease;box-shadow:16px 0 48px rgba(28,25,23,.2)}
+#picker.on{transform:none}
+.pk-head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--surface-3)}
+.pk-head b{font-size:15px;flex:none}
+#p-target{font-size:12.5px;font-weight:600;color:var(--accent-ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pk-close{border:0;background:none;font-size:20px;line-height:1;cursor:pointer;color:var(--muted);padding:4px 8px;flex:none}
+#pk-close:hover{color:var(--err)}
+.pk-search{display:flex;align-items:center;gap:8px;margin:12px 16px 0;background:var(--surface);border-radius:12px;padding:9px 12px;border:1.5px solid var(--surface-3)}
+.pk-search:focus-within{border-color:var(--accent)}
+.pk-search svg{flex:none;color:var(--faint)}
+.pk-search input{flex:1;border:0;background:none;font:inherit;font-size:14.5px;outline:none;color:var(--ink);min-width:0}
+#pk-count{font-size:11.5px;color:var(--faint);flex:none}
+#pk-clear{border:0;background:var(--surface-3);border-radius:50%;width:20px;height:20px;font-size:12px;color:var(--muted);cursor:pointer;flex:none;line-height:1}
+.pk-filters{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px 4px;max-height:118px;overflow:auto}
+.chip-c{font:inherit;font-size:12px;border:0;border-radius:999px;padding:4px 11px;background:var(--surface-2);color:var(--muted);cursor:pointer}
+.chip-c:hover{color:var(--accent-ink)}
+.chip-c.on{background:var(--accent);color:#fff;font-weight:600}
+#pk-body{flex:1;overflow:auto;padding:8px 16px 12px}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+#grid button{border:0;background:var(--surface-2);border-radius:12px;padding:10px 4px 7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px}
+#grid button:hover{background:var(--accent-soft)}
+#grid button[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+#grid img{width:40px;height:40px;object-fit:contain}
+#grid .nm{font-size:10.5px;line-height:1.25;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#grid .grid-empty{grid-column:1/-1;color:var(--faint);font-size:12.5px;padding:22px 4px;text-align:center}
+.more-wrap{display:flex;justify-content:center;padding:10px 0 4px}
+#pk-more{font:inherit;font-size:12.5px;border:1px solid var(--surface-3);background:var(--surface);border-radius:999px;padding:6px 18px;color:var(--muted);cursor:pointer}
+#pk-more:hover{border-color:var(--accent);color:var(--accent-ink)}
+.pk-foot{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid var(--surface-3)}
+#pk-n{font-size:12.5px;color:var(--muted);flex:1}
+#pk-done{font:inherit;font-size:13px;border:0;border-radius:999px;padding:7px 20px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+/* 历史抽屉(右侧) */
+#hist{position:fixed;top:0;right:0;bottom:0;width:min(380px,94vw);background:var(--surface);box-shadow:-12px 0 40px rgba(28,25,23,.18);z-index:50;display:flex;flex-direction:column}
+#hist .dh{display:flex;align-items:baseline;gap:10px;padding:13px 16px;border-bottom:1px solid var(--surface-3)}
+#hist .dh b{font-size:15px}
+#hist .dh span{font-size:12px;color:var(--faint)}
+#hist-close{margin-left:auto;border:0;background:none;font-size:20px;line-height:1;cursor:pointer;color:var(--muted);padding:4px 8px}
+#hist-close:hover{color:var(--err)}
+#hist-list{flex:1;overflow:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.hrow{display:flex;gap:10px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 10px}
+.hrow img{height:30px;width:auto;max-width:64px;object-fit:contain;outline:1px solid var(--surface-3);background:#fff;border-radius:4px;flex:none}
+.hmeta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hmeta b{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hmeta span{font-size:11px;color:var(--faint)}
+.hmeta code{font:10.5px/1.4 ui-monospace,"SF Mono",Consolas,monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hact{display:flex;gap:6px;flex:none}
+.hact button{font:inherit;font-size:11.5px;border:0;border-radius:7px;padding:4px 10px;background:var(--surface);color:var(--muted);cursor:pointer}
+.hact button:hover{background:var(--accent-soft);color:var(--accent-ink)}
+.hempty{color:var(--faint);font-size:12.5px;padding:18px 4px}
+#hist-clear{margin:8px 14px 14px;border:0;background:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:6px;align-self:flex-start}
+footer{max-width:1040px;margin:0 auto;padding:0 24px 40px;color:var(--faint);font-size:12.5px}
 </style>
 </head>
 <body>
 <header>
-  <h1>Icon 合成</h1>
-  <span class="sub">角标 · 框内 · 图文 · 叠加 —— 调好即得 URL</span>
-  <a class="back" href="./">← 返回图标库</a>
+  <h1>Icon 合成编辑器</h1>
+  <span class="sub">产出由 URL 完全决定</span>
+  <nav class="tabs" id="modes" aria-label="合成方式">
+    <button type="button" data-mode="badge" aria-pressed="true">角标</button>
+    <button type="button" data-mode="in" aria-pressed="false">框内</button>
+    <button type="button" data-mode="bar" aria-pressed="false">图文</button>
+    <button type="button" data-mode="stack" aria-pressed="false">叠加</button>
+  </nav>
+  <div class="tools">
+    <button type="button" id="btn-hist">历史<b id="hist-n" aria-label="条数"></b></button>
+    <button type="button" id="btn-reset" title="清空当前模式的状态">重置</button>
+  </div>
 </header>
 <main>
-  <!-- 左:选图 -->
-  <aside id="picker" class="card">
-    <h2>挑图标</h2>
-    <p id="p-target">点图填入:图标</p>
-    <div class="row">
-      <select id="cat" aria-label="分类"></select>
-      <input id="q" type="search" placeholder="搜本分类 id / 概念">
-    </div>
-    <div id="grid" aria-label="图标网格"></div>
-  </aside>
-
-  <!-- 右:模式 + 预览 -->
-  <div>
-    <section class="card">
-      <h2>合成方式</h2>
-      <div class="tabs" id="modes">
-        <button type="button" data-mode="badge" aria-pressed="true">角标</button>
-        <button type="button" data-mode="in" aria-pressed="false">框内</button>
-        <button type="button" data-mode="bar" aria-pressed="false">图文</button>
-        <button type="button" data-mode="stack" aria-pressed="false">叠加</button>
+  <div class="work">
+    <!-- 画布(预览 + 产出) -->
+    <section class="card preview-card">
+      <h2>画布
+        <span class="pvbar" id="pvbar">
+          <button type="button" data-zoom="s" aria-pressed="false" title="预览显示大小">小</button>
+          <button type="button" data-zoom="m" aria-pressed="true">中</button>
+          <button type="button" data-zoom="l" aria-pressed="false">大</button>
+          <span class="grp">
+            <button type="button" data-bg="check" aria-pressed="true" title="预览背景">棋盘</button>
+            <button type="button" data-bg="white" aria-pressed="false">白</button>
+            <button type="button" data-bg="dark" aria-pressed="false">黑</button>
+          </span>
+        </span>
+        <span id="dims"></span>
+      </h2>
+      <div id="pv" class="bg-check"><span class="empty">点下面的槽位选图标,即得合成 URL</span></div>
+      <p id="err" aria-live="polite"></p>
+      <div class="out">
+        <div class="line"><span class="cap">URL</span><code id="o-url">-</code><button type="button" data-copy="o-url">复制</button></div>
+        <div class="line off" id="o-id-line"><span class="cap">合成 id</span><code id="o-id">-</code><button type="button" data-copy="o-id">复制</button></div>
+        <div class="line"><span class="cap">嵌入</span><code id="o-img">-</code><button type="button" data-copy="o-img">复制</button></div>
       </div>
+      <p class="note">「合成 id」(如 <code>infra:disk?rl=x2</code>)给 x-cmd/draw 画架构图用;长条 / 叠加暂无紧凑写法,直接用 URL。</p>
+    </section>
 
+    <!-- 参数(每模式一个工作区) -->
+    <section class="card">
+      <h2 id="panel-title">参数 · 角标</h2>
       <div id="panels">
         <section data-m="badge">
           <div class="slots" data-slots></div>
           <div class="ctl">
             <label>角标文字</label><input type="text" id="b-text" value="x2" maxlength="12">
             <label>位置</label>
-            <div class="seg" id="b-pos">
-              <button type="button" data-v="rl" aria-pressed="true">右下</button>
-              <button type="button" data-v="ru" aria-pressed="false">右上</button>
-              <button type="button" data-v="lu" aria-pressed="false">左上</button>
-              <button type="button" data-v="ll" aria-pressed="false">左下</button>
+            <div class="seg posgrid" id="b-pos">
+              <button type="button" data-v="lu" aria-label="左上" title="左上"><i class="dot lu"></i></button>
+              <button type="button" data-v="ru" aria-label="右上" title="右上"><i class="dot ru"></i></button>
+              <button type="button" data-v="ll" aria-label="左下" title="左下"><i class="dot ll"></i></button>
+              <button type="button" data-v="rl" aria-label="右下" title="右下"><i class="dot rl"></i></button>
             </div>
             <label>样式</label>
             <div class="seg" id="b-style">
@@ -193,9 +271,9 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);fon
           <div class="ctl">
             <label>摆法</label>
             <div class="seg" id="t-dir">
-              <button type="button" data-v="icon-text" aria-pressed="true">左图右文</button>
-              <button type="button" data-v="text-icon" aria-pressed="false">左文右图</button>
-              <button type="button" data-v="icon-text-v" aria-pressed="false">上图下文</button>
+              <button type="button" data-v="icon-text" aria-pressed="true" title="左图右文"><span class="mini"><i class="s" style="left:1px;top:4px"></i><i class="b" style="left:11px;top:6px"></i></span>左图右文</button>
+              <button type="button" data-v="text-icon" aria-pressed="false" title="左文右图"><span class="mini"><i class="b" style="left:1px;top:6px"></i><i class="s" style="left:15px;top:4px"></i></span>左文右图</button>
+              <button type="button" data-v="icon-text-v" aria-pressed="false" title="上图下文"><span class="mini"><i class="s" style="left:6px;top:0"></i><i class="b" style="left:5px;top:10px"></i></span>上图下文</button>
             </div>
             <label>文字</label><textarea id="t-text" rows="2" maxlength="80">API</textarea>
             <label>底色</label>
@@ -225,11 +303,11 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);fon
           <div class="ctl">
             <label>摆法</label>
             <div class="seg" id="s-layout">
-              <button type="button" data-v="h" aria-pressed="true">左右</button>
-              <button type="button" data-v="v" aria-pressed="false">上下</button>
-              <button type="button" data-v="tri" aria-pressed="false">三角</button>
-              <button type="button" data-v="tri-inv" aria-pressed="false">倒三角</button>
-              <button type="button" data-v="grid" aria-pressed="false">四格</button>
+              <button type="button" data-v="h" aria-pressed="true" title="左右两枚"><span class="mini"><i class="d" style="left:2px;top:4px"></i><i class="d" style="left:12px;top:4px"></i></span>左右</button>
+              <button type="button" data-v="v" aria-pressed="false" title="上下两枚"><span class="mini"><i class="d" style="left:7px;top:0"></i><i class="d" style="left:7px;top:9px"></i></span>上下</button>
+              <button type="button" data-v="tri" aria-pressed="false" title="上一下二"><span class="mini"><i class="d" style="left:7px;top:0"></i><i class="d" style="left:2px;top:9px"></i><i class="d" style="left:12px;top:9px"></i></span>三角</button>
+              <button type="button" data-v="tri-inv" aria-pressed="false" title="上二下一"><span class="mini"><i class="d" style="left:2px;top:0"></i><i class="d" style="left:12px;top:0"></i><i class="d" style="left:7px;top:9px"></i></span>倒三角</button>
+              <button type="button" data-v="grid" aria-pressed="false" title="四格"><span class="mini"><i class="d" style="left:3px;top:1px"></i><i class="d" style="left:13px;top:1px"></i><i class="d" style="left:3px;top:9px"></i><i class="d" style="left:13px;top:9px"></i></span>四格</button>
             </div>
             <label>输出像素</label><input type="number" id="s-px" min="8" max="512" placeholder="24">
           </div>
@@ -237,75 +315,130 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);fon
         </section>
       </div>
     </section>
-
-    <section class="card preview-card" style="margin-top:18px">
-      <h2>预览
-        <span class="pvbar" id="pvbar">
-          <button type="button" data-zoom="s" aria-pressed="false" title="预览显示大小">小</button>
-          <button type="button" data-zoom="m" aria-pressed="true">中</button>
-          <button type="button" data-zoom="l" aria-pressed="false">大</button>
-          <span class="grp">
-            <button type="button" data-bg="check" aria-pressed="true" title="预览背景">棋盘</button>
-            <button type="button" data-bg="white" aria-pressed="false">白</button>
-            <button type="button" data-bg="dark" aria-pressed="false">黑</button>
-          </span>
-        </span>
-        <span id="dims"></span>
-      </h2>
-      <div id="pv" class="bg-check"><span class="empty">先在左边挑一枚图标</span></div>
-      <p id="err"></p>
-      <div class="out">
-        <div class="line"><span class="cap">URL</span><code id="o-url">-</code><button type="button" data-copy="o-url">复制</button></div>
-        <div class="line off" id="o-id-line"><span class="cap">合成 id</span><code id="o-id">-</code><button type="button" data-copy="o-id">复制</button></div>
-        <div class="line"><span class="cap">嵌入</span><code id="o-img">-</code><button type="button" data-copy="o-img">复制</button></div>
-      </div>
-      <p class="note">「合成 id」(如 <code>infra:disk?rl=x2</code>)给 x-cmd/draw 画架构图用;长条 / 叠加暂无紧凑写法,直接用 URL。</p>
-    </section>
   </div>
 </main>
-<footer>产出由 URL 完全决定,可长缓存、可 data URI 内嵌 —— 合成逻辑在 <a href="https://github.com/ljh-sh/iconbase" target="_blank" rel="noopener">iconbase</a> 的边缘上。</footer>
+
+<!-- 选图抽屉:左侧滑出,搜索 / 分类 / 增量渲染对标首页 -->
+<div id="pk-scrim" hidden></div>
+<aside id="picker" hidden aria-label="选图标">
+  <div class="pk-head">
+    <b>选图标</b>
+    <span id="p-target">点图填入:图标</span>
+    <button type="button" id="pk-close" aria-label="关闭">×</button>
+  </div>
+  <div class="pk-search">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="搜索图标:id / 名称 / 分类">
+    <span id="pk-count"></span>
+    <button id="pk-clear" type="button" hidden aria-label="清空搜索">×</button>
+  </div>
+  <div id="pk-filters" class="pk-filters"></div>
+  <div id="pk-body">
+    <div id="grid" aria-label="图标网格"></div>
+    <div class="more-wrap"><button id="pk-more" type="button" hidden></button></div>
+  </div>
+  <div class="pk-foot" id="pk-foot" hidden>
+    <span id="pk-n"></span>
+    <button id="pk-done" type="button">完成</button>
+  </div>
+</aside>
+
+<!-- 历史抽屉:右侧 -->
+<aside id="hist" hidden aria-label="历史记录">
+  <div class="dh"><b>历史</b><span>最近 24 条 · 存在本机浏览器</span><button type="button" id="hist-close" aria-label="关闭">×</button></div>
+  <div id="hist-list"></div>
+  <button type="button" id="hist-clear">清空历史</button>
+</aside>
+
+<footer>产出由 URL 完全决定,可长缓存、可 data URI 内嵌 —— 合成逻辑在 <a href="https://github.com/ljh-sh/iconbase" target="_blank" rel="noopener">iconbase</a> 的边缘上。状态与历史只存在你的浏览器(localStorage),刷新不丢。</footer>
 <script>
 'use strict';
-// ---------------------------------------------------------------- 状态
-const S = {
-  mode: 'badge',                 // badge | in | bar | stack
-  target: 'main',                // 选图填哪个槽:main / frame / content
-  zoom: 'm',                     // 预览显示档(不进 URL)
-  cat: '', q: '',
-  picked: { main: null, frame: null, content: null }, // 槽 → 元数据
-  stack: [],                     // 叠加模式的多选(按点选顺序)
-  badge: { pos: 'rl', style: 'disc', scale: '1', fsm: '1', px: '' },
-  in:   { kind: 'icon', px: '' },
-  bar:  { dir: 'icon-text', r: '', fsm: '1', px: '' },
-  stk:  { layout: 'h', px: '' },
-};
+// ================================================================ 常量与默认状态
+const LS_KEY = 'iconbase.editor.v1';
+const HIST_MAX = 24;
+const MODE_LABEL = { badge: '角标', in: '框内', bar: '图文', stack: '叠加' };
 const NEED = { h: 2, v: 2, tri: 3, 'tri-inv': 3, grid: 4 };
+const LAYOUT_LABEL = { h: '左右', v: '上下', tri: '三角', 'tri-inv': '倒三角', grid: '四格' };
 const SLOT_LABEL = { main: '图标', frame: '① 框 / 底座', content: '② 内容' };
-const $ = (id) => document.getElementById(id);
-const CATS_BY_ID = {};
-const BUNDLES = {}; // cat → manifest 文件名(index.json 的 bundles)
-const manifests = new Map(); // manifest 文件 → { icons:[…] }
-let curIcons = [];
-let truncHint = '';
+const clone = (o) => JSON.parse(JSON.stringify(o));
+// 每个模式独立状态:选图、参数、连同选图器的分类/搜索 —— 模式之间互不覆盖
+const DEF = {
+  badge: { icon: null, text: 'x2', pos: 'rl', style: 'disc', con: false, bg: '#ea580c', fg: '#ffffff', scale: '1', fsm: '1', px: '', cat: '', q: '' },
+  in:    { frame: null, content: null, kind: 'icon', text: 'x-cmd', con: false, fg: '#1e293b', px: '', cat: 'frame', q: '', target: 'frame' },
+  bar:   { icon: null, text: 'API', dir: 'icon-text', bgOn: false, bg: '#f1f5f9', fgOn: false, fg: '#1e293b', r: '', fsm: '1', px: '', cat: '', q: '' },
+  stack: { icons: [], layout: 'h', px: '', cat: '', q: '' },
+};
 
-// ---------------------------------------------------------------- 数据
+function fixPick(p) {
+  return (p && typeof p === 'object' && typeof p.id === 'string' && typeof p.file === 'string') ? p : null;
+}
+function loadState() {
+  const S0 = { mode: 'badge', modes: clone(DEF), ui: { zoom: 'm', pvbg: 'check' }, history: [] };
+  let raw = null;
+  try { raw = localStorage.getItem(LS_KEY); } catch (e) {}
+  if (!raw) return S0;
+  try {
+    const d = JSON.parse(raw);
+    if (!d || d.v !== 1) return S0;
+    for (const k of Object.keys(DEF)) if (d.modes && d.modes[k]) S0.modes[k] = { ...clone(DEF[k]), ...d.modes[k] };
+    const b = S0.modes.badge, i = S0.modes.in, r = S0.modes.bar, s = S0.modes.stack;
+    b.icon = fixPick(b.icon);
+    i.frame = fixPick(i.frame); i.content = fixPick(i.content);
+    if (i.kind !== 'text') i.kind = 'icon';
+    if (i.target !== 'content') i.target = 'frame';
+    r.icon = fixPick(r.icon);
+    s.icons = (Array.isArray(s.icons) ? s.icons : []).map(fixPick).filter(Boolean).slice(0, 4);
+    if (MODE_LABEL[d.mode]) S0.mode = d.mode;
+    if (d.ui) S0.ui = { ...S0.ui, ...d.ui };
+    if (Array.isArray(d.history))
+      S0.history = d.history.filter((e) => e && typeof e.url === 'string' && e.snap && e.snap.st && MODE_LABEL[e.snap.mode]).slice(0, HIST_MAX);
+  } catch (e) {}
+  return S0;
+}
+const S = loadState();
+const ms = () => S.modes[S.mode];
+
+// ================================================================ 持久化
+let saveT = 0;
+function save() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ v: 1, mode: S.mode, modes: S.modes, ui: S.ui, history: S.history })); } catch (e) {}
+}
+function scheduleSave() { clearTimeout(saveT); saveT = setTimeout(save, 400); }
+
+const $ = (id) => document.getElementById(id);
+const CATS = [];
+const CATS_BY_ID = {};
+const BUNDLES = {}; // 包名 → { manifest }(index.json 的 bundles 是权威映射)
+const manifests = new Set(); // 已拉下的清单文件
+const ICONS = new Map(); // id → 图标信息(已加载的,随包渐进合并)
+const raf = (f) => (window.requestAnimationFrame ? requestAnimationFrame(f) : setTimeout(f, 16));
+
+// ================================================================ 数据
 async function jget(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); }
 
-async function loadCat(cat) {
-  // 没进 bundles 的分类(图标全在 star 包里)没有自己的 manifest,
-  // 去 star 包里按 cat 过滤 —— index.json 的 bundles 是权威映射
-  const fromStar = !BUNDLES[cat];
-  const file = fromStar ? 'manifest.star.json' : 'manifest.' + cat + '.json';
-  try {
-    if (!manifests.has(file)) manifests.set(file, await jget(file));
-    const icons = manifests.get(file).icons || [];
-    S.cat = cat;
-    curIcons = fromStar ? icons.filter((m) => m.cat === cat) : icons;
-    renderGrid();
-  } catch (e) {
-    flash('清单拉不到:' + file + ' ' + e.message);
-  }
+async function loadManifest(file) {
+  if (manifests.has(file)) return;
+  const j = await jget(file);
+  manifests.add(file);
+  for (const m of (j.icons || [])) if (!ICONS.has(m.id)) ICONS.set(m.id, m);
 }
+async function loadBundle(name) {
+  if (!name || name === '*' || manifests.has(name)) return;
+  manifests.add(name);
+  const file = (BUNDLES[name] && BUNDLES[name].manifest) || 'manifest.' + name + '.json';
+  try { await loadManifest(file); }
+  catch (e) { manifests.delete(name); flash('清单拉不到:' + name); return; }
+  renderGrid();
+}
+// 全局搜索:把全名单下下来过滤(与首页同一策略)
+async function loadAll() {
+  if (manifests.has('*')) return;
+  manifests.add('*');
+  try { await loadManifest('manifest.json'); }
+  catch (e) { manifests.delete('*'); return; }
+  renderGrid();
+}
+
 // id → 静态文件:版本化分类的别名走推荐版本(与 ID2FILE 同一套规则)
 function fileOf(m) {
   const ci = CATS_BY_ID[m.cat];
@@ -314,223 +447,342 @@ function fileOf(m) {
   if (ci && ci.versioned) return 'i/' + m.cat + '/' + ci.recommended + '/' + concept + '.svg';
   return 'i/' + m.cat + '/' + concept + '.svg';
 }
+const trimPick = (m) => ({ id: m.id, cat: m.cat, concept: m.concept, file: fileOf(m) });
 
-// ---------------------------------------------------------------- 渲染
+// ================================================================ 选图
+function slotOf() {
+  const st = ms();
+  if (S.mode === 'in') return (st.kind === 'icon' && st.target === 'content') ? 'content' : 'frame';
+  return 'main';
+}
+function pick(m) {
+  const st = ms();
+  if (S.mode === 'stack') {
+    const i = st.icons.findIndex((x) => x.id === m.id);
+    if (i >= 0) st.icons.splice(i, 1);
+    else if (st.icons.length < 4) st.icons.push(trimPick(m));
+    else { flash('最多 4 枚'); return; }
+  } else if (S.mode === 'in') {
+    const slot = slotOf();
+    st[slot] = (st[slot] && st[slot].id === m.id) ? null : trimPick(m);
+    if (slot === 'frame' && st.frame) st.target = 'content';
+  } else {
+    st.icon = (st.icon && st.icon.id === m.id) ? null : trimPick(m);
+  }
+  renderAll();
+  updateSel();
+}
+
+// ================================================================ 渲染:编辑区
+function applyUI() {
+  for (const x of $('modes').querySelectorAll('button')) x.setAttribute('aria-pressed', String(x.dataset.mode === S.mode));
+  for (const d of document.querySelectorAll('#panels [data-m]')) d.hidden = d.dataset.m !== S.mode;
+  $('panel-title').textContent = '参数 · ' + MODE_LABEL[S.mode];
+  $('q').value = ms().q;
+  renderChips();
+  const st = ms();
+  const pressed = (id, v) => { for (const x of $(id).querySelectorAll('button[data-v]')) x.setAttribute('aria-pressed', String(x.dataset.v === v)); };
+  if (S.mode === 'badge') {
+    $('b-text').value = st.text;
+    pressed('b-pos', st.pos); pressed('b-style', st.style); pressed('b-scale', st.scale); pressed('b-fs', st.fsm);
+    $('b-color').setAttribute('aria-pressed', String(st.con));
+    $('b-bg').value = st.bg; $('b-fg').value = st.fg;
+    $('b-bg').disabled = $('b-fg').disabled = !st.con;
+    $('b-px').value = st.px;
+  } else if (S.mode === 'in') {
+    pressed('i-kind', st.kind);
+    $('i-text').value = st.text; $('i-text').disabled = st.kind !== 'text';
+    $('i-color').setAttribute('aria-pressed', String(st.con));
+    $('i-fg').value = st.fg; $('i-fg').disabled = !st.con;
+    $('i-px').value = st.px;
+  } else if (S.mode === 'bar') {
+    pressed('t-dir', st.dir); pressed('t-fs', st.fsm);
+    $('t-text').value = st.text;
+    $('t-bg-on').setAttribute('aria-pressed', String(st.bgOn)); $('t-bg').value = st.bg; $('t-bg').disabled = !st.bgOn;
+    $('t-fg-on').setAttribute('aria-pressed', String(st.fgOn)); $('t-fg').value = st.fg; $('t-fg').disabled = !st.fgOn;
+    $('t-r').value = st.r; $('t-px').value = st.px;
+  } else {
+    pressed('s-layout', st.layout);
+    $('s-px').value = st.px;
+  }
+  for (const x of $('pvbar').querySelectorAll('[data-zoom]')) x.setAttribute('aria-pressed', String(x.dataset.zoom === S.ui.zoom));
+  for (const x of $('pvbar').querySelectorAll('[data-bg]')) x.setAttribute('aria-pressed', String(x.dataset.bg === S.ui.pvbg));
+  $('pv').className = 'bg-' + S.ui.pvbg;
+}
+
 function renderBanner() {
   const el = $('p-target');
   if (S.mode === 'stack') {
-    const need = NEED[S.stk.layout], n = S.stack.length;
-    el.textContent = (n > need ? '已选 ' + n + ' 枚,' + labelOf(S.stk.layout) + ' 只要 ' + need + ' 枚 —— 删掉多的'
-      : '点图添加(' + n + '/' + need + '),按点选顺序排') + truncHint;
+    const need = NEED[ms().layout], n = ms().icons.length;
+    el.textContent = n > need
+      ? '已选 ' + n + ' 枚,' + LAYOUT_LABEL[ms().layout] + ' 只要 ' + need + ' 枚 —— 删掉多的'
+      : '点图添加(' + n + '/' + need + '),按点选顺序排';
   } else {
-    el.textContent = '点图填入:' + SLOT_LABEL[S.target] + truncHint;
+    el.textContent = '点图填入:' + (S.mode === 'in' ? SLOT_LABEL[slotOf()] : SLOT_LABEL.main);
   }
-}
-function labelOf(l) {
-  return { h: '左右', v: '上下', tri: '三角', 'tri-inv': '倒三角', grid: '四格' }[l] || l;
 }
 
 function renderSlots() {
   for (const box of document.querySelectorAll('[data-slots]')) box.innerHTML = '';
   const box = document.querySelector('[data-m="' + S.mode + '"] [data-slots]');
   if (!box) return;
+  const st = ms();
 
-  const chipFilled = (m, slot) => {
+  const chipFilled = (m, extra) => {
     const c = document.createElement('div');
-    c.className = 'chip' + (S.target === slot ? ' cur' : '');
-    c.title = '点它 = 接着给这个槽换图';
-    const img = document.createElement('img'); img.alt = ''; img.src = fileOf(m);
+    c.className = 'chip';
+    c.title = '点击换图';
+    const img = document.createElement('img'); img.alt = ''; img.src = m.file;
     const id = document.createElement('span'); id.className = 'id'; id.textContent = m.id;
     const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.title = '移除';
-    x.onclick = (e) => { e.stopPropagation(); S.picked[slot] = null; if (S.mode === 'in') S.target = 'frame'; renderAll(); };
+    x.onclick = (e) => { e.stopPropagation(); extra.remove(); renderAll(); };
     c.append(img, id, x);
-    c.onclick = () => { S.target = slot; renderAll(); pulsePicker(); };
+    c.onclick = () => { extra.activate && extra.activate(); openPicker(); };
     box.appendChild(c);
   };
-  const chipEmpty = (slot) => {
+  const chipEmpty = (label, activate) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'chip empty' + (S.target === slot ? ' cur' : '');
-    b.textContent = SLOT_LABEL[slot] + ':点左边选图';
-    b.onclick = () => { S.target = slot; renderAll(); pulsePicker(); };
+    b.type = 'button'; b.className = 'chip empty';
+    b.textContent = label + ':点此选图';
+    b.onclick = () => { activate && activate(); openPicker(); };
     box.appendChild(b);
   };
 
   if (S.mode === 'stack') {
-    S.stack.forEach((m, i) => {
+    st.icons.forEach((m, i) => {
       const c = document.createElement('div');
-      c.className = 'chip'; c.title = '第 ' + (i + 1) + ' 枚';
+      c.className = 'chip'; c.title = '点击换第 ' + (i + 1) + ' 枚';
       const ord = document.createElement('span'); ord.className = 'ord'; ord.textContent = i + 1;
-      const img = document.createElement('img'); img.alt = ''; img.src = fileOf(m);
+      const img = document.createElement('img'); img.alt = ''; img.src = m.file;
       const id = document.createElement('span'); id.className = 'id'; id.textContent = m.id;
       const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.title = '移除第 ' + (i + 1) + ' 枚';
-      x.onclick = (e) => { e.stopPropagation(); S.stack.splice(i, 1); renderAll(); };
+      x.onclick = (e) => { e.stopPropagation(); st.icons.splice(i, 1); renderAll(); };
       c.append(ord, img, id, x);
+      c.onclick = () => openPicker();
       box.appendChild(c);
     });
-    const left = 4 - S.stack.length;
+    const left = 4 - st.icons.length;
     if (left > 0) {
-      const g = document.createElement('span');
-      g.className = 'chip ghost'; g.textContent = '还可加 ' + left + ' 枚';
+      const g = document.createElement('button');
+      g.type = 'button'; g.className = 'chip ghost'; g.textContent = '＋ 添加(还可 ' + left + ' 枚)';
+      g.onclick = () => openPicker();
       box.appendChild(g);
     }
-    if (S.stack.length) {
+    if (st.icons.length) {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'chip clear'; b.textContent = '清空';
-      b.onclick = () => { S.stack = []; renderAll(); };
+      b.onclick = () => { st.icons = []; renderAll(); };
       box.appendChild(b);
     }
     return;
   }
   if (S.mode === 'in') {
-    S.picked.frame ? chipFilled(S.picked.frame, 'frame') : chipEmpty('frame');
-    if (S.in.kind === 'icon') S.picked.content ? chipFilled(S.picked.content, 'content') : chipEmpty('content');
+    st.frame
+      ? chipFilled(st.frame, { remove: () => { st.frame = null; st.target = 'frame'; }, activate: () => { st.target = 'frame'; renderBanner(); } })
+      : chipEmpty(SLOT_LABEL.frame, () => { st.target = 'frame'; });
+    if (st.kind === 'icon') {
+      const arrow = document.createElement('span'); arrow.className = 'arrow'; arrow.textContent = '→';
+      box.appendChild(arrow);
+      st.content
+        ? chipFilled(st.content, { remove: () => { st.content = null; st.target = 'content'; }, activate: () => { st.target = 'content'; renderBanner(); } })
+        : chipEmpty(SLOT_LABEL.content, () => { st.target = 'content'; });
+    }
     return;
   }
-  S.picked.main ? chipFilled(S.picked.main, 'main') : chipEmpty('main');
+  st.icon
+    ? chipFilled(st.icon, { remove: () => { st.icon = null; } })
+    : chipEmpty(SLOT_LABEL.main, () => {});
 }
 
-function renderGrid() {
-  const grid = $('grid');
-  grid.innerHTML = '';
-  const q = S.q.toLowerCase();
-  const all = curIcons.filter((m) => !q || (m.id + ' ' + m.concept + ' ' + (m.descEn || '')).toLowerCase().includes(q));
-  const icons = all.slice(0, 400);
-  truncHint = all.length > icons.length ? '(命中 ' + all.length + ' 枚,列出前 400)' : '';
-  renderBanner();
-  let sel;
-  if (S.mode === 'stack') sel = (m) => S.stack.includes(m);
-  else {
-    let slot = S.target;
-    if (S.mode === 'in' && slot === 'content' && S.in.kind !== 'icon') slot = 'frame';
-    const cur = S.picked[slot];
-    sel = (m) => m === cur;
-  }
-  for (const m of icons) {
+// ================================================================ 渲染:选图抽屉
+// 与首页同一套筛选:分类 + 搜索;空搜索只摆推荐版本(别名),打了字全库搜
+function pkMatch(m) {
+  const st = ms();
+  if (st.cat && m.cat !== st.cat) return false;
+  if (!st.q) return !m.version || m.recommended;
+  return (m.id + ' ' + (m.aliasFor || '') + ' ' + (m.descEn || '') + ' ' + m.cat + ' ' + (m.concept || '')).toLowerCase().includes(st.q);
+}
+function selOf(m) {
+  const st = ms();
+  if (S.mode === 'stack') return st.icons.some((x) => x.id === m.id);
+  if (S.mode === 'in') { const c = st[slotOf()]; return !!c && c.id === m.id; }
+  return !!st.icon && st.icon.id === m.id;
+}
+function renderChips() {
+  const host = $('pk-filters');
+  host.textContent = '';
+  const cur = ms().cat;
+  const mk = (label, v) => {
     const b = document.createElement('button');
-    b.type = 'button';
-    b.title = m.id;
-    b.setAttribute('aria-pressed', sel(m));
-    const img = document.createElement('img');
-    img.loading = 'lazy'; img.alt = ''; img.src = fileOf(m);
-    const nm = document.createElement('span');
-    nm.className = 'nm'; nm.textContent = m.concept;
-    b.append(img, nm);
-    b.onclick = () => pick(m);
-    grid.appendChild(b);
-  }
-  if (!icons.length) {
-    const p = document.createElement('p');
-    p.className = 'grid-empty';
-    p.textContent = q ? '本分类无命中 —— 换个分类,或清空搜索' : '这个分类是空的';
-    grid.appendChild(p);
-  }
+    b.type = 'button'; b.className = 'chip-c' + (cur === v ? ' on' : ''); b.dataset.v = v;
+    b.textContent = label;
+    b.onclick = () => {
+      const st = ms();
+      st.cat = v; limit = LIMIT0;
+      if (v) loadBundle(v);
+      renderChips(); renderGrid(); scheduleSave();
+    };
+    host.appendChild(b);
+  };
+  mk('全部', '');
+  for (const c of CATS) mk(c.title || c.cat, c.cat);
 }
 
-function renderAll() { renderSlots(); renderBanner(); renderGrid(); update(); }
-
-function pick(m) {
-  if (S.mode === 'stack') {
-    const i = S.stack.indexOf(m);
-    if (i >= 0) S.stack.splice(i, 1);
-    else if (S.stack.length < 4) S.stack.push(m);
-    else { flash('最多 4 枚'); return; }
+// 增量渲染:前缀没变只补尾部,滚动位置不丢;变了整个重画
+const LIMIT0 = 60;
+let limit = LIMIT0;
+let shownList = [];
+function renderGrid() {
+  const host = $('grid');
+  const list = [...ICONS.values()].filter(pkMatch);
+  const shown = list.slice(0, limit);
+  let p = 0;
+  while (p < shownList.length && p < shown.length && shownList[p] === shown[p]) p++;
+  // 宿主子元素数也得对上:setMode 换模式会重置 shownList,旧格子还挂在 DOM 里,
+  // 只看前缀会把新分类的格子直接追加进去(两分类混排)
+  if (p === shownList.length && host.childElementCount === shownList.length) {
+    const frag = document.createDocumentFragment();
+    for (const m of shown.slice(p)) frag.append(pkCell(m));
+    host.append(frag);
   } else {
-    // 统一语义(单图/双图与叠加一致):再点同一枚 = 取消,点不同枚 = 替换
-    S.picked[S.target] = S.picked[S.target] === m ? null : m;
-    // 框内模式:挑上框后自动把目标切到内容,顺手
-    if (S.mode === 'in' && S.target === 'frame' && S.picked.frame) S.target = 'content';
+    host.textContent = '';
+    for (const m of shown) host.append(pkCell(m));
   }
-  renderAll();
+  shownList = shown;
+  if (!shown.length) {
+    const p2 = document.createElement('p');
+    p2.className = 'grid-empty';
+    p2.textContent = ms().q ? '无命中 —— 换个词,或清掉分类筛选' : '点上面的分类看图标,或直接搜索';
+    host.appendChild(p2);
+  }
+  const rest = list.length - shown.length;
+  $('pk-more').hidden = rest <= 0;
+  $('pk-more').textContent = '显示更多(' + rest + ')';
+  $('pk-count').textContent = list.length + ' 个';
+  renderBanner();
+  updateSel();
 }
-function flash(msg) { $('err').textContent = msg; setTimeout(() => { if ($('err').textContent === msg) $('err').textContent = ''; }, 2500); }
-function pulsePicker() {
-  const p = $('picker');
-  p.classList.remove('pulse'); void p.offsetWidth; p.classList.add('pulse');
-  if (typeof p.scrollIntoView === 'function') { try { p.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+function pkCell(m) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.title = m.id;
+  b.dataset.id = m.id;
+  b.setAttribute('aria-pressed', String(selOf(m)));
+  const img = document.createElement('img');
+  img.loading = 'lazy'; img.alt = ''; img.src = fileOf(m);
+  const nm = document.createElement('span');
+  nm.className = 'nm'; nm.textContent = m.aliasFor || m.id;
+  b.append(img, nm);
+  b.onclick = () => {
+    pick(m);
+    if (S.mode !== 'stack') closePicker();
+  };
+  return b;
+}
+function updateSel() {
+  for (const b of $('grid').querySelectorAll('button[data-id]')) {
+    const m = ICONS.get(b.dataset.id);
+    if (m) b.setAttribute('aria-pressed', String(selOf(m)));
+  }
+  $('pk-foot').hidden = S.mode !== 'stack';
+  if (S.mode === 'stack') $('pk-n').textContent = '已选 ' + ms().icons.length + ' 枚(上限 4,点图增删)';
+}
+$('pk-more').addEventListener('click', () => { limit += 180; renderGrid(); });
+
+function renderAll() { renderSlots(); renderBanner(); renderGrid(); update(); scheduleSave(); }
+
+function setMode(m) {
+  if (!MODE_LABEL[m] || m === S.mode) return;
+  S.mode = m;
+  limit = LIMIT0; shownList = []; // 每模式的 cat/q 不同,列表前缀必然对不上
+  applyUI(); renderAll();
 }
 
-// ---------------------------------------------------------------- URL 组装
+function flash(msg) { $('err').textContent = msg; setTimeout(() => { if ($('err').textContent === msg) $('err').textContent = ''; }, 2500); }
+
+// ================================================================ URL 组装(只读状态)
 function clampSend(v, lo, hi) {
   if (!/^\d+$/.test(v)) return '';
   return String(Math.min(hi, Math.max(lo, parseInt(v, 10))));
 }
 function params() {
   const p = new URLSearchParams();
+  const st = ms();
   if (S.mode === 'badge') {
-    const t = $('b-text').value.trim();
-    if (!S.picked.main) return { wait: '先挑一枚主图(左边点一枚)' };
+    const t = st.text.trim();
+    if (!st.icon) return { wait: '先挑一枚主图(点上方槽位选图)' };
     if (!t) return { wait: '填角标文字' };
-    p.set('icon', S.picked.main.id); p.set('text', t); p.set('pos', S.badge.pos); p.set('style', S.badge.style);
-    let id = S.picked.main.id + '?' + S.badge.pos + '=' + encodeURIComponent(t);
-    if (S.badge.style !== 'disc') { p.set('style', S.badge.style); id += '&style=' + S.badge.style; }
-    if (S.badge.scale !== '1') { p.set('scale', S.badge.scale); id += '&scale=' + S.badge.scale; }
-    if (S.badge.fsm !== '1') {
-      const fs = String(Math.round(4.6 * Number(S.badge.scale) * Number(S.badge.fsm) * 100) / 100);
+    p.set('icon', st.icon.id); p.set('text', t); p.set('pos', st.pos);
+    let id = st.icon.id + '?' + st.pos + '=' + encodeURIComponent(t);
+    if (st.style !== 'disc') { p.set('style', st.style); id += '&style=' + st.style; }
+    if (st.scale !== '1') { p.set('scale', st.scale); id += '&scale=' + st.scale; }
+    if (st.fsm !== '1') {
+      const fs = String(Math.round(4.6 * Number(st.scale) * Number(st.fsm) * 100) / 100);
       p.set('fs', fs); id += '&fs=' + fs;
     }
-    if ($('b-color').getAttribute('aria-pressed') === 'true') {
-      p.set('bg', $('b-bg').value); p.set('fg', $('b-fg').value);
-      id += '&bg=' + $('b-bg').value + '&fg=' + $('b-fg').value;
-    }
-    const px = clampSend(S.badge.px, 8, 512);
+    if (st.con) { p.set('bg', st.bg); p.set('fg', st.fg); id += '&bg=' + st.bg + '&fg=' + st.fg; }
+    const px = clampSend(st.px, 8, 512);
     if (px) { p.set('px', px); id += '&px=' + px; }
-    return { kind: 'badge', p, id };
+    return { kind: 'badge', p, id, label: t };
   }
   if (S.mode === 'in') {
-    const f = S.picked.frame;
-    if (!f) return { wait: '先挑一枚框(frame:)或底座(base:)' };
-    p.set('icon', f.id);
-    if (S.in.kind === 'text') {
-      const t = $('i-text').value.trim();
+    if (!st.frame) return { wait: '先挑一枚框(frame:)或底座(base:)' };
+    p.set('icon', st.frame.id);
+    if (st.kind === 'text') {
+      const t = st.text.trim();
       if (!t) return { wait: '填框内文字' };
       p.set('text', t);
-      let id = f.id + '?text=' + encodeURIComponent(t);
-      if ($('i-color').getAttribute('aria-pressed') === 'true') { p.set('fg', $('i-fg').value); id += '&fg=' + $('i-fg').value; }
-      const px = clampSend(S.in.px, 8, 512);
+      let id = st.frame.id + '?text=' + encodeURIComponent(t);
+      if (st.con) { p.set('fg', st.fg); id += '&fg=' + st.fg; }
+      const px = clampSend(st.px, 8, 512);
       if (px) { p.set('px', px); id += '&px=' + px; }
-      return { kind: 'in', p, id };
+      return { kind: 'in', p, id, label: t.split('\n')[0] };
     }
-    if (!S.picked.content) return { wait: '再挑一枚内容图标(②)' };
-    p.set('in', S.picked.content.id);
-    let id = f.id + '?in=' + encodeURIComponent(S.picked.content.id);
-    const px = clampSend(S.in.px, 8, 512);
+    if (!st.content) return { wait: '再挑一枚内容图标(②)' };
+    p.set('in', st.content.id);
+    let id = st.frame.id + '?in=' + encodeURIComponent(st.content.id);
+    const px = clampSend(st.px, 8, 512);
     if (px) { p.set('px', px); id += '&px=' + px; }
-    return { kind: 'in', p, id };
+    return { kind: 'in', p, id, label: st.content.id };
   }
   if (S.mode === 'bar') {
-    const t = $('t-text').value.trim();
-    if (!S.picked.main) return { wait: '先挑一枚主图(左边点一枚)' };
+    const t = st.text.trim();
+    if (!st.icon) return { wait: '先挑一枚主图(点上方槽位选图)' };
     if (!t) return { wait: '填文字' };
-    p.set('icon', S.picked.main.id); p.set('text', t);
-    if ($('t-bg-on').getAttribute('aria-pressed') === 'true') p.set('bg', $('t-bg').value);
-    if ($('t-fg-on').getAttribute('aria-pressed') === 'true') p.set('fg', $('t-fg').value);
-    if (S.bar.fsm !== '1') p.set('fs', String(Math.round((S.bar.dir === 'icon-text-v' ? 5.5 : 10) * Number(S.bar.fsm) * 100) / 100));
-    const r = clampSend(S.bar.r, 0, 12);
+    p.set('icon', st.icon.id); p.set('text', t);
+    if (st.bgOn) p.set('bg', st.bg);
+    if (st.fgOn) p.set('fg', st.fg);
+    if (st.fsm !== '1') p.set('fs', String(Math.round((st.dir === 'icon-text-v' ? 5.5 : 10) * Number(st.fsm) * 100) / 100));
+    const r = clampSend(st.r, 0, 12);
     if (r) p.set('r', r);
-    const px = clampSend(S.bar.px, 8, 512);
+    const px = clampSend(st.px, 8, 512);
     if (px) p.set('px', px);
-    return { kind: S.bar.dir, p, id: '' };
+    return { kind: st.dir, p, id: '', label: t.split('\n')[0] };
   }
   // stack
-  const need = NEED[S.stk.layout], n = S.stack.length;
-  if (n < need) return { wait: '还要挑 ' + (need - n) + ' 枚(' + labelOf(S.stk.layout) + ' 要 ' + need + ' 枚)' };
-  if (n > need) return { wait: '多挑了 ' + (n - need) + ' 枚 —— 点上方芯片的 × 删掉' };
-  p.set('icons', S.stack.map((m) => m.id).join(','));
-  p.set('layout', S.stk.layout);
-  const px = clampSend(S.stk.px, 8, 512);
+  const need = NEED[st.layout], n = st.icons.length;
+  if (n < need) return { wait: '还要挑 ' + (need - n) + ' 枚(' + LAYOUT_LABEL[st.layout] + ' 要 ' + need + ' 枚)' };
+  if (n > need) return { wait: '多挑了 ' + (n - need) + ' 枚 —— 点芯片的 × 删掉' };
+  p.set('icons', st.icons.map((m) => m.id).join(','));
+  p.set('layout', st.layout);
+  const px = clampSend(st.px, 8, 512);
   if (px) p.set('px', px);
-  return { kind: 'stack', p, id: '' };
+  return { kind: 'stack', p, id: '', label: LAYOUT_LABEL[st.layout] };
 }
 
-// ---------------------------------------------------------------- 预览与产出
+// ================================================================ 画布(预览与产出)
 // 显示尺寸(仅预览,不进 URL):方 24 系 / 长条 / 上图下文各一档
 const ZOOM = { s: { sq: 96, bar: 48, v: 60 }, m: { sq: 176, bar: 96, v: 110 }, l: { sq: 288, bar: 160, v: 180 } };
 let timer = 0;
+let histT = 0;
+let renderSeq = 0; // 丢弃在途的过期响应(如恢复历史瞬间旧 fetch 才回来)
 function update() {
   clearTimeout(timer); // 等待分支也要掐掉上一次的防抖,否则过期渲染会盖掉提示
+  const mySeq = ++renderSeq;
   const r = params();
   const pv = $('pv'), err = $('err');
   if (r.wait) {
+    clearTimeout(histT); // 进入等待态也掐掉待记录的旧 URL,否则换模式后旧记录才姗姗落进历史
     pv.innerHTML = '<span class="empty">' + r.wait + '</span>';
     $('dims').textContent = '';
     setOut(null); err.textContent = '';
@@ -543,6 +795,7 @@ function update() {
     try {
       const res = await fetch(url);
       const text = await res.text();
+      if (mySeq !== renderSeq) return; // 已有更新的渲染,丢弃
       if (!res.ok) {
         err.textContent = text.trim();
         pv.innerHTML = '';
@@ -565,11 +818,14 @@ function update() {
       const cls = r.kind === 'icon-text-v' ? 'v' : (r.kind === 'icon-text' || r.kind === 'text-icon' ? 'bar' : 'sq');
       const ratio = m ? Math.max(parseFloat(m[1]) / Math.max(parseFloat(m[2]), 0.001), 0.05) : 1;
       const maxW = (pv.clientWidth || 640) - 8;
-      const h = Math.max(24, Math.min(ZOOM[S.zoom][cls], maxW / ratio));
+      const h = Math.max(24, Math.min(ZOOM[S.ui.zoom][cls], maxW / ratio));
       img.style.height = h + 'px';
       img.style.width = h * ratio + 'px';
       a.appendChild(img);
       pv.appendChild(a);
+      // URL 稳定 2 秒才进历史:打字途中的中间态不记
+      clearTimeout(histT);
+      histT = setTimeout(() => recordHistory(url, r), 2000);
     } catch (e) { err.textContent = String(e); }
   }, 250);
 }
@@ -584,7 +840,93 @@ function setOut(r, url) {
   im.textContent = '<img src="' + url.href + '" height="' + (isBar ? 48 : 24) + '" alt="">';
 }
 
-// ---------------------------------------------------------------- 控件接线
+// ================================================================ 历史
+const fmtTime = (ts) => {
+  const d = new Date(ts), p = (n) => String(n).padStart(2, '0');
+  return (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+};
+function recordHistory(url, r) {
+  const h = S.history;
+  const ex = h.find((e) => e.url === url.href);
+  if (ex) {
+    ex.ts = Date.now();
+    if (ex !== h[0]) { h.splice(h.indexOf(ex), 1); h.unshift(ex); }
+  } else {
+    h.unshift({ ts: Date.now(), url: url.href, kind: r.kind, label: r.label || '', id: r.id || '', snap: { mode: S.mode, st: clone(ms()) } });
+    if (h.length > HIST_MAX) h.length = HIST_MAX;
+  }
+  renderHistory(); scheduleSave();
+}
+function renderHistory() {
+  $('hist-n').textContent = S.history.length ? String(S.history.length) : '';
+  const list = $('hist-list');
+  list.innerHTML = '';
+  if (!S.history.length) {
+    const p = document.createElement('p');
+    p.className = 'hempty'; p.textContent = '还没有记录 —— 调出一枚合成,停稳两秒自动进历史。';
+    list.appendChild(p);
+    return;
+  }
+  for (const e of S.history) {
+    const row = document.createElement('div'); row.className = 'hrow';
+    const img = document.createElement('img'); img.alt = ''; img.loading = 'lazy'; img.src = e.url;
+    const meta = document.createElement('div'); meta.className = 'hmeta';
+    const lab = document.createElement('b');
+    lab.textContent = (MODE_LABEL[e.snap.mode] || e.kind) + (e.label ? ' · ' + e.label : '');
+    lab.title = lab.textContent;
+    const tm = document.createElement('span'); tm.textContent = fmtTime(e.ts);
+    meta.append(lab, tm);
+    if (e.id) {
+      const code = document.createElement('code'); code.textContent = e.id; code.title = e.id;
+      meta.appendChild(code);
+    }
+    const act = document.createElement('div'); act.className = 'hact';
+    const use = document.createElement('button'); use.type = 'button'; use.textContent = '恢复';
+    use.onclick = () => restoreEntry(e);
+    const cp = document.createElement('button'); cp.type = 'button'; cp.textContent = '复制';
+    cp.onclick = () => copyText(e.url, cp);
+    act.append(use, cp);
+    row.append(img, meta, act);
+    list.appendChild(row);
+  }
+}
+function restoreEntry(e) {
+  S.modes[e.snap.mode] = clone(e.snap.st);
+  S.mode = e.snap.mode;
+  limit = LIMIT0; shownList = [];
+  applyUI(); renderAll();
+  closeHist();
+}
+function copyText(t, btn) {
+  navigator.clipboard.writeText(t).then(() => {
+    const o = btn.textContent; btn.textContent = '已复制';
+    setTimeout(() => { btn.textContent = o; }, 1200);
+  });
+}
+const openHist = () => { $('hist').hidden = false; };
+const closeHist = () => { $('hist').hidden = true; };
+
+// ================================================================ 抽屉开关
+function openPicker() {
+  $('picker').hidden = false; $('pk-scrim').hidden = false;
+  raf(() => { $('picker').classList.add('on'); $('pk-scrim').classList.add('on'); });
+  const st = ms();
+  loadBundle('star');
+  if (st.cat) loadBundle(st.cat);
+  if (st.q) loadAll();
+  renderChips(); renderGrid();
+  try { $('q').focus(); } catch (e) {}
+}
+function closePicker() {
+  $('picker').classList.remove('on'); $('pk-scrim').classList.remove('on');
+  setTimeout(() => { $('picker').hidden = true; $('pk-scrim').hidden = true; }, 220);
+}
+$('pk-close').addEventListener('click', closePicker);
+$('pk-scrim').addEventListener('click', closePicker);
+$('pk-done').addEventListener('click', closePicker);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePicker(); closeHist(); } });
+
+// ================================================================ 控件接线
 function seg(id, set, after) {
   const box = $(id);
   box.addEventListener('click', (e) => {
@@ -593,71 +935,78 @@ function seg(id, set, after) {
     set(b.dataset.v);
     for (const x of box.querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
     after && after();
-    update();
+    update(); scheduleSave();
   });
 }
-seg('b-pos', (v) => S.badge.pos = v);
-seg('b-style', (v) => S.badge.style = v);
-seg('b-scale', (v) => S.badge.scale = v);
-seg('b-fs', (v) => S.badge.fsm = v);
+seg('b-pos', (v) => { ms().pos = v; });
+seg('b-style', (v) => { ms().style = v; });
+seg('b-scale', (v) => { ms().scale = v; });
+seg('b-fs', (v) => { ms().fsm = v; });
 seg('i-kind', (v) => {
-  S.in.kind = v;
-  $('i-text').disabled = v !== 'text';
-  if (v !== 'icon' && S.target === 'content') S.target = 'frame';
-  renderAll();
+  const st = ms();
+  st.kind = v;
+  if (v !== 'icon' && st.target === 'content') st.target = 'frame';
+  applyUI(); renderAll();
 });
-seg('t-dir', (v) => S.bar.dir = v);
-seg('t-fs', (v) => S.bar.fsm = v);
-seg('s-layout', (v) => { S.stk.layout = v; renderBanner(); renderSlots(); });
+seg('t-dir', (v) => { ms().dir = v; });
+seg('t-fs', (v) => { ms().fsm = v; });
+seg('s-layout', (v) => { ms().layout = v; renderBanner(); renderSlots(); });
 
 // 颜色:开关关 = 不带参数;开 = 用色板的值
-function colorToggle(btnId, inputs) {
+const COLOR_KEY = { 'b-bg': 'bg', 'b-fg': 'fg', 'i-fg': 'fg', 't-bg': 'bg', 't-fg': 'fg' };
+function colorToggle(btnId, onKey, inputs) {
   const btn = $(btnId);
   btn.addEventListener('click', () => {
-    const on = btn.getAttribute('aria-pressed') !== 'true';
-    btn.setAttribute('aria-pressed', String(on));
-    for (const i of inputs) $(i).disabled = !on;
-    update();
+    const st = ms();
+    st[onKey] = !st[onKey];
+    btn.setAttribute('aria-pressed', String(st[onKey]));
+    for (const i of inputs) $(i).disabled = !st[onKey];
+    update(); scheduleSave();
   });
-  for (const i of inputs) $(i).addEventListener('input', () => { if (!$(i).disabled) update(); });
+  for (const i of inputs) $(i).addEventListener('input', () => {
+    if ($(i).disabled) return;
+    ms()[COLOR_KEY[i]] = $(i).value;
+    update(); scheduleSave();
+  });
 }
-colorToggle('b-color', ['b-bg', 'b-fg']);
-colorToggle('i-color', ['i-fg']);
-colorToggle('t-bg-on', ['t-bg']);
-colorToggle('t-fg-on', ['t-fg']);
+colorToggle('b-color', 'con', ['b-bg', 'b-fg']);
+colorToggle('i-color', 'con', ['i-fg']);
+colorToggle('t-bg-on', 'bgOn', ['t-bg']);
+colorToggle('t-fg-on', 'fgOn', ['t-fg']);
 
-for (const id of ['b-text', 'i-text', 't-text']) $(id).addEventListener('input', update);
-for (const [id, o, k] of [['b-px', S.badge, 'px'], ['i-px', S.in, 'px'], ['t-r', S.bar, 'r'], ['t-px', S.bar, 'px'], ['s-px', S.stk, 'px']])
-  $(id).addEventListener('input', () => { o[k] = $(id).value; update(); });
+for (const [id, key] of [['b-text', 'text'], ['i-text', 'text'], ['t-text', 'text'], ['b-px', 'px'], ['i-px', 'px'], ['t-r', 'r'], ['t-px', 'px'], ['s-px', 'px']])
+  $(id).addEventListener('input', () => { ms()[key] = $(id).value; update(); scheduleSave(); });
 
 $('modes').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-mode]');
-  if (!b) return;
-  S.mode = b.dataset.mode;
-  for (const x of $('modes').querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
-  for (const d of document.querySelectorAll('#panels [data-m]')) d.hidden = d.dataset.m !== S.mode;
-  S.target = S.mode === 'in' ? 'frame' : 'main';
-  renderAll();
-  // 框内模式直接把选图器切到 frame 分类,省得用户满分类找框
-  if (S.mode === 'in' && !S.picked.frame && S.cat !== 'frame' && S.cat !== 'base') {
-    $('cat').value = 'frame';
-    loadCat('frame');
-  }
+  if (b) setMode(b.dataset.mode);
 });
-$('cat').addEventListener('change', () => loadCat($('cat').value));
-$('q').addEventListener('input', () => { S.q = $('q').value; renderGrid(); });
+$('q').addEventListener('input', () => {
+  const st = ms();
+  st.q = $('q').value.trim().toLowerCase();
+  $('pk-clear').hidden = !$('q').value;
+  limit = LIMIT0;
+  if (st.q) loadAll();
+  renderGrid(); scheduleSave();
+});
+$('pk-clear').addEventListener('click', () => {
+  $('q').value = '';
+  $('q').dispatchEvent(new Event('input', { bubbles: true }));
+});
 $('pvbar').addEventListener('click', (e) => {
   const z = e.target.closest('button[data-zoom]');
   if (z) {
-    S.zoom = z.dataset.zoom;
+    S.ui.zoom = z.dataset.zoom;
     for (const x of $('pvbar').querySelectorAll('[data-zoom]')) x.setAttribute('aria-pressed', String(x === z));
-    update();
+    update(); scheduleSave();
     return;
   }
   const b = e.target.closest('button[data-bg]');
   if (!b) return;
+  S.ui.pvbg = b.dataset.bg;
   for (const x of $('pvbar').querySelectorAll('[data-bg]')) x.setAttribute('aria-pressed', String(x === b));
   $('pv').className = 'bg-' + b.dataset.bg;
+  scheduleSave();
 });
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-copy]');
@@ -665,20 +1014,27 @@ document.addEventListener('click', (e) => {
   navigator.clipboard.writeText($(b.dataset.copy).textContent).then(() => { b.textContent = '已复制'; setTimeout(() => (b.textContent = '复制'), 1200); });
 });
 
-// ---------------------------------------------------------------- 启动
+// 工具:历史抽屉 / 重置
+$('btn-hist').addEventListener('click', () => { $('hist').hidden ? openHist() : closeHist(); });
+$('hist-close').addEventListener('click', closeHist);
+$('hist-clear').addEventListener('click', () => { S.history = []; renderHistory(); scheduleSave(); });
+$('btn-reset').addEventListener('click', () => {
+  S.modes[S.mode] = clone(DEF[S.mode]);
+  limit = LIMIT0; shownList = [];
+  applyUI(); renderAll();
+  flash('已重置' + MODE_LABEL[S.mode]);
+});
+
+// ================================================================ 启动
 (async () => {
   const index = await jget('index.json');
   Object.assign(BUNDLES, index.bundles || {});
-  const sel = $('cat');
   for (const c of index.cats) {
+    CATS.push(c);
     CATS_BY_ID[c.cat] = c;
-    const o = document.createElement('option');
-    o.value = c.cat; o.textContent = (c.title || c.cat) + '(' + c.count + ')';
-    sel.appendChild(o);
   }
-  sel.value = 'infra';
-  renderAll();
-  await loadCat('infra');
+  for (const k of Object.keys(S.modes)) { const c = S.modes[k].cat; if (c && !CATS_BY_ID[c]) S.modes[k].cat = ''; }
+  applyUI(); renderHistory(); renderAll();
 })();
 </script>
 </body>
