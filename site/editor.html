@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Icon 合成 —— x-cmd/icon</title>
+<meta name="description" content="把图标库里的图标按需拼成新的:角标、框内内容、图文长条、多枚叠加。调好即得 URL,可直接嵌图,也可给 draw 画架构图用。">
+<base href="__ICON_BASE__/">
+<style>
+:root{
+  --bg:#fbfaf8;--surface:#ffffff;--surface-2:#f4f2ee;--surface-3:#eceae4;
+  --ink:#1c1917;--muted:#78716c;--faint:#a8a29e;
+  --accent:#fb923c;--accent-ink:#ea580c;--accent-soft:rgba(251,146,60,.14);
+  --ok:#16a34a;--err:#dc2626;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg)}
+a{color:var(--accent-ink);text-decoration:none}
+a:hover{text-decoration:underline}
+header{padding:18px 24px 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:650}
+header .sub{color:var(--muted);font-size:13px}
+header .back{margin-left:auto;font-size:13px}
+main{max-width:1180px;margin:0 auto;padding:12px 24px 64px;display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--surface-2);border-radius:14px;padding:14px 16px}
+.card h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 10px}
+/* 选图器 */
+#picker label,#picker select,#picker input[type=search]{font:inherit}
+#picker .row{display:flex;gap:8px;margin-bottom:10px}
+#picker select,#picker input[type=search]{border:0;background:var(--surface);border-radius:9px;padding:7px 10px;font-size:13px;color:var(--ink);outline:none;min-width:0}
+#picker input[type=search]{flex:1}
+#targets{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+#targets button{font:inherit;font-size:12.5px;border:0;border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--muted);cursor:pointer}
+#targets button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
+#targets .hint{font-size:12.5px;color:var(--faint);align-self:center}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:520px;overflow:auto;padding:2px}
+#grid button{border:0;background:var(--surface);border-radius:10px;padding:6px 2px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+#grid button:hover{background:var(--accent-soft)}
+#grid button[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+#grid img{width:32px;height:32px;object-fit:contain}
+#grid .nm{font-size:9.5px;line-height:1.2;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 控件 */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{font:inherit;font-size:13.5px;border:0;border-radius:999px;padding:7px 16px;background:var(--surface);color:var(--muted);cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
+fieldset{border:0;padding:0;margin:0 0 12px;display:grid;grid-template-columns:max-content 1fr;gap:8px 10px;align-items:center}
+fieldset legend{display:none}
+fieldset label{font-size:13px;color:var(--muted);white-space:nowrap}
+fieldset input[type=text],fieldset input[type=number],fieldset select{font:inherit;font-size:13.5px;border:0;background:var(--surface);border-radius:9px;padding:6px 10px;color:var(--ink);outline:none;width:100%;min-width:0}
+fieldset .seg{display:flex;gap:6px;flex-wrap:wrap}
+fieldset .seg button{font:inherit;font-size:12.5px;border:0;border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--muted);cursor:pointer}
+fieldset .seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+fieldset .seg input[type=color]{width:34px;height:30px;border:0;border-radius:8px;background:none;padding:0;cursor:pointer}
+.note{font-size:12px;color:var(--faint);margin:-4px 0 12px}
+/* 预览与产出 */
+#pv{min-height:150px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:
+  repeating-conic-gradient(var(--surface) 0% 25%,var(--surface-3) 0% 50%) 0 0/20px 20px}
+#pv img{max-width:100%;height:auto}
+#pv .empty{color:var(--faint);font-size:13px;padding:20px}
+#err{color:var(--err);font-size:12.5px;margin:8px 0 0;min-height:1em;white-space:pre-wrap}
+.out{margin-top:10px}
+.out .line{display:flex;gap:8px;align-items:center;margin-top:8px}
+.out .line:first-child{margin-top:0}
+.out code{flex:1;font:12px/1.5 ui-monospace,"SF Mono",Consolas,monospace;background:var(--surface);border-radius:8px;padding:7px 10px;color:var(--ink);overflow:auto;white-space:nowrap}
+.out .cap{font-size:12px;color:var(--muted);width:64px;flex:none}
+.out button{font:inherit;font-size:12px;border:0;border-radius:8px;padding:6px 12px;background:var(--accent);color:#fff;cursor:pointer;flex:none}
+.out button:active{transform:translateY(1px)}
+.out .off code{color:var(--faint)}
+footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);font-size:12.5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Icon 合成</h1>
+  <span class="sub">角标 · 框内 · 图文 · 叠加 —— 调好即得 URL</span>
+  <a class="back" href="./">← 返回图标库</a>
+</header>
+<main>
+  <!-- 左:选图 -->
+  <section id="picker" class="card">
+    <h2>挑图标</h2>
+    <div class="row">
+      <select id="cat"></select>
+      <input id="q" type="search" placeholder="搜 id / 概念 / 描述">
+    </div>
+    <div id="targets"></div>
+    <div id="grid" aria-label="图标网格"></div>
+  </section>
+  <!-- 右:模式 + 参数 + 预览 -->
+  <div>
+    <section class="card">
+      <h2>合成方式</h2>
+      <div class="tabs" id="modes">
+        <button data-mode="badge" aria-pressed="true">角标</button>
+        <button data-mode="in" aria-pressed="false">框内</button>
+        <button data-mode="bar" aria-pressed="false">图文</button>
+        <button data-mode="stack" aria-pressed="false">叠加</button>
+      </div>
+
+      <form id="ctl">
+        <div data-m="badge">
+          <fieldset>
+            <label>角标文字</label><input type="text" id="b-text" value="x2" maxlength="12">
+            <label>位置</label>
+            <div class="seg" id="b-pos">
+              <button data-v="rl" aria-pressed="true">右下</button>
+              <button data-v="ru" aria-pressed="false">右上</button>
+              <button data-v="lu" aria-pressed="false">左上</button>
+              <button data-v="ll" aria-pressed="false">左下</button>
+            </div>
+            <label>样式</label>
+            <div class="seg" id="b-style">
+              <button data-v="disc" aria-pressed="true">圆标</button>
+              <button data-v="bubble" aria-pressed="false">气泡</button>
+            </div>
+            <label>颜色</label>
+            <div class="seg" id="b-colors">
+              <input type="color" id="b-bg" value="#ea580c" title="底色"><input type="color" id="b-fg" value="#ffffff" title="文字色">
+              <button type="button" id="b-default" aria-pressed="true">默认</button>
+            </div>
+            <label>输出像素</label><input type="number" id="b-px" min="8" max="512" placeholder="24">
+          </fieldset>
+          <p class="note">圆标文字放不下会自动长成胶囊(如 120+)。右下角是构图规范里留给计数徽标的位置。</p>
+        </div>
+
+        <div data-m="in" hidden>
+          <fieldset>
+            <label>内容</label>
+            <div class="seg" id="i-kind">
+              <button data-v="icon" aria-pressed="true">图标</button>
+              <button data-v="text" aria-pressed="false">文字</button>
+            </div>
+            <label>文字</label><input type="text" id="i-text" value="x-cmd" maxlength="16" disabled>
+            <label>文字颜色</label><div class="seg"><input type="color" id="i-fg" value="#1e293b"><button type="button" id="i-default" aria-pressed="true">默认</button></div>
+            <label>输出像素</label><input type="number" id="i-px" min="8" max="512" placeholder="24">
+          </fieldset>
+          <p class="note">框与底座自带内容区(白板中间、地图台面之上)。深色框(黑板 / 终端)自动配浅色文字,可用下面的颜色覆盖。</p>
+        </div>
+
+        <div data-m="bar" hidden>
+          <fieldset>
+            <label>摆法</label>
+            <div class="seg" id="t-dir">
+              <button data-v="icon-text" aria-pressed="true">左图右文</button>
+              <button data-v="text-icon" aria-pressed="false">左文右图</button>
+              <button data-v="icon-text-v" aria-pressed="false">上图下文</button>
+            </div>
+            <label>文字</label><input type="text" id="t-text" value="API" maxlength="40">
+            <label>背景色</label><div class="seg"><input type="color" id="t-bg" value="#f1f5f9"><button type="button" id="t-bg-on" aria-pressed="false">铺底</button></div>
+            <label>文字色</label><div class="seg"><input type="color" id="t-fg" value="#1e293b"><button type="button" id="t-fg-on" aria-pressed="true">默认</button></div>
+            <label>圆角</label><input type="number" id="t-r" min="0" max="12" placeholder="5">
+            <label>输出像素高</label><input type="number" id="t-px" min="8" max="512" placeholder="48">
+          </fieldset>
+          <p class="note">长条的宽度按文字自适应;「上图下文」是方的,文字太长自动缩字。</p>
+        </div>
+
+        <div data-m="stack" hidden>
+          <fieldset>
+            <label>摆法</label>
+            <div class="seg" id="s-layout">
+              <button data-v="h" aria-pressed="true">左右</button>
+              <button data-v="v" aria-pressed="false">上下</button>
+              <button data-v="tri" aria-pressed="false">三角</button>
+              <button data-v="tri-inv" aria-pressed="false">倒三角</button>
+              <button data-v="grid" aria-pressed="false">四格</button>
+            </div>
+            <label>输出像素</label><input type="number" id="s-px" min="8" max="512" placeholder="24">
+          </fieldset>
+          <p class="note" id="s-note">左右 / 上下要 2 枚,三角 / 倒三角要 3 枚,四格要 4 枚 —— 在左边连点几枚,再按顺序排。</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h2>预览</h2>
+      <div id="pv"><span class="empty">先在左边挑一枚图标</span></div>
+      <p id="err"></p>
+      <div class="out">
+        <div class="line"><span class="cap">URL</span><code id="o-url">-</code><button data-copy="o-url" type="button">复制</button></div>
+        <div class="line off" id="o-id-line"><span class="cap">合成 id</span><code id="o-id">-</code><button data-copy="o-id" type="button">复制</button></div>
+        <div class="line"><span class="cap">嵌入</span><code id="o-img">-</code><button data-copy="o-img" type="button">复制</button></div>
+      </div>
+      <p class="note" style="margin-top:10px">「合成 id」(如 <code>infra:disk?rl=x2</code>)给 x-cmd/draw 画架构图用;长条 / 叠加暂无紧凑写法,直接用 URL。</p>
+    </section>
+  </div>
+</main>
+<footer>产出由 URL 完全决定,可长缓存、可 data URI 内嵌 —— 合成逻辑在 <a href="https://github.com/ljh-sh/iconbase" target="_blank" rel="noopener">iconbase</a> 的边缘上。</footer>
+<script>
+'use strict';
+// ---------------------------------------------------------------- 状态
+const S = {
+  mode: 'badge',                 // badge | in | bar | stack
+  target: 'main',                // 选图填哪个槽:main(主图)/ frame(框)/ content(内容)
+  cat: '', q: '',
+  picked: { main: null, frame: null, content: null }, // id → 元数据
+  stack: [],                     // 叠加模式的多选(按点选顺序)
+  bPos: 'rl', bStyle: 'disc', bBg: '', bFg: '', bPx: '',
+  iKind: 'icon', iFg: '', iPx: '',
+  tDir: 'icon-text', tBg: '', tFg: '', tR: '', tPx: '',
+  sLayout: 'h', sPx: '',
+};
+const NEED = { h: 2, v: 2, tri: 3, 'tri-inv': 3, grid: 4 };
+const $ = (id) => document.getElementById(id);
+const CATS_BY_ID = {};
+const manifests = new Map(); // cat → { icons:[…] }
+let curIcons = [];
+
+// ---------------------------------------------------------------- 数据
+async function jget(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); }
+
+async function loadCat(cat) {
+  if (!manifests.has(cat)) manifests.set(cat, await jget('manifest.' + cat + '.json'));
+  S.cat = cat;
+  renderGrid();
+}
+// id → 静态文件:版本化分类的别名走推荐版本(与 ID2FILE 同一套规则)
+function fileOf(m) {
+  const ci = CATS_BY_ID[m.cat];
+  const concept = m.id.slice(m.id.indexOf(':') + 1);
+  if (m.id.includes('/')) return 'i/' + m.id.replace(':', '/').replace(':', '/') + '.svg'; // cat/vN:concept → cat/vN/concept
+  if (ci && ci.versioned) return 'i/' + m.cat + '/' + ci.recommended + '/' + concept + '.svg';
+  return 'i/' + m.cat + '/' + concept + '.svg';
+}
+
+// ---------------------------------------------------------------- 选图器
+function renderTargets() {
+  const box = $('targets');
+  box.innerHTML = '';
+  const mk = (key, label) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = label;
+    b.setAttribute('aria-pressed', S.target === key);
+    b.onclick = () => { S.target = key; renderTargets(); };
+    box.appendChild(b);
+  };
+  if (S.mode === 'in') { mk('frame', '① 选框 / 底座'); mk('content', '② 选内容图标'); }
+  else if (S.mode === 'stack') {
+    const hint = document.createElement('span');
+    hint.className = 'hint';
+    hint.textContent = '点选添加、再点取消(按点选顺序排),已选 ' + S.stack.length + ' 枚';
+    box.appendChild(hint);
+  } else mk('main', '选一枚图标');
+}
+
+function renderGrid() {
+  const grid = $('grid');
+  grid.innerHTML = '';
+  const q = S.q.toLowerCase();
+  const icons = curIcons.filter((m) => !q || (m.id + ' ' + m.concept + ' ' + (m.descEn || '')).toLowerCase().includes(q)).slice(0, 400);
+  for (const m of icons) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.title = m.id;
+    const on = S.mode === 'stack' ? S.stack.includes(m) : S.picked[S.target === 'content' && S.iKind !== 'icon' ? 'frame' : S.target] === m;
+    b.setAttribute('aria-pressed', on);
+    const img = document.createElement('img');
+    img.loading = 'lazy'; img.alt = ''; img.src = fileOf(m);
+    const nm = document.createElement('span');
+    nm.className = 'nm'; nm.textContent = m.concept;
+    b.append(img, nm);
+    b.onclick = () => pick(m);
+    grid.appendChild(b);
+  }
+}
+
+function pick(m) {
+  if (S.mode === 'stack') {
+    const i = S.stack.indexOf(m);
+    if (i >= 0) S.stack.splice(i, 1);
+    else if (S.stack.length < 4) S.stack.push(m);
+    else { flash('最多 4 枚'); return; }
+  } else {
+    S.picked[S.target] = m;
+    // 框内模式:挑完框自动把目标切到内容,顺手
+    if (S.mode === 'in' && S.target === 'frame') { S.target = 'content'; renderTargets(); }
+  }
+  renderGrid();
+  update();
+}
+function flash(msg) { $('err').textContent = msg; setTimeout(() => { if ($('err').textContent === msg) $('err').textContent = ''; }, 2500); }
+
+// ---------------------------------------------------------------- URL 组装
+function params() {
+  const p = new URLSearchParams();
+  if (S.mode === 'badge') {
+    const t = $('b-text').value.trim();
+    if (!t || !S.picked.main) return null;
+    p.set('icon', S.picked.main.id); p.set('text', t); p.set('pos', S.bPos); p.set('style', S.bStyle);
+    if (S.bBg) p.set('bg', S.bBg);
+    if (S.bFg) p.set('fg', S.bFg);
+    if (S.bPx) p.set('px', S.bPx);
+    return { kind: 'badge', p, id: S.picked.main.id + '?' + S.bPos + '=' + encodeURIComponent(t) };
+  }
+  if (S.mode === 'in') {
+    const f = S.picked.frame;
+    if (!f) return null;
+    p.set('icon', f.id);
+    if (S.iKind === 'text') {
+      const t = $('i-text').value.trim();
+      if (!t) return null;
+      p.set('text', t);
+      if (S.iFg) p.set('fg', S.iFg);
+      if (S.iPx) p.set('px', S.iPx);
+      return { kind: 'in', p, id: f.id + '?text=' + encodeURIComponent(t) };
+    }
+    if (!S.picked.content) return null;
+    p.set('in', S.picked.content.id);
+    if (S.iFg) p.set('fg', S.iFg);
+    if (S.iPx) p.set('px', S.iPx);
+    return { kind: 'in', p, id: f.id + '?in=' + encodeURIComponent(S.picked.content.id) };
+  }
+  if (S.mode === 'bar') {
+    const t = $('t-text').value.trim();
+    if (!t || !S.picked.main) return null;
+    p.set('icon', S.picked.main.id); p.set('text', t);
+    if (S.tBg) p.set('bg', S.tBg);
+    if (S.tFg) p.set('fg', S.tFg);
+    if (S.tR) p.set('r', S.tR);
+    if (S.tPx) p.set('px', S.tPx);
+    return { kind: S.tDir, p, id: '' };
+  }
+  const need = NEED[S.sLayout];
+  if (S.stack.length !== need) return { wait: '还要挑 ' + (need - S.stack.length) + ' 枚(' + S.sLayout + ' 要 ' + need + ' 枚)' };
+  p.set('icons', S.stack.map((m) => m.id).join(','));
+  p.set('layout', S.sLayout);
+  if (S.sPx) p.set('px', S.sPx);
+  return { kind: 'stack', p, id: '' };
+}
+
+// ---------------------------------------------------------------- 预览与产出
+let timer = 0;
+function update() {
+  const r = params();
+  const pv = $('pv'), err = $('err');
+  if (!r) {
+    pv.innerHTML = '<span class="empty">' + (S.mode === 'in' ? '先挑一枚框(frame:)或底座(base:)' : '先在左边挑一枚图标') + '</span>';
+    setOut(null); err.textContent = '';
+    return;
+  }
+  if (r.wait) { pv.innerHTML = '<span class="empty">' + r.wait + '</span>'; setOut(null); err.textContent = ''; return; }
+  const url = new URL('draw/' + r.kind, document.baseURI);
+  url.search = r.p.toString();
+  setOut(r, url);
+  clearTimeout(timer);
+  timer = setTimeout(async () => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) { err.textContent = await res.text(); return; }
+      err.textContent = '';
+      pv.innerHTML = '';
+      const img = document.createElement('img');
+      img.alt = r.kind; img.src = url.href; img.height = 128;
+      if (r.kind === 'icon-text' || r.kind === 'text-icon' || r.kind === 'icon-text-v') img.height = Number(S.tPx || 48);
+      pv.appendChild(img);
+    } catch (e) { err.textContent = String(e); }
+  }, 250);
+}
+
+function setOut(r, url) {
+  const u = $('o-url'), id = $('o-id'), idLine = $('o-id-line'), im = $('o-img');
+  if (!r) { u.textContent = id.textContent = im.textContent = '-'; idLine.classList.add('off'); return; }
+  u.textContent = url.href;
+  if (r.id) { id.textContent = r.id; idLine.classList.remove('off'); }
+  else { id.textContent = '(长条 / 叠加暂无紧凑写法)'; idLine.classList.add('off'); }
+  im.textContent = '<img src="' + url.href + '" height="' + (r.kind === 'stack' || r.kind === 'badge' || r.kind === 'in' ? 24 : 48) + '" alt="">';
+}
+
+// ---------------------------------------------------------------- 控件接线
+function seg(id, key, fn) {
+  const box = $(id);
+  box.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b || !b.dataset.v) return;
+    S[key] = b.dataset.v;
+    for (const x of box.querySelectorAll('button')) x.setAttribute('aria-pressed', x === b && !x.id.endsWith('-on') && !x.id.endsWith('-default'));
+    fn && fn();
+    update();
+  });
+}
+seg('b-pos', 'bPos'); seg('b-style', 'bStyle');
+seg('i-kind', 'iKind', () => { $('i-text').disabled = S.iKind !== 'text'; renderTargets(); renderGrid(); });
+seg('t-dir', 'tDir'); seg('s-layout', 'sLayout', () => update());
+
+// 颜色:「默认」按钮 = 不带参数;配色时把色值写进参数
+function colorPair(btnId, fgInput, set) {
+  $(btnId).addEventListener('click', () => {
+    const on = $(btnId).getAttribute('aria-pressed') !== 'true';
+    $(btnId).setAttribute('aria-pressed', on);
+    set(on ? $(fgInput).value : '');
+    update();
+  });
+  $(fgInput).addEventListener('input', () => { if ($(btnId).getAttribute('aria-pressed') === 'true') set($(fgInput).value); update(); });
+}
+colorPair('b-default', 'b-bg', (v) => { S.bBg = v; S.bFg = v ? '#ffffff' : ''; $('b-fg').value = S.bFg || '#ffffff'; });
+colorPair('i-default', 'i-fg', (v) => { S.iFg = v; });
+colorPair('t-fg-on', 't-fg', (v) => { S.tFg = v; });
+$('t-bg-on').addEventListener('click', () => {
+  const on = $('t-bg-on').getAttribute('aria-pressed') !== 'true';
+  $('t-bg-on').setAttribute('aria-pressed', on);
+  S.tBg = on ? $('t-bg').value : '';
+  update();
+});
+$('t-bg').addEventListener('input', () => { if ($('t-bg-on').getAttribute('aria-pressed') === 'true') S.tBg = $('t-bg').value; update(); });
+$('b-fg').addEventListener('input', () => { if ($('b-default').getAttribute('aria-pressed') === 'true') { S.bFg = $('b-fg').value; update(); } });
+
+for (const [id, key] of [['b-text', 'bText'], ['i-text', 'iText'], ['t-text', 'tText']]) $(id).addEventListener('input', update);
+for (const [id, key] of [['b-px', 'bPx'], ['i-px', 'iPx'], ['t-r', 'tR'], ['t-px', 'tPx'], ['s-px', 'sPx']])
+  $(id).addEventListener('input', () => { S[key] = $(id).value; update(); });
+
+$('modes').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  S.mode = b.dataset.mode;
+  for (const x of $('modes').querySelectorAll('button')) x.setAttribute('aria-pressed', x === b);
+  for (const d of $('ctl').querySelectorAll('[data-m]')) d.hidden = d.dataset.m !== S.mode;
+  S.target = S.mode === 'in' ? 'frame' : 'main';
+  // 框内模式直接把选图器切到 frame 分类,省得用户满分类找框
+  if (S.mode === 'in' && S.cat !== 'frame' && S.cat !== 'base') { $('cat').value = 'frame'; loadCat('frame'); return; }
+  renderTargets(); renderGrid(); update();
+});
+$('cat').addEventListener('change', () => loadCat($('cat').value));
+$('q').addEventListener('input', () => { S.q = $('q').value; renderGrid(); });
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-copy]');
+  if (!b) return;
+  navigator.clipboard.writeText($(b.dataset.copy).textContent).then(() => { b.textContent = '已复制'; setTimeout(() => (b.textContent = '复制'), 1200); });
+});
+
+// ---------------------------------------------------------------- 启动
+(async () => {
+  const index = await jget('index.json');
+  const sel = $('cat');
+  for (const c of index.cats) {
+    CATS_BY_ID[c.cat] = c;
+    const o = document.createElement('option');
+    o.value = c.cat; o.textContent = (c.title || c.cat) + '(' + c.count + ')';
+    sel.appendChild(o);
+  }
+  sel.value = 'infra';
+  await loadCat('infra');
+})();
+</script>
+</body>
+</html>

@@ -800,3 +800,12 @@ writeFileSync(
   `// 生成物,别手改 —— 由 scripts/build.mjs 生成:CSS/JS 内联后的页面。\nexport const PAGE = ${JSON.stringify(page)};\n`,
 );
 console.log(`src/page.ts: ${(page.length / 1024).toFixed(0)} KB`);
+
+// ---- Worker 用的页面:合成编辑器(/editor) ----
+// site/editor.html 本就自包含(CSS/JS 全内联),原样嵌成字符串。
+const editorHtml = readFileSync(join(ROOT, 'site/editor.html'), 'utf8');
+writeFileSync(
+  join(ROOT, 'src/editor.ts'),
+  `// 生成物,别手改 —— 由 scripts/build.mjs 生成:/editor 合成编辑器页。\nexport const EDITOR = ${JSON.stringify(editorHtml)};\n`,
+);
+console.log(`src/editor.ts: ${(editorHtml.length / 1024).toFixed(0)} KB`);

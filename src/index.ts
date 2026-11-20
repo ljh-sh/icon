@@ -10,8 +10,13 @@
 //   /sprite.*.svg    → 图标符号(按包)
 //   /i/<cat>/<file>  → 图标原文件 —— 静态资源,边缘直接发
 //   /api/icons.json?ids=a,b → { id: data URI },给 draw 那侧内嵌用
+//                          ids 里也可以是合成 id,如 infra:disk?rl=x2
+//   /draw/<kind>?<params>   → 按需合成(badge / 框内 / 图文 / 叠加),URL 即配方
+//   /editor          → 合成编辑器(选图、调参数、复制 URL / 合成 id)
 import { CATS, ID2FILE, LICENSE, BUILD } from './gen.js';
 import { PAGE } from './page.js';
+import { EDITOR } from './editor.js';
+import { renderDraw, parseComposedId, parseIconSvg, DrawError, type IconSrc } from './draw.js';
 
 // 静态资源在 public/icon/** 下的那个前缀 —— 所有挂载点都从这儿取
 const ASSET_ROOT = '/icon';
@@ -52,6 +57,13 @@ function b64ToBytes(b64: string): Uint8Array {
   return out;
 }
 
+function b64OfText(s: string): string {
+  const bytes = new TextEncoder().encode(s);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -77,7 +89,40 @@ export default {
       return new Response('not found', { status: 404 });
     }
 
-    // 给 draw 内嵌用:按 id 取 data URI
+    // 合成引擎的图标来源:id → 静态资源里的原文件 → 解析出内容与内容区
+    const getIcon = async (id: string): Promise<IconSrc | null> => {
+      const file = ID2FILE[id];
+      if (!file) return null;
+      const res = await env.ASSETS.fetch(new URL(`${ASSET_ROOT}/${file}`, url.origin));
+      if (!res.ok) return null;
+      return parseIconSvg(await res.text());
+    };
+
+    // 按需合成(draw 风格:URL 即配方)。产出由 URL 完全决定,可长缓存
+    const dm = path.match(/^\/draw\/([a-z-]+)\/?$/);
+    if (dm || path === '/draw' || path === '/draw/') {
+      try {
+        const svg = await renderDraw(dm?.[1] ?? '', url.searchParams, getIcon);
+        return new Response(svg, {
+          headers: {
+            'content-type': 'image/svg+xml; charset=utf-8',
+            'cache-control': 'public, max-age=86400',
+            // 公开图床,任何网页的 JS 都能直接取图内嵌
+            'access-control-allow-origin': '*',
+          },
+        });
+      } catch (e) {
+        if (e instanceof DrawError) {
+          return new Response(e.message + '\n', {
+            status: 400,
+            headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },
+          });
+        }
+        throw e;
+      }
+    }
+
+    // 给 draw 内嵌用:按 id 取 data URI;带 ? 的是合成 id(如 infra:disk?rl=x2)
     if (path === '/api/icons.json') {
       const ids = (url.searchParams.get('ids') || '')
         .split(',')
@@ -89,6 +134,16 @@ export default {
       }
       const out: Record<string, string> = {};
       for (const id of ids) {
+        if (id.includes('?')) {
+          const spec = parseComposedId(id);
+          if (!spec || !ID2FILE[spec.base]) continue;
+          try {
+            out[id] = `data:image/svg+xml;base64,${b64OfText(await renderDraw(spec.kind, spec.params, getIcon))}`;
+          } catch {
+            // 坏配方跳过,与「查不到的 id 跳过」一个待遇
+          }
+          continue;
+        }
         const file = ID2FILE[id];
         if (!file) continue;
         const res = await env.ASSETS.fetch(new URL(`${ASSET_ROOT}/${file}`, url.origin));
@@ -101,6 +156,9 @@ export default {
       }
       return json(out, 300);
     }
+
+    // 合成编辑器:选图、调参数、复制 URL / 合成 id
+    if (path === '/editor') return html(EDITOR, base);
 
     // 老链接 /c/<cat> —— 分类不再是子页,重定向到首页并带上筛选条件
     const cm = path.match(/^\/c\/([a-z0-9-]+)/i);

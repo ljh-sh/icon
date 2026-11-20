@@ -90,6 +90,8 @@ function rootMeta(file) {
   return {
     type: open.match(/data-type="([^"]+)"/)?.[1],
     inner: open.match(/data-inner="([^"]+)"/)?.[1],
+    // 深色框(黑板 / 终端):框内放文字时默认配浅色字 —— /draw/in 用
+    dark: open.match(/data-dark="([^"]+)"/)?.[1],
   };
 }
 
@@ -152,7 +154,9 @@ for (const line of readFileSync(RECIPES, 'utf8').split('\n')) {
     join(dir, `${concept}.svg`),
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"${
       meta.type ? ` data-type="${meta.type}"` : ''
-    }${meta.inner ? ` data-inner="${meta.inner}"` : ''}>${body}</svg>\n`,
+    }${meta.inner ? ` data-inner="${meta.inner}"` : ''}${
+      meta.dark ? ` data-dark="${meta.dark}"` : ''
+    }>${body}</svg>\n`,
   );
   n++;
 }
