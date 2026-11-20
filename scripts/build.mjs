@@ -395,7 +395,9 @@ for (const [id, info] of [...found].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
           verdict: rec.meta.verdict,
           trademark: rec.meta.trademarkOwner || tm?.owner || '',
           trademarkPolicy: rec.meta.trademarkPolicy || '',
+          license: rec.meta.license || '',
           licenseUrl: rec.meta.licenseUrl || '',
+          source: rec.meta.source || '',
           restrictions: rec.meta.restrictions || '',
           reviewed: rec.meta.reviewed || '',
           notes: rec.body,
@@ -461,7 +463,8 @@ for (const m of metas) {
 }
 const licMeta = {};
 for (const m of metas) {
-  if (!m.verdict) continue;
+  // pending 是商标表合成的(无许可记录),LICENSE 只收有结论的,不然 license/source 缺字段
+  if (!m.verdict || m.verdict === 'pending') continue;
   licMeta[m.id] = {
     verdict: m.verdict,
     trademark: m.trademark || '',
