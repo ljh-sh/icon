@@ -251,33 +251,47 @@ async function inFrame(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   return svgDoc(24, 24, iconNode(icon, FULL) + layer, pxOf(p, null), `${id}:${content || text}`);
 }
 
-/** icon-text / text-icon —— 长条:图 + 文字(哪个在左由 textFirst 决定) */
+/** icon-text / text-icon —— 长条:图 + 文字(哪个在左由 textFirst 决定),文字可 \n 换行 */
 async function bar(p: URLSearchParams, getIcon: GetIcon, textFirst: boolean): Promise<string> {
   const { icon, id } = await needIcon(p, getIcon);
-  const text = (p.get('text') || '').slice(0, 40);
+  const text = (p.get('text') || '').replace(/\r/g, '').slice(0, 80);
   if (!text) throw new DrawError(`缺 text,如 /draw/${textFirst ? 'text-icon' : 'icon-text'}?icon=${id || 'infra:server'}&text=API`);
-  const fs = 10;
-  const tw = textW(text, fs);
-  const W = 25 + tw; // 2 边距 + 文字 + 3 间隔 + 18 图标 + 2 边距
+  const lines = text.split('\n').filter((s, i, a) => s.trim() || (i > 0 && i < a.length - 1));
+  const lh = 1.15;
+  // 多行时默认字号按行数收缩(fs= 可覆盖),整块在 24 高里垂直居中
+  const fsAuto = lines.length > 1 ? Math.min(10, 16.5 / (1 + lh * (lines.length - 1))) : 10;
+  const fs = num(p, 'fs', r2(fsAuto), 4, 14);
+  const tw = Math.max(...lines.map((s) => textW(s, fs)), 0.001);
+  const W = 25 + tw; // 2 边距 + 最长行文字 + 3 间隔 + 18 图标 + 2 边距
   const bgV = p.get('bg');
   const bg = bgV ? `<rect x="0" y="0" width="${r2(W)}" height="24" rx="${num(p, 'r', 5, 0, 12)}" fill="${color(p, 'bg', '#f1f5f9')}"/>` : '';
   const iconBox: Box = textFirst ? { x: W - 20, y: 3, w: 18, h: 18 } : { x: 2, y: 3, w: 18, h: 18 };
   const tx = textFirst ? 2 : 23;
-  const body = bg + textEl(tx, 12, fs, text, color(p, 'fg', '#1e293b'), 'start', 600) + iconNode(icon, iconBox);
+  const fg = color(p, 'fg', '#1e293b');
+  const texts = lines
+    .map((s, i) => (s.trim() ? textEl(tx, 12 + (i - (lines.length - 1) / 2) * fs * lh, fs, s, fg, 'start', 600) : ''))
+    .join('');
+  const body = bg + texts + iconNode(icon, iconBox);
   return svgDoc(W, 24, body, pxOf(p, 48), `${id} ${text}`);
 }
 
-/** icon-text-v —— 方型:上图下文 */
+/** icon-text-v —— 方型:上图下文,文字可 \n 换行(高度按行数生长) */
 async function barV(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const { icon, id } = await needIcon(p, getIcon);
-  const text = (p.get('text') || '').slice(0, 40);
+  const text = (p.get('text') || '').replace(/\r/g, '').slice(0, 80);
   if (!text) throw new DrawError(`缺 text,如 /draw/icon-text-v?icon=${id || 'frame:door'}&text=入口`);
-  const em = Math.max(textW(text, 1), 0.001);
-  const fs = Math.min(5.5, 22 / em); // 装不下就缩字,不换行
+  const lines = text.split('\n').filter((s, i, a) => s.trim() || (i > 0 && i < a.length - 1));
+  const emMax = Math.max(...lines.map((s) => textW(s, 1)), 0.001);
+  const fs = Math.min(num(p, 'fs', 5.5, 2.5, 8), 22 / emMax); // 装不下就缩字
+  const H = 30 + (fs + 0.5) * (lines.length - 1);
   const bgV = p.get('bg');
-  const bg = bgV ? `<rect x="0" y="0" width="24" height="30" rx="${num(p, 'r', 5, 0, 12)}" fill="${color(p, 'bg', '#f1f5f9')}"/>` : '';
-  const body = bg + iconNode(icon, { x: 3, y: 1, w: 18, h: 18 }) + textEl(12, 25, fs, text, color(p, 'fg', '#1e293b'), 'middle', 600);
-  return svgDoc(24, 30, body, pxOf(p, 48), `${id} ${text}`);
+  const bg = bgV ? `<rect x="0" y="0" width="24" height="${r2(H)}" rx="${num(p, 'r', 5, 0, 12)}" fill="${color(p, 'bg', '#f1f5f9')}"/>` : '';
+  const fg = color(p, 'fg', '#1e293b');
+  const texts = lines
+    .map((s, i) => (s.trim() ? textEl(12, 25 + (i - (lines.length - 1) / 2) * (fs + 0.5), fs, s, fg, 'middle', 600) : ''))
+    .join('');
+  const body = bg + iconNode(icon, { x: 3, y: 1, w: 18, h: 18 }) + texts;
+  return svgDoc(24, H, body, pxOf(p, 48), `${id} ${text}`);
 }
 
 // 叠加的摆法(#12):h 左右 / v 上下 / grid 四格 / tri 上一下二(△)/ tri-inv 上二下一(▽)

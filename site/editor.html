@@ -197,7 +197,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);fon
               <button type="button" data-v="text-icon" aria-pressed="false">左文右图</button>
               <button type="button" data-v="icon-text-v" aria-pressed="false">上图下文</button>
             </div>
-            <label>文字</label><input type="text" id="t-text" value="API" maxlength="40">
+            <label>文字</label><textarea id="t-text" rows="2" maxlength="80">API</textarea>
             <label>底色</label>
             <div class="seg">
               <button type="button" id="t-bg-on" aria-pressed="false">铺底</button>
@@ -209,9 +209,15 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);fon
               <input type="color" id="t-fg" value="#1e293b" disabled>
             </div>
             <label>圆角</label><input type="number" id="t-r" min="0" max="12" placeholder="5">
+            <label>字号</label>
+            <div class="seg" id="t-fs">
+              <button type="button" data-v="0.85" aria-pressed="false">小</button>
+              <button type="button" data-v="1" aria-pressed="true">标准</button>
+              <button type="button" data-v="1.15" aria-pressed="false">大</button>
+            </div>
             <label>输出像素高</label><input type="number" id="t-px" min="8" max="512" placeholder="48">
           </div>
-          <p class="note">长条的宽度按文字自适应;「上图下文」是方的,文字太长自动缩字。</p>
+          <p class="note">文字可回车换行:长条按最长行加宽,「上图下文」按行数加高,字太长自动缩号。</p>
         </section>
 
         <section data-m="stack" hidden>
@@ -270,7 +276,7 @@ const S = {
   stack: [],                     // 叠加模式的多选(按点选顺序)
   badge: { pos: 'rl', style: 'disc', scale: '1', fsm: '1', px: '' },
   in:   { kind: 'icon', px: '' },
-  bar:  { dir: 'icon-text', r: '', px: '' },
+  bar:  { dir: 'icon-text', r: '', fsm: '1', px: '' },
   stk:  { layout: 'h', px: '' },
 };
 const NEED = { h: 2, v: 2, tri: 3, 'tri-inv': 3, grid: 4 };
@@ -429,9 +435,10 @@ function pick(m) {
     else if (S.stack.length < 4) S.stack.push(m);
     else { flash('最多 4 枚'); return; }
   } else {
-    S.picked[S.target] = m;
-    // 框内模式:挑完框自动把目标切到内容,顺手
-    if (S.mode === 'in' && S.target === 'frame') S.target = 'content';
+    // 统一语义(单图/双图与叠加一致):再点同一枚 = 取消,点不同枚 = 替换
+    S.picked[S.target] = S.picked[S.target] === m ? null : m;
+    // 框内模式:挑上框后自动把目标切到内容,顺手
+    if (S.mode === 'in' && S.target === 'frame' && S.picked.frame) S.target = 'content';
   }
   renderAll();
 }
@@ -497,6 +504,7 @@ function params() {
     p.set('icon', S.picked.main.id); p.set('text', t);
     if ($('t-bg-on').getAttribute('aria-pressed') === 'true') p.set('bg', $('t-bg').value);
     if ($('t-fg-on').getAttribute('aria-pressed') === 'true') p.set('fg', $('t-fg').value);
+    if (S.bar.fsm !== '1') p.set('fs', String(Math.round((S.bar.dir === 'icon-text-v' ? 5.5 : 10) * Number(S.bar.fsm) * 100) / 100));
     const r = clampSend(S.bar.r, 0, 12);
     if (r) p.set('r', r);
     const px = clampSend(S.bar.px, 8, 512);
@@ -599,6 +607,7 @@ seg('i-kind', (v) => {
   renderAll();
 });
 seg('t-dir', (v) => S.bar.dir = v);
+seg('t-fs', (v) => S.bar.fsm = v);
 seg('s-layout', (v) => { S.stk.layout = v; renderBanner(); renderSlots(); });
 
 // 颜色:开关关 = 不带参数;开 = 用色板的值
