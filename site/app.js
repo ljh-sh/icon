@@ -489,7 +489,9 @@ async function prefetch(cat) {
       const j = JSON.parse(txt);
       const want = new Set();
       for (const m of j.icons.slice(0, LIMIT0)) if (m.shard) want.add(m.shard);
-      await Promise.all([...want].map(shardURL));
+      want.delete(first); // 第一片已经在拉了,别重复
+      // 片是 immutable 长缓存 —— fetch 一下就暖在 HTTP 缓存里,点下去 <use> 直接命中
+      await Promise.all([...want].map((s) => fetch(`${BASE}${s}${V}`).catch(() => null)));
     }
     await shardP;
   } finally {

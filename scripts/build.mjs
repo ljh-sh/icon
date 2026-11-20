@@ -432,8 +432,21 @@ const cats = Object.entries(CATS).map(([cat, meta]) => ({
   recommended: versions[cat] || '',
 }));
 
+// 构建号得对**产出的内容**负责:片、清单、翻译包,任何一样变了 ?v 就得变。
+// 曾经只哈希「图标 id + 源文件大小」—— 分片从 300 改到 80 那次,图标一个没变,
+// BUILD 也没变,而片文件全换了内容;immutable 一年的旧片顶在新清单前面,
+// 第 80 个图标(第一片之外的第一个)往后全部空白,且永远不会自愈。
+// 所以这里把决定产出的东西全算进去:源文件内容、清单字段、star 名单、翻译包、生成器本身。
 const BUILD = createHash('sha1')
-  .update(metas.map((m) => `${m.id}:${statSync(metaFile.get(m.id)).size}`).join('\n'))
+  .update(readFileSync(new URL(import.meta.url))) // 生成器:切法/清洗逻辑变了也能感知
+  .update(
+    metas
+      .map((m) => `${m.id}:${createHash('sha1').update(readFileSync(metaFile.get(m.id))).digest('hex')}`)
+      .join('\n'),
+  )
+  .update(JSON.stringify(metas))
+  .update(existsSync(join(ROOT, 'star.tsv')) ? readFileSync(join(ROOT, 'star.tsv')) : '')
+  .update(JSON.stringify(zhNames))
   .digest('hex')
   .slice(0, 10);
 
