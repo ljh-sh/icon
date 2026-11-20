@@ -148,10 +148,7 @@ async function needIcon(p: URLSearchParams, getIcon: GetIcon): Promise<{ icon: I
 
 export const KINDS = ['badge', 'in', 'icon-text', 'text-icon', 'icon-text-v', 'stack'] as const;
 
-// 角标圆心(24 系):r=4.6 + 白描边 1.2(外扩 0.6),四角都收在画布内
-const BADGE_POS: Record<string, [number, number]> = {
-  ru: [18.8, 5.2], rl: [18.8, 18.8], lu: [5.2, 5.2], ll: [5.2, 18.8],
-};
+// 角标圆心(24 系)锚在画布角上:圆心距角 scale 后的 (r + 0.6),放大不出界
 const POS_ALIAS: Record<string, string> = {
   ru: 'ru', rl: 'rl', lu: 'lu', ll: 'll',
   'right-upper': 'ru', 'right-lower': 'rl', 'left-upper': 'lu', 'left-lower': 'll',
@@ -175,48 +172,53 @@ async function badge(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const bubble = style === 'bubble';
   const bg = color(p, 'bg', bubble ? '#ffffff' : '#ea580c'); // 站点主色的深一档,白字压得住
   const fg = color(p, 'fg', bubble ? '#1e293b' : '#ffffff');
-  const fs = 4.6;
+  // scale:角标整体大小;fs:字号(24 系)—— 缺省随 scale,只动一个即可整体缩放
+  const scale = num(p, 'scale', 1, 0.5, 2);
+  const fs = num(p, 'fs', r2(4.6 * scale), 2.5, 9);
   const tw = textW(text, fs);
   let layer: string;
   if (bubble) {
     // 气泡:白底圆角矩形 + 尾巴指向图标中心;画在角上,占的面积比圆标大
-    const bh = 9;
-    const bw = Math.max(9, tw + 3.2);
+    const bh = 9 * scale;
+    const bw = Math.max(9 * scale, tw + 3.2 * scale);
     const x = pos.includes('r') ? 23.6 - bw : 0.4;
     const y = pos === 'ru' || pos === 'lu' ? 0.4 : 23.6 - bh;
     const top = pos === 'ru' || pos === 'lu';
     // 尾巴:根在气泡靠内侧的边上,尖往图标中心指
-    const ex = x + bw * 0.32 + 1.2;
+    const ex = x + bw * 0.32 + 1.2 * scale;
     const ey = top ? y + bh : y;
     const dx = pos.includes('r') ? -1 : 1;
     const dy = top ? 1 : -1;
-    const tail = `<path d="M${r2(ex - 1.2)} ${r2(ey)}L${r2(ex + 1.2)} ${r2(ey)}L${r2(ex + dx * 1.4)} ${r2(ey + dy * 2.8)}Z" fill="${bg}"/>`;
+    const tail = `<path d="M${r2(ex - 1.2 * scale)} ${r2(ey)}L${r2(ex + 1.2 * scale)} ${r2(ey)}L${r2(ex + dx * 1.4 * scale)} ${r2(ey + dy * 2.8 * scale)}Z" fill="${bg}"/>`;
     // 接缝:把气泡边框在尾巴根部那一段盖掉,让尾把和气泡连成一体
     const seam = `<rect x="${r2(ex - 1)}" y="${r2(top ? y + bh - 0.55 : y - 0.55)}" width="2" height="1.1" fill="${bg}"/>`;
     layer =
-      `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${bh}" rx="2.4" fill="${bg}" stroke="#cbd5e1" stroke-width="0.5"/>` +
+      `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(bh)}" rx="${r2(2.4 * scale)}" fill="${bg}" stroke="#cbd5e1" stroke-width="${r2(Math.max(0.4, 0.5 * scale))}"/>` +
       seam + tail + textEl(x + bw / 2, y + bh / 2, fs, text, fg, 'middle', 600);
   } else {
-    // 圆标:文字放不下就自动长成胶囊(stadium)
-    const [cx, cy] = BADGE_POS[pos];
-    const r = 4.6;
-    if (tw <= r * 2 - 2.6) {
+    // 圆标:文字放不下就自动长成胶囊(stadium);锚在画布角上,放大不出界
+    const r = 4.6 * scale;
+    const off = r + 0.6;
+    const cx = pos.includes('r') ? 24 - off : off;
+    const cy = pos === 'ru' || pos === 'lu' ? off : 24 - off;
+    const stroke = r2(Math.max(0.9, 1.2 * scale));
+    if (tw <= r * 2 - 2.6 * scale) {
       layer =
-        `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${bg}" stroke="#ffffff" stroke-width="1.2" paint-order="stroke"/>` +
+        `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
         textEl(cx, cy, fs, text, fg, 'middle', 700);
     } else {
-      const bw = tw + 3.4;
+      const bw = tw + 3.4 * scale;
       const x = pos.includes('r') ? 23.4 - bw : 0.6;
       const y = pos === 'ru' || pos === 'lu' ? 0.6 : 23.4 - r * 2;
       layer =
-        `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(r * 2)}" rx="${r}" fill="${bg}" stroke="#ffffff" stroke-width="1.2" paint-order="stroke"/>` +
+        `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(r * 2)}" rx="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
         textEl(x + bw / 2, y + r, fs, text, fg, 'middle', 700);
     }
   }
   return svgDoc(24, 24, iconNode(icon, FULL) + layer, pxOf(p, null), `${id} ${text}`);
 }
 
-/** in —— 框内放内容(#8 全/半包围的运行时版):内容是图标或一行文字 */
+/** in —— 框内放内容(#8 全/半包围的运行时版):内容是图标或文字(支持 \n 换行) */
 async function inFrame(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const { icon, id } = await needIcon(p, getIcon);
   if (!icon.inner) {
@@ -224,7 +226,7 @@ async function inFrame(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   }
   const inner = icon.inner;
   const content = p.get('in');
-  const text = (p.get('text') || '').slice(0, 16);
+  const text = (p.get('text') || '').replace(/\r/g, '').slice(0, 40);
   if (!content && !text) {
     throw new DrawError('缺内容:in=<图标id> 或 text=<文字>,如 /draw/in?icon=frame:whiteboard&in=common:atom');
   }
@@ -235,10 +237,16 @@ async function inFrame(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
     if (!c) throw new DrawError(`找不到图标 ${content} —— 去首页查 id:/`);
     layer = iconNode(c, inner);
   } else {
-    const em = Math.max(textW(text, 1), 0.001);
-    const fs = Math.min(inner.h * 0.9, inner.w / em);
-    // 深色框(黑板 / 终端)默认浅色字,其余深色字 —— fg= 永远可覆盖
-    layer = textEl(inner.x + inner.w / 2, inner.y + inner.h / 2, fs, text, color(p, 'fg', icon.dark ? '#f8fafc' : '#1e293b'), 'middle', 600);
+    // 多行:每行各自水平居中,整块垂直居中;字号按「最长行宽 + 行数」自适应收缩
+    const lines = text.split('\n').filter((s, i, a) => s.trim() || (i > 0 && i < a.length - 1));
+    const lh = 1.15;
+    const emMax = Math.max(...lines.map((s) => textW(s, 1)), 0.001);
+    const fs = Math.min(inner.w / emMax, (inner.h * 0.9) / (1 + lh * (lines.length - 1)));
+    const cy = inner.y + inner.h / 2;
+    const fg = color(p, 'fg', icon.dark ? '#f8fafc' : '#1e293b'); // 深色框默认浅色字,fg= 可覆盖
+    layer = lines
+      .map((s, i) => (s.trim() ? textEl(inner.x + inner.w / 2, cy + (i - (lines.length - 1) / 2) * fs * lh, fs, s, fg, 'middle', 600) : ''))
+      .join('');
   }
   return svgDoc(24, 24, iconNode(icon, FULL) + layer, pxOf(p, null), `${id}:${content || text}`);
 }
