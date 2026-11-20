@@ -95,11 +95,125 @@ interface Box { x: number; y: number; w: number; h: number }
 const FULL: Box = { x: 0, y: 0, w: 24, h: 24 };
 
 /** 把任意 viewBox 的图标 contain 居中放进目标框(厂商图标 80×80 也能进 24 系) */
-function iconNode(icon: IconSrc, box: Box): string {
+function fitOf(icon: IconSrc, box: Box) {
   const s = Math.min(box.w / icon.w, box.h / icon.h);
-  const x = box.x + (box.w - icon.w * s) / 2 - icon.vx * s;
-  const y = box.y + (box.h - icon.h * s) / 2 - icon.vy * s;
+  return { s, x: box.x + (box.w - icon.w * s) / 2 - icon.vx * s, y: box.y + (box.h - icon.h * s) / 2 - icon.vy * s };
+}
+function iconNode(icon: IconSrc, box: Box): string {
+  const { s, x, y } = fitOf(icon, box);
   return `<g transform="translate(${r2(x)} ${r2(y)}) scale(${Math.round(s * 10000) / 10000})">${icon.body}</g>`;
+}
+
+// ---------------------------------------------------------------- 墨迹扫描
+// 量一枚图标实际画到哪儿:文字贴墨迹摆,而不是贴 contain 盒 ——
+// 图标自带的 viewBox 内边距(disk-array 上下各留 4.5)不该变成「字离图很远」。
+// 只认平铺的 rect/circle/ellipse/line/poly*/path;嵌套 transform、弧参数粘连这类
+// 解析不动的一律回 null,调用方退回整盒 —— 宁可松,不能错。
+
+const PATH_TOK = /[MmLlHhVvCcSsQqTtAaZz]|-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g;
+
+function pathInk(d: string, eat: (x: number, y: number) => void): boolean {
+  const t = d.match(PATH_TOK);
+  if (!t) return true;
+  let i = 0;
+  const n = () => {
+    const v = Number(t[i++]);
+    if (!Number.isFinite(v)) throw new Error('nan');
+    return v;
+  };
+  let cx = 0, cy = 0, mx = 0, my = 0, qx = 0, qy = 0, qSet = false;
+  const reflect = () => (qSet ? { x: 2 * cx - qx, y: 2 * cy - qy } : { x: cx, y: cy });
+  try {
+    while (i < t.length) {
+      const raw = t[i++];
+      if (!/[a-zA-Z]/.test(raw)) return false; // 段首必须是命令字母
+      let K = raw.toUpperCase();
+      const rel = K !== raw;
+      if (K === 'Z') { cx = mx; cy = my; qSet = false; continue; }
+      const arity = ({ M: 2, L: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, T: 2, A: 7 } as const)[K as 'M'];
+      if (!arity) return false;
+      for (;;) { // 同一字母后跟多组参数 = 隐式重复(M 的后续组按 L 算)
+        if (K === 'A') {
+          const rx = n(), ry = n(), _rot = n(), _laf = n(), _sf = n();
+          const dx = rel ? cx + n() : n(), dy = rel ? cy + n() : n();
+          const r = Math.max(Math.abs(rx), Math.abs(ry));
+          for (const [px_, py_] of [[cx, cy], [dx, dy]]) { eat(px_ - r, py_ - r); eat(px_ + r, py_ + r); }
+          cx = dx; cy = dy; qSet = false;
+        } else if (K === 'H') {
+          cx = rel ? cx + n() : n(); eat(cx, cy); qSet = false;
+        } else if (K === 'V') {
+          cy = rel ? cy + n() : n(); eat(cx, cy); qSet = false;
+        } else {
+          const g: number[] = [];
+          for (let j = 0; j < arity; j++) g.push(n());
+          const X = (k: number) => (rel ? cx + g[k] : g[k]);
+          const Y = (k: number) => (rel ? cy + g[k] : g[k]);
+          if (K === 'M') { mx = X(0); my = Y(0); cx = mx; cy = my; eat(cx, cy); qSet = false; }
+          else if (K === 'L') { cx = X(0); cy = Y(0); eat(cx, cy); qSet = false; }
+          else if (K === 'C') { eat(X(0), Y(0)); eat(X(2), Y(2)); cx = X(4); cy = Y(4); qx = X(2); qy = Y(2); qSet = true; eat(cx, cy); }
+          else if (K === 'S') { const c0 = reflect(); eat(c0.x, c0.y); eat(X(0), Y(0)); cx = X(2); cy = Y(2); qx = X(0); qy = Y(1); qSet = true; eat(cx, cy); }
+          else if (K === 'Q') { eat(X(0), Y(0)); cx = X(2); cy = Y(3); qx = X(0); qy = Y(1); qSet = true; eat(cx, cy); }
+          else if (K === 'T') { const c0 = reflect(); eat(c0.x, c0.y); cx = X(0); cy = Y(1); qx = c0.x; qy = c0.y; qSet = true; eat(cx, cy); }
+        }
+        if (i >= t.length || /[a-zA-Z]/.test(t[i])) break;
+        if (K === 'M') K = 'L'; // 隐式重复降级
+      }
+    }
+  } catch {
+    return false;
+  }
+  return true;
+}
+
+const INK_EL = /<(rect|circle|ellipse|line|polyline|polygon|path)\b([^>]*)>/gi;
+function numAttr(a: string, k: string, def = 0): number {
+  const v = a.match(new RegExp('\\b' + k + '\\s*=\\s*"\\s*(-?[\\d.eE+]+)\\s*"'));
+  const f = v ? Number(v[1]) : def;
+  return Number.isFinite(f) ? f : def;
+}
+function strAttr(a: string, k: string): string | null {
+  return a.match(new RegExp('\\b' + k + '\\s*=\\s*"([^"]*)"'))?.[1] ?? null;
+}
+
+/** 图标墨迹的包络盒(图标自身坐标);量不出返回 null */
+function inkOf(icon: IconSrc): Box | null {
+  if (/<(g|text|image|use|foreignObject)\b/i.test(icon.body)) return null;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const eat = (x: number, y: number) => {
+    if (x < x0) x0 = x; if (x > x1) x1 = x;
+    if (y < y0) y0 = y; if (y > y1) y1 = y;
+  };
+  for (const m of icon.body.matchAll(INK_EL)) {
+    const el = m[1].toLowerCase();
+    const a = m[2];
+    if (el === 'rect') { const x = numAttr(a, 'x'), y = numAttr(a, 'y'); eat(x, y); eat(x + numAttr(a, 'width'), y + numAttr(a, 'height')); }
+    else if (el === 'circle') { const r = numAttr(a, 'r'); eat(numAttr(a, 'cx') - r, numAttr(a, 'cy') - r); eat(numAttr(a, 'cx') + r, numAttr(a, 'cy') + r); }
+    else if (el === 'ellipse') { const rx = numAttr(a, 'rx'), ry = numAttr(a, 'ry'); eat(numAttr(a, 'cx') - rx, numAttr(a, 'cy') - ry); eat(numAttr(a, 'cx') + rx, numAttr(a, 'cy') + ry); }
+    else if (el === 'line') { eat(numAttr(a, 'x1'), numAttr(a, 'y1')); eat(numAttr(a, 'x2'), numAttr(a, 'y2')); }
+    else if (el === 'polygon' || el === 'polyline') {
+      const pts = strAttr(a, 'points')?.match(/-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g) || [];
+      for (let j = 0; j + 1 < pts.length; j += 2) eat(+pts[j], +pts[j + 1]);
+    } else {
+      const d = strAttr(a, 'd');
+      if (!d || !pathInk(d, eat)) return null;
+    }
+  }
+  if (!(x1 > x0 && y1 > y0)) return null;
+  // 出 viewBox 一点是描边/圆整的正常损耗,出太多 = 量错了,退回整盒
+  const SL = 2.5;
+  if (x0 < icon.vx - SL || y0 < icon.vy - SL || x1 > icon.vx + icon.w + SL || y1 > icon.vy + icon.h + SL) return null;
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+
+/** 墨迹放进目标盒后的纵向锚点(中线/底边);量不出退回盒本身 */
+function inkY(icon: IconSrc, box: Box): { cy: number; bottom: number } {
+  const f = fitOf(icon, box);
+  const ink = inkOf(icon);
+  if (!ink) return { cy: f.y + (icon.vy + icon.h / 2) * f.s, bottom: f.y + (icon.vy + icon.h) * f.s };
+  return {
+    cy: Math.min(box.y + box.h * 0.8, Math.max(box.y + box.h * 0.2, f.y + (ink.y + ink.h / 2) * f.s)),
+    bottom: Math.min(box.y + box.h, f.y + (ink.y + ink.h) * f.s),
+  };
 }
 
 function textEl(x: number, y: number, fs: number, s: string, fill: string, anchor = 'middle', weight = 400): string {
@@ -321,9 +435,10 @@ async function bar(p: URLSearchParams, getIcon: GetIcon, textFirst: boolean): Pr
   const bg = bgV ? `<rect x="0" y="0" width="${r2(W)}" height="24" rx="${num(p, 'r', 5, 0, 12)}" fill="${color(p, 'bg', '#f1f5f9')}"/>` : '';
   const iconBox: Box = textFirst ? { x: W - 20, y: 3, w: 18, h: 18 } : { x: 2, y: 3, w: 18, h: 18 };
   const tx = textFirst ? 2 : 23;
+  const tcy = inkY(icon, iconBox).cy; // 文字跟图标墨迹垂直对齐,而非 contain 盒
   const fg = color(p, 'fg', '#1e293b');
   const texts = lines
-    .map((s, i) => (s.trim() ? textEl(tx, 12 + (i - (lines.length - 1) / 2) * fs * lh, fs, s, fg, 'start', 600) : ''))
+    .map((s, i) => (s.trim() ? textEl(tx, tcy + (i - (lines.length - 1) / 2) * fs * lh, fs, s, fg, 'start', 600) : ''))
     .join('');
   // 角点键在这里 = 给条里的图标戴一枚角标(样式走 b. 前缀,避开宿主的 bg/fg/fs)
   const bcol = cornerBadges(p);
@@ -333,7 +448,7 @@ async function bar(p: URLSearchParams, getIcon: GetIcon, textFirst: boolean): Pr
   return svgDoc(W, 24, body, pxOf(p, 48), `${id} ${text}`);
 }
 
-/** icon-text-v —— 方型:上图下文,文字可 \n 换行(高度按行数生长) */
+/** icon-text-v —— 方型:上图下文,文字可 \n 换行(高度按行数与墨迹生长) */
 async function barV(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const { icon, id } = await needIcon(p, getIcon);
   const text = (p.get('text') || '').replace(/\r/g, '').slice(0, 80);
@@ -341,14 +456,20 @@ async function barV(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const lines = text.split('\n').filter((s, i, a) => s.trim() || (i > 0 && i < a.length - 1));
   const emMax = Math.max(...lines.map((s) => textW(s, 1)), 0.001);
   const fs = Math.min(num(p, 'fs', 5.5, 2.5, 8), 22 / emMax); // 装不下就缩字
-  const H = 30 + (fs + 0.5) * (lines.length - 1);
+  const iconBox: Box = { x: 3, y: 1, w: 18, h: 18 };
+  // 文字贴图标墨迹摆:图标自带的 viewBox 内边距不再变成「字离图很远」;
+  // 小墨迹图标(点/短线)保住盒的 75% 下沿 —— 尺寸契约不破,免得整图被放大
+  const lh = fs + 0.5;
+  const half = 0.5 * fs + ((lines.length - 1) * lh) / 2; // 文字块半高(em 盒估)
+  const bottom = Math.max(inkY(icon, iconBox).bottom, iconBox.y + iconBox.h * 0.75);
+  const C = r2(bottom + 1.2 + half); // 文字块视觉中线
+  const H = r2(Math.max(C + half + 1.6, iconBox.y + iconBox.h + 1.5));
   const bgV = p.get('bg');
-  const bg = bgV ? `<rect x="0" y="0" width="24" height="${r2(H)}" rx="${num(p, 'r', 5, 0, 12)}" fill="${color(p, 'bg', '#f1f5f9')}"/>` : '';
+  const bg = bgV ? `<rect x="0" y="0" width="24" height="${H}" rx="${num(p, 'r', 5, 0, 12)}" fill="${color(p, 'bg', '#f1f5f9')}"/>` : '';
   const fg = color(p, 'fg', '#1e293b');
   const texts = lines
-    .map((s, i) => (s.trim() ? textEl(12, 25 + (i - (lines.length - 1) / 2) * (fs + 0.5), fs, s, fg, 'middle', 600) : ''))
+    .map((s, i) => (s.trim() ? textEl(12, C + (i - (lines.length - 1) / 2) * lh, fs, s, fg, 'middle', 600) : ''))
     .join('');
-  const iconBox: Box = { x: 3, y: 1, w: 18, h: 18 };
   const bcol = cornerBadges(p);
   if (bcol.length > 1) throw new DrawError('长条上的角标最多一枚 —— 图标小,双角挤');
   const badgeG = bcol.length ? badgeOnBox(iconBox, bcol[0], badgeOpts(p, 'b.')) : '';
