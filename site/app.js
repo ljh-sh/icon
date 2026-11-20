@@ -105,6 +105,7 @@ let lang = 'zh';
 const LIMIT0 = 60; // 默认只显示前 60 个 —— 要更多点「显示更多」,那才会去下载
 let limit = LIMIT0;
 let V = ''; // 构建号:URL 上带上,重新部署后不会顶着旧缓存
+let MORE_OBS; // 滚动自动加载:盯着「显示更多」那个按钮,快进视口就多渲染一批
 let BUILD = 'dev'; // 构建号(本地缓存的键)
 let current = null; // 面板里正在看的图标
 
@@ -363,24 +364,48 @@ function cell(m) {
 }
 
 // 渲染前 limit 个,其余给「显示更多」
+// 增量渲染:列表只会在尾部变长(滚动加载 / 后台并分类),接着摆就行;
+// 前缀对不上(搜索词、分类变了)才整个重画 —— 万级格子重画一次要上百毫秒,滚动会顿
+let shownList = [];
 function grid(host, list) {
   const shown = list.slice(0, limit);
-  host.textContent = '';
-  for (const m of shown) host.append(cell(m));
+  let p = 0;
+  while (p < shownList.length && p < shown.length && shownList[p] === shown[p]) p++;
+  if (p === shownList.length && shown.length >= p) {
+    const frag = document.createDocumentFragment();
+    for (const m of shown.slice(p)) frag.append(cell(m));
+    host.append(frag);
+  } else {
+    host.textContent = '';
+    for (const m of shown) host.append(cell(m));
+  }
+  shownList = shown;
   const left = list.length - shown.length;
   // 选了分类的话,能显示的就是这个分类里的那些 —— 别的分类还没下载也算不进来
   // (不然一个只有 28 个图标的分类也会冒出「显示更多 (6000)」,点了什么都没有)
   const rest = cat ? left : left + (ALL - ICONS.size);
-  for (const more of document.querySelectorAll('.more')) {
-    more.hidden = rest <= 0;
-    more.textContent = `${t('more')} (${rest})`;
-    more.onclick = () => {
-      limit += 240;
-      render();
-      // 全部视图:把没下载的分类拉下来,列表跟着长;选分类时没什么可拉的了
-      if (!cat) loadRest(true);
-    };
-  }
+  const more = $('#more');
+  more.hidden = rest <= 0;
+  more.textContent = `${t('more')} (${rest})`;
+  const grow = () => {
+    limit += 240;
+    render();
+    // 全部视图:把没下载的分类拉下来,列表跟着长;选分类时没什么可拉的了
+    if (!cat) loadRest(true);
+  };
+  more.onclick = grow;
+  // 滚到快见底就自动加载 —— 按钮留着,键盘和点按照旧能用
+  if (rest > 0 && 'IntersectionObserver' in window) {
+    if (!MORE_OBS) {
+      MORE_OBS = new IntersectionObserver(
+        (es) => {
+          if (es.some((e) => e.isIntersecting)) grow();
+        },
+        { rootMargin: '900px' }, // 提前一段加载,滚过去时新一格已经在了
+      );
+    }
+    MORE_OBS.observe(more);
+  } else if (MORE_OBS) MORE_OBS.disconnect();
   return shown.length;
 }
 
