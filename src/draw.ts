@@ -161,22 +161,50 @@ function posOf(p: URLSearchParams): string {
   return pos;
 }
 
-/** badge —— 在已有图标上叠角标(计数 / 状态 / 气泡) */
-async function badge(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
-  const { icon, id } = await needIcon(p, getIcon);
-  const text = (p.get('text') || '').slice(0, 12);
-  if (!text) throw new DrawError('缺 text(角标文字),如 /draw/badge?icon=infra:disk&text=x2');
-  const pos = posOf(p);
-  const style = p.get('style') || 'disc';
-  if (style !== 'disc' && style !== 'bubble') throw new DrawError(`style 只认 disc / bubble,收到:${style}`);
+const CORNER_ORDER = ['lu', 'ru', 'll', 'rl'] as const;
+
+interface BadgeSpec { pos: string; text: string }
+interface BadgeOpts { bubble: boolean; bg: string; fg: string; scale: number; fs: number }
+
+/** 收集角点键(lu=/ru=/ll=/rl=,含长写)——「在某角挂一枚角标」的统一修饰语法 */
+function cornerBadges(p: URLSearchParams): BadgeSpec[] {
+  const byPos: Partial<Record<string, string>> = {};
+  for (const k of [...p.keys()]) {
+    const pos = POS_ALIAS[k];
+    if (!pos) continue;
+    for (const v of p.getAll(k)) {
+      const text = v.slice(0, 12);
+      if (!text) throw new DrawError(`${k}= 的角标文字是空的`);
+      if (pos in byPos) throw new DrawError(`${pos} 角已有角标 —— 一角一枚,换一个角`);
+      byPos[pos] = text;
+    }
+  }
+  // 固定角序输出,URL 与产物确定
+  return CORNER_ORDER.filter((c) => c in byPos).map((c) => ({ pos: c, text: byPos[c]! }));
+}
+
+/** 角标样式:pre 为空 = /draw/badge 本尊;带 b. 前缀 = 挂在长条/叠加里的角标,避开宿主自己的 bg/fg/fs */
+function badgeOpts(p: URLSearchParams, pre: string): BadgeOpts {
+  const style = p.get(pre + 'style') || 'disc';
+  if (style !== 'disc' && style !== 'bubble') throw new DrawError(`${pre}style 只认 disc / bubble,收到:${style}`);
   const bubble = style === 'bubble';
-  const bg = color(p, 'bg', bubble ? '#ffffff' : '#ea580c'); // 站点主色的深一档,白字压得住
-  const fg = color(p, 'fg', bubble ? '#1e293b' : '#ffffff');
-  // scale:角标整体大小;fs:字号(24 系)—— 缺省随 scale,只动一个即可整体缩放
-  const scale = num(p, 'scale', 1, 0.5, 2);
-  const fs = num(p, 'fs', r2(4.6 * scale), 2.5, 9);
+  const scale = num(p, pre + 'scale', 1, 0.5, 2);
+  return {
+    bubble,
+    // 站点主色的深一档,白字压得住;气泡反过来:白底深字
+    bg: color(p, pre + 'bg', bubble ? '#ffffff' : '#ea580c'),
+    fg: color(p, pre + 'fg', bubble ? '#1e293b' : '#ffffff'),
+    scale,
+    // scale:角标整体大小;fs:字号(24 系)—— 缺省随 scale,只动一个即可整体缩放
+    fs: num(p, pre + 'fs', r2(4.6 * scale), 2.5, 9),
+  };
+}
+
+/** 画一枚角标(24 系几何,锚画布角)—— badge 本尊与嵌进小图标盒共用 */
+function drawBadge(b: BadgeSpec, o: BadgeOpts): string {
+  const { pos, text } = b;
+  const { bubble, bg, fg, scale, fs } = o;
   const tw = textW(text, fs);
-  let layer: string;
   if (bubble) {
     // 气泡:白底圆角矩形 + 尾巴指向图标中心;画在角上,占的面积比圆标大
     const bh = 9 * scale;
@@ -192,30 +220,56 @@ async function badge(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
     const tail = `<path d="M${r2(ex - 1.2 * scale)} ${r2(ey)}L${r2(ex + 1.2 * scale)} ${r2(ey)}L${r2(ex + dx * 1.4 * scale)} ${r2(ey + dy * 2.8 * scale)}Z" fill="${bg}"/>`;
     // 接缝:把气泡边框在尾巴根部那一段盖掉,让尾把和气泡连成一体
     const seam = `<rect x="${r2(ex - 1)}" y="${r2(top ? y + bh - 0.55 : y - 0.55)}" width="2" height="1.1" fill="${bg}"/>`;
-    layer =
+    return (
       `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(bh)}" rx="${r2(2.4 * scale)}" fill="${bg}" stroke="#cbd5e1" stroke-width="${r2(Math.max(0.4, 0.5 * scale))}"/>` +
-      seam + tail + textEl(x + bw / 2, y + bh / 2, fs, text, fg, 'middle', 600);
-  } else {
-    // 圆标:文字放不下就自动长成胶囊(stadium);锚在画布角上,放大不出界
-    const r = 4.6 * scale;
-    const off = r + 0.6;
-    const cx = pos.includes('r') ? 24 - off : off;
-    const cy = pos === 'ru' || pos === 'lu' ? off : 24 - off;
-    const stroke = r2(Math.max(0.9, 1.2 * scale));
-    if (tw <= r * 2 - 2.6 * scale) {
-      layer =
-        `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
-        textEl(cx, cy, fs, text, fg, 'middle', 700);
-    } else {
-      const bw = tw + 3.4 * scale;
-      const x = pos.includes('r') ? 23.4 - bw : 0.6;
-      const y = pos === 'ru' || pos === 'lu' ? 0.6 : 23.4 - r * 2;
-      layer =
-        `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(r * 2)}" rx="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
-        textEl(x + bw / 2, y + r, fs, text, fg, 'middle', 700);
-    }
+      seam + tail + textEl(x + bw / 2, y + bh / 2, fs, text, fg, 'middle', 600)
+    );
   }
-  return svgDoc(24, 24, iconNode(icon, FULL) + layer, pxOf(p, null), `${id} ${text}`);
+  // 圆标:文字放不下就自动长成胶囊(stadium);锚在画布角上,放大不出界
+  const r = 4.6 * scale;
+  const off = r + 0.6;
+  const cx = pos.includes('r') ? 24 - off : off;
+  const cy = pos === 'ru' || pos === 'lu' ? off : 24 - off;
+  const stroke = r2(Math.max(0.9, 1.2 * scale));
+  if (tw <= r * 2 - 2.6 * scale) {
+    return (
+      `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
+      textEl(cx, cy, fs, text, fg, 'middle', 700)
+    );
+  }
+  const bw = tw + 3.4 * scale;
+  const x = pos.includes('r') ? 23.4 - bw : 0.6;
+  const y = pos === 'ru' || pos === 'lu' ? 0.6 : 23.4 - r * 2;
+  return (
+    `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(r * 2)}" rx="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
+    textEl(x + bw / 2, y + r, fs, text, fg, 'middle', 700)
+  );
+}
+
+/** 把角标按比例缩进宿主图标盒:角标恒为图标的 ~19%,几何零重算 */
+function badgeOnBox(box: Box, b: BadgeSpec, o: BadgeOpts): string {
+  const side = Math.min(box.w, box.h); // contain 后的图标是盒内最大方形
+  const x = box.x + (box.w - side) / 2;
+  const y = box.y + (box.h - side) / 2;
+  const s = Math.round((side / 24) * 10000) / 10000;
+  return `<g transform="translate(${r2(x)} ${r2(y)}) scale(${s})">${drawBadge(b, o)}</g>`;
+}
+
+/** badge —— 在已有图标上叠角标(计数 / 状态 / 气泡),可多角:rl=x2&lu=新 */
+async function badge(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
+  const { icon, id } = await needIcon(p, getIcon);
+  const legacy = p.has('pos') || p.has('text');
+  const badges = cornerBadges(p);
+  if (legacy && badges.length) throw new DrawError('pos=/text= 是单角标旧写法,别和 rl=/lu= 角点键混用');
+  if (legacy) {
+    const text = (p.get('text') || '').slice(0, 12);
+    if (!text) throw new DrawError('缺 text(角标文字),如 /draw/badge?icon=infra:disk-array&rl=x2');
+    badges.push({ pos: posOf(p), text });
+  }
+  if (!badges.length) throw new DrawError('缺角标:至少一个角点键,如 /draw/badge?icon=infra:disk-array&rl=x2(多角:&rl=x2&lu=新)');
+  const o = badgeOpts(p, '');
+  const layer = badges.map((b) => drawBadge(b, o)).join('');
+  return svgDoc(24, 24, iconNode(icon, FULL) + layer, pxOf(p, null), `${id} ${badges.map((b) => b.text).join(' ')}`);
 }
 
 /** in —— 框内放内容(#8 全/半包围的运行时版):内容是图标或文字(支持 \n 换行) */
@@ -271,7 +325,11 @@ async function bar(p: URLSearchParams, getIcon: GetIcon, textFirst: boolean): Pr
   const texts = lines
     .map((s, i) => (s.trim() ? textEl(tx, 12 + (i - (lines.length - 1) / 2) * fs * lh, fs, s, fg, 'start', 600) : ''))
     .join('');
-  const body = bg + texts + iconNode(icon, iconBox);
+  // 角点键在这里 = 给条里的图标戴一枚角标(样式走 b. 前缀,避开宿主的 bg/fg/fs)
+  const bcol = cornerBadges(p);
+  if (bcol.length > 1) throw new DrawError('长条上的角标最多一枚 —— 图标小,双角挤');
+  const badgeG = bcol.length ? badgeOnBox(iconBox, bcol[0], badgeOpts(p, 'b.')) : '';
+  const body = bg + texts + iconNode(icon, iconBox) + badgeG;
   return svgDoc(W, 24, body, pxOf(p, 48), `${id} ${text}`);
 }
 
@@ -290,7 +348,11 @@ async function barV(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const texts = lines
     .map((s, i) => (s.trim() ? textEl(12, 25 + (i - (lines.length - 1) / 2) * (fs + 0.5), fs, s, fg, 'middle', 600) : ''))
     .join('');
-  const body = bg + iconNode(icon, { x: 3, y: 1, w: 18, h: 18 }) + texts;
+  const iconBox: Box = { x: 3, y: 1, w: 18, h: 18 };
+  const bcol = cornerBadges(p);
+  if (bcol.length > 1) throw new DrawError('长条上的角标最多一枚 —— 图标小,双角挤');
+  const badgeG = bcol.length ? badgeOnBox(iconBox, bcol[0], badgeOpts(p, 'b.')) : '';
+  const body = bg + iconNode(icon, iconBox) + badgeG + texts;
   return svgDoc(24, H, body, pxOf(p, 48), `${id} ${text}`);
 }
 
@@ -312,21 +374,34 @@ const STACK_LAYOUTS: Record<string, { n: number; vb: [number, number]; boxes: Bo
   },
 };
 
-/** stack —— 几枚图标摆成一枚(左右 / 四格 / 三角 / 倒三角) */
+/** stack —— 几枚图标摆成一枚(左右 / 四格 / 三角 / 倒三角);每项可带一枚角标:icons=infra:disk-array?rl=x2,aws:ec2 */
 async function stack(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const layout = p.get('layout') || 'h';
   const L = STACK_LAYOUTS[layout];
   if (!L) throw new DrawError(`layout 只认 ${Object.keys(STACK_LAYOUTS).join(' / ')},收到:${layout}`);
-  const ids = (p.get('icons') || '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 4);
-  if (ids.length !== L.n) {
-    throw new DrawError(`layout=${layout} 要 ${L.n} 枚图标,给了 ${ids.length} 枚 —— icons=以逗号分隔,如 icons=aws:ec2,aws:s3`);
+  const raw = (p.get('icons') || '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 4);
+  if (raw.length !== L.n) {
+    throw new DrawError(`layout=${layout} 要 ${L.n} 枚图标,给了 ${raw.length} 枚 —— icons=以逗号分隔,如 icons=aws:ec2,aws:s3`);
   }
-  const icons = await Promise.all(ids.map(getIcon));
-  icons.forEach((ic, i) => {
-    if (!ic) throw new DrawError(`找不到图标 ${ids[i]} —— 去首页查 id:/`);
+  // 项内只能有一枚角标修饰(逗号分隔,项内没有 &):id?rl=x2
+  const items = raw.map((s) => {
+    const q = s.indexOf('?');
+    if (q < 0) return { id: s, badge: null as BadgeSpec | null };
+    const rest = s.slice(q + 1);
+    const m = /^([A-Za-z-]+)=([^&]+)$/.exec(rest);
+    const pos = m && POS_ALIAS[m[1]];
+    if (!pos) throw new DrawError(`叠加项只能带一枚角标修饰(${s})—— 写法:infra:disk-array?rl=x2`);
+    return { id: s.slice(0, q), badge: { pos, text: m[2].slice(0, 12) } };
   });
-  const body = icons.map((ic, i) => iconNode(ic!, L.boxes[i])).join('');
-  return svgDoc(L.vb[0], L.vb[1], body, pxOf(p, null), ids.join(' + '));
+  const icons = await Promise.all(items.map((x) => getIcon(x.id)));
+  icons.forEach((ic, i) => {
+    if (!ic) throw new DrawError(`找不到图标 ${items[i].id} —— 去首页查 id:/`);
+  });
+  const bo = badgeOpts(p, 'b.');
+  const body = icons
+    .map((ic, i) => iconNode(ic!, L.boxes[i]) + (items[i].badge ? badgeOnBox(L.boxes[i], items[i].badge!, bo) : ''))
+    .join('');
+  return svgDoc(L.vb[0], L.vb[1], body, pxOf(p, null), items.map((x) => x.id).join(' + '));
 }
 
 // ---------------------------------------------------------------- 入口
@@ -348,6 +423,7 @@ export async function renderDraw(kind: string, p: URLSearchParams, getIcon: GetI
 
 // 紧凑写法(给 /api/icons.json 与 draw 侧用,即 #12 里的提议):
 //   infra:disk?rl=x2                 → badge,右下角 x2
+//   infra:disk?rl=x2&lu=新           → badge,双角标(一角一枚,角点键即角标)
 //   infra:disk?right-lower=120+      → 同上(长写)
 //   frame:terminal?text=x-cmd        → 框内文字
 //   frame:whiteboard?in=common:atom  → 框内图标
@@ -367,12 +443,8 @@ export function parseComposedId(id: string): ComposedSpec | null {
   params.set('icon', base);
   let kind = '';
   for (const k of [...params.keys()]) {
-    const pos = POS_ALIAS[k];
-    if (!pos) continue;
-    kind = 'badge';
-    if (!params.has('text')) params.set('text', params.get(k)!); // rl=x2 即「右下角 x2」
-    params.set('pos', pos);
-    params.delete(k);
+    // 角点键原样保留(badge 原生认,几个键就是几枚角标)
+    if (POS_ALIAS[k]) kind = 'badge';
   }
   if (!kind && (params.has('text') || params.has('in'))) kind = 'in';
   if (!kind) return null;

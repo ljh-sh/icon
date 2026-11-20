@@ -104,7 +104,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 24px 64px}
 .posgrid button:hover{background:var(--surface-3)}
 .posgrid button[aria-pressed=true]{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent)}
 .posgrid .dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--faint)}
-.posgrid button[aria-pressed=true] .dot{background:var(--accent-ink)}
+.posgrid button[aria-pressed=true] .dot,.posgrid button.has .dot{background:var(--accent-ink)}
 .dot.lu{top:5px;left:5px}.dot.ru{top:5px;right:5px}.dot.ll{bottom:5px;left:5px}.dot.rl{bottom:5px;right:5px}
 /* 摆法小图示 */
 .mini{position:relative;width:20px;height:15px;display:inline-block;vertical-align:-2px;margin-right:7px;flex:none}
@@ -122,7 +122,7 @@ main{max-width:1180px;margin:0 auto;padding:26px 24px 64px}
 .pvbar button{font:inherit;font-size:11px;border:0;border-radius:6px;padding:3px 8px;background:var(--surface-2);color:var(--muted)}
 .pvbar button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
 #dims{font-size:11px;color:var(--faint);font-weight:400}
-#pv{min-height:240px;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:18px}
+#pv{min-height:300px;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:20px}
 #pv.bg-check{background:repeating-conic-gradient(var(--surface-2) 0% 25%,var(--surface-3) 0% 50%) 0 0/20px 20px}
 html[data-theme="light"] #pv.bg-check{--pv-line:rgba(23,21,29,.25)}
 html[data-theme="dark"] #pv.bg-check,#pv.bg-check{--pv-line:rgba(246,244,249,.25)}
@@ -146,7 +146,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px sol
 /* ---------- 选图抽屉:左侧滑出,自身就是一页"首页"(大搜索 + 分类 chips + 网格) ---------- */
 #pk-scrim{position:fixed;inset:0;background:rgba(35,25,60,.34);z-index:35;opacity:0;pointer-events:none;transition:opacity .22s ease;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 #pk-scrim.on{opacity:1;pointer-events:auto}
-#picker{position:fixed;top:0;left:0;bottom:0;width:min(620px,94vw);background:var(--bg);z-index:40;display:flex;flex-direction:column;transform:translateX(-102%);transition:transform .22s cubic-bezier(.2,.7,.3,1);box-shadow:16px 0 48px rgba(0,0,0,.5)}
+#picker{position:fixed;top:0;left:0;bottom:0;width:min(680px,94vw);background:var(--bg);z-index:40;display:flex;flex-direction:column;transform:translateX(-102%);transition:transform .22s cubic-bezier(.2,.7,.3,1);box-shadow:16px 0 48px rgba(0,0,0,.5)}
 html[data-theme="light"] #picker{box-shadow:16px 0 48px rgba(35,25,60,.2)}
 #picker.on{transform:none}
 .pk-head{display:flex;align-items:center;gap:10px;padding:14px 16px}
@@ -168,13 +168,13 @@ html[data-theme="light"] #picker{box-shadow:16px 0 48px rgba(35,25,60,.2)}
 .chip-c:hover{background:var(--surface);color:var(--ink)}
 .chip-c.on{background:var(--accent);color:var(--on-accent);font-weight:600}
 #pk-body{flex:1;overflow:auto;padding:8px 16px 12px}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px}
 /* 格子:平时无框直接落在页面上,hover 才浮起一张卡(首页同款) */
 #grid button{border:0;background:none;border-radius:12px;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background-color .15s ease,transform .15s ease,box-shadow .15s ease}
 #grid button:hover{background:var(--surface);transform:translateY(-2px)}
 #grid button[aria-pressed=true]{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent)}
-#grid img{width:40px;height:40px;object-fit:contain;border-radius:9px}
-#grid .nm{font-size:10.5px;line-height:1.25;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#grid img{width:52px;height:52px;object-fit:contain;border-radius:11px}
+#grid .nm{font-size:11px;line-height:1.25;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #grid .grid-empty{grid-column:1/-1;color:var(--faint);font-size:12.5px;padding:22px 4px;text-align:center}
 .more-wrap{display:flex;justify-content:center;padding:10px 0 4px}
 #pk-more{font:inherit;font-size:12.5px;border:0;background:var(--surface);color:var(--muted);border-radius:999px;padding:7px 18px;box-shadow:var(--shadow)}
@@ -193,7 +193,7 @@ html[data-theme="light"] #hist{box-shadow:-18px 0 50px rgba(35,25,60,.16)}
 #hist-close:hover{color:var(--ink);background:var(--surface-2)}
 #hist-list{flex:1;overflow:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
 .hrow{display:flex;gap:10px;align-items:center;background:var(--surface-2);border-radius:12px;padding:8px 10px}
-.hrow img{height:30px;width:auto;max-width:64px;object-fit:contain;outline:1px solid var(--surface-3);background:#fff;border-radius:4px;flex:none}
+.hrow img{height:36px;width:auto;max-width:72px;object-fit:contain;outline:1px solid var(--surface-3);background:#fff;border-radius:4px;flex:none}
 .hmeta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .hmeta b{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hmeta span{font-size:11px;color:var(--faint)}
@@ -266,14 +266,14 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 48px;color:var(--faint);fon
         <section data-m="badge">
           <div class="slots" data-slots></div>
           <div class="ctl">
-            <label>角标文字</label><input type="text" id="b-text" value="x2" maxlength="12">
-            <label>位置</label>
+            <label>角位</label>
             <div class="seg posgrid" id="b-pos">
-              <button type="button" data-v="lu" aria-label="左上" title="左上"><i class="dot lu"></i></button>
-              <button type="button" data-v="ru" aria-label="右上" title="右上"><i class="dot ru"></i></button>
-              <button type="button" data-v="ll" aria-label="左下" title="左下"><i class="dot ll"></i></button>
-              <button type="button" data-v="rl" aria-label="右下" title="右下"><i class="dot rl"></i></button>
+              <button type="button" data-v="lu" aria-label="左上" title="左上:点亮 = 已有角标,再点即删"><i class="dot lu"></i></button>
+              <button type="button" data-v="ru" aria-label="右上" title="右上:点亮 = 已有角标,再点即删"><i class="dot ru"></i></button>
+              <button type="button" data-v="ll" aria-label="左下" title="左下:点亮 = 已有角标,再点即删"><i class="dot ll"></i></button>
+              <button type="button" data-v="rl" aria-label="右下" title="右下:点亮 = 已有角标,再点即删"><i class="dot rl"></i></button>
             </div>
+            <label id="b-text-l" for="b-text">角标文字</label><input type="text" id="b-text" maxlength="12" placeholder="点角位后填文字">
             <label>样式</label>
             <div class="seg" id="b-style">
               <button type="button" data-v="disc" aria-pressed="true">圆标</button>
@@ -300,7 +300,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 48px;color:var(--faint);fon
             </div>
             <label>输出像素</label><input type="number" id="b-px" min="8" max="512" placeholder="24">
           </div>
-          <p class="note">圆标文字放不下会自动长成胶囊(如 120+);右下角是构图规范里留给计数徽标的位置。「角标大小」缩角标本体,「输出像素」缩整张图。</p>
+          <p class="note">点九宫格的角加角标(点亮的角已有),选中哪个角就编哪个角的文字 —— 可多角并存,如右下 x2 + 左上「新」;样式 / 大小 / 颜色各角共用。圆标文字放不下会自动长成胶囊(如 120+);右下角是构图规范里留给计数徽标的位置。</p>
         </section>
 
         <section data-m="in" hidden>
@@ -343,6 +343,20 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 48px;color:var(--faint);fon
               <input type="color" id="t-fg" value="#1e293b" disabled>
             </div>
             <label>圆角</label><input type="number" id="t-r" min="0" max="12" placeholder="5">
+            <label>角标位置</label>
+            <div class="seg posgrid" id="t-bpos">
+              <button type="button" data-v="lu" aria-label="左上" title="左上"><i class="dot lu"></i></button>
+              <button type="button" data-v="ru" aria-label="右上" title="右上"><i class="dot ru"></i></button>
+              <button type="button" data-v="ll" aria-label="左下" title="左下"><i class="dot ll"></i></button>
+              <button type="button" data-v="rl" aria-label="右下" title="右下(默认)"><i class="dot rl"></i></button>
+            </div>
+            <label>角标文字</label><input type="text" id="t-btext" maxlength="12" placeholder="留空 = 不加角标">
+            <label>角标颜色</label>
+            <div class="seg">
+              <button type="button" id="t-bcon" aria-pressed="false">自定义</button>
+              <input type="color" id="t-bbg" value="#ea580c" title="底色" disabled>
+              <input type="color" id="t-bfg" value="#ffffff" title="文字色" disabled>
+            </div>
             <label>字号</label>
             <div class="seg" id="t-fs">
               <button type="button" data-v="0.85" aria-pressed="false">小</button>
@@ -351,7 +365,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 48px;color:var(--faint);fon
             </div>
             <label>输出像素高</label><input type="number" id="t-px" min="8" max="512" placeholder="48">
           </div>
-          <p class="note">文字可回车换行:长条按最长行加宽,「上图下文」按行数加高,字太长自动缩号。</p>
+          <p class="note">文字可回车换行:长条按最长行加宽,「上图下文」按行数加高,字太长自动缩号。角标挂在条内那枚图标上,按图标比例缩放;URL 还能加 b.style / b.scale 微调角标本体。</p>
         </section>
 
         <section data-m="stack" hidden>
@@ -367,7 +381,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 48px;color:var(--faint);fon
             </div>
             <label>输出像素</label><input type="number" id="s-px" min="8" max="512" placeholder="24">
           </div>
-          <p class="note">左右 / 上下要 2 枚,三角 / 倒三角要 3 枚,四格要 4 枚 —— 顺序即点选顺序,点芯片上的 × 可单删。</p>
+          <p class="note">左右 / 上下要 2 枚,三角 / 倒三角要 3 枚,四格要 4 枚 —— 顺序即点选顺序,点芯片上的 × 可单删。URL 的 icons= 每项还能带一枚角标:id?rl=x2。</p>
         </section>
       </div>
     </section>
@@ -416,14 +430,29 @@ const MODE_LABEL = { badge: '角标', in: '框内', bar: '图文', stack: '叠�
 const NEED = { h: 2, v: 2, tri: 3, 'tri-inv': 3, grid: 4 };
 const LAYOUT_LABEL = { h: '左右', v: '上下', tri: '三角', 'tri-inv': '倒三角', grid: '四格' };
 const SLOT_LABEL = { main: '图标', frame: '① 框 / 底座', content: '② 内容' };
+const CORNERS = ['lu', 'ru', 'll', 'rl'];
+const CORNER_NAME = { lu: '左上', ru: '右上', ll: '左下', rl: '右下' };
 const clone = (o) => JSON.parse(JSON.stringify(o));
 // 每个模式独立状态:选图、参数、连同选图器的分类/搜索 —— 模式之间互不覆盖
 const DEF = {
-  badge: { icon: null, text: 'x2', pos: 'rl', style: 'disc', con: false, bg: '#ea580c', fg: '#ffffff', scale: '1', fsm: '1', px: '', cat: '', q: '' },
+  badge: { icon: null, badges: { rl: 'x2' }, sel: 'rl', style: 'disc', con: false, bg: '#ea580c', fg: '#ffffff', scale: '1', fsm: '1', px: '', cat: '', q: '' },
   in:    { frame: null, content: null, kind: 'icon', text: 'x-cmd', con: false, fg: '#1e293b', px: '', cat: 'frame', q: '', target: 'frame' },
-  bar:   { icon: null, text: 'API', dir: 'icon-text', bgOn: false, bg: '#f1f5f9', fgOn: false, fg: '#1e293b', r: '', fsm: '1', px: '', cat: '', q: '' },
+  bar:   { icon: null, text: 'API', dir: 'icon-text', bgOn: false, bg: '#f1f5f9', fgOn: false, fg: '#1e293b', r: '', bpos: 'rl', btext: '', bcon: false, bbg: '#ea580c', bfg: '#ffffff', fsm: '1', px: '', cat: '', q: '' },
   stack: { icons: [], layout: 'h', px: '', cat: '', q: '' },
 };
+
+// 旧状态(单角标 text/pos)迁到多角结构;顺带清掉空角、修好失效的选中角
+function normBadge(st) {
+  if (!st.badges || typeof st.badges !== 'object' || Array.isArray(st.badges)) {
+    st.badges = typeof st.text === 'string' && st.text.trim() ? { [typeof st.pos === 'string' && st.pos ? st.pos : 'rl']: st.text } : {};
+  }
+  const ok = {};
+  for (const c of CORNERS) if (typeof st.badges[c] === 'string' && st.badges[c].trim()) ok[c] = st.badges[c];
+  st.badges = ok;
+  if (!CORNERS.includes(st.sel) || !st.badges[st.sel]) st.sel = CORNERS.find((c) => st.badges[c]) || '';
+  delete st.pos; delete st.text;
+  return st;
+}
 
 function fixPick(p) {
   return (p && typeof p === 'object' && typeof p.id === 'string' && typeof p.file === 'string') ? p : null;
@@ -439,6 +468,7 @@ function loadState() {
     for (const k of Object.keys(DEF)) if (d.modes && d.modes[k]) S0.modes[k] = { ...clone(DEF[k]), ...d.modes[k] };
     const b = S0.modes.badge, i = S0.modes.in, r = S0.modes.bar, s = S0.modes.stack;
     b.icon = fixPick(b.icon);
+    normBadge(b);
     i.frame = fixPick(i.frame); i.content = fixPick(i.content);
     if (i.kind !== 'text') i.kind = 'icon';
     if (i.target !== 'content') i.target = 'frame';
@@ -539,8 +569,14 @@ function applyUI() {
   const st = ms();
   const pressed = (id, v) => { for (const x of $(id).querySelectorAll('button[data-v]')) x.setAttribute('aria-pressed', String(x.dataset.v === v)); };
   if (S.mode === 'badge') {
-    $('b-text').value = st.text;
-    pressed('b-pos', st.pos); pressed('b-style', st.style); pressed('b-scale', st.scale); pressed('b-fs', st.fsm);
+    for (const x of $('b-pos').querySelectorAll('button[data-v]')) {
+      x.setAttribute('aria-pressed', String(st.sel === x.dataset.v));
+      x.classList.toggle('has', !!st.badges[x.dataset.v]);
+    }
+    $('b-text-l').textContent = st.sel ? '角标文字 · ' + CORNER_NAME[st.sel] : '角标文字';
+    $('b-text').value = st.sel ? (st.badges[st.sel] || '') : '';
+    $('b-text').disabled = !st.sel;
+    pressed('b-style', st.style); pressed('b-scale', st.scale); pressed('b-fs', st.fsm);
     $('b-color').setAttribute('aria-pressed', String(st.con));
     $('b-bg').value = st.bg; $('b-fg').value = st.fg;
     $('b-bg').disabled = $('b-fg').disabled = !st.con;
@@ -552,10 +588,13 @@ function applyUI() {
     $('i-fg').value = st.fg; $('i-fg').disabled = !st.con;
     $('i-px').value = st.px;
   } else if (S.mode === 'bar') {
-    pressed('t-dir', st.dir); pressed('t-fs', st.fsm);
+    pressed('t-dir', st.dir); pressed('t-fs', st.fsm); pressed('t-bpos', st.bpos);
     $('t-text').value = st.text;
     $('t-bg-on').setAttribute('aria-pressed', String(st.bgOn)); $('t-bg').value = st.bg; $('t-bg').disabled = !st.bgOn;
     $('t-fg-on').setAttribute('aria-pressed', String(st.fgOn)); $('t-fg').value = st.fg; $('t-fg').disabled = !st.fgOn;
+    $('t-bcon').setAttribute('aria-pressed', String(st.bcon)); $('t-bbg').value = st.bbg; $('t-bfg').value = st.bfg;
+    $('t-bbg').disabled = $('t-bfg').disabled = !st.bcon;
+    $('t-btext').value = st.btext;
     $('t-r').value = st.r; $('t-px').value = st.px;
   } else {
     pressed('s-layout', st.layout);
@@ -765,11 +804,12 @@ function params() {
   const p = new URLSearchParams();
   const st = ms();
   if (S.mode === 'badge') {
-    const t = st.text.trim();
     if (!st.icon) return { wait: '先挑一枚主图(点上方槽位选图)' };
-    if (!t) return { wait: '填角标文字' };
-    p.set('icon', st.icon.id); p.set('text', t); p.set('pos', st.pos);
-    let id = st.icon.id + '?' + st.pos + '=' + encodeURIComponent(t);
+    const cs = CORNERS.filter((c) => (st.badges[c] || '').trim());
+    if (!cs.length) return { wait: '至少在一个角填角标文字 —— 点九宫格的角,再填字' };
+    p.set('icon', st.icon.id);
+    for (const c of cs) p.set(c, st.badges[c].trim());
+    let id = st.icon.id + '?' + cs.map((c) => c + '=' + encodeURIComponent(st.badges[c].trim())).join('&');
     if (st.style !== 'disc') { p.set('style', st.style); id += '&style=' + st.style; }
     if (st.scale !== '1') { p.set('scale', st.scale); id += '&scale=' + st.scale; }
     if (st.fsm !== '1') {
@@ -779,7 +819,7 @@ function params() {
     if (st.con) { p.set('bg', st.bg); p.set('fg', st.fg); id += '&bg=' + st.bg + '&fg=' + st.fg; }
     const px = clampSend(st.px, 8, 512);
     if (px) { p.set('px', px); id += '&px=' + px; }
-    return { kind: 'badge', p, id, label: t };
+    return { kind: 'badge', p, id, label: cs.map((c) => st.badges[c].trim()).join(' ') };
   }
   if (S.mode === 'in') {
     if (!st.frame) return { wait: '先挑一枚框(frame:)或底座(base:)' };
@@ -808,6 +848,11 @@ function params() {
     p.set('icon', st.icon.id); p.set('text', t);
     if (st.bgOn) p.set('bg', st.bg);
     if (st.fgOn) p.set('fg', st.fg);
+    const bt = (st.btext || '').trim();
+    if (bt) {
+      p.set(st.bpos, bt);
+      if (st.bcon) { p.set('b.bg', st.bbg); p.set('b.fg', st.bfg); }
+    }
     if (st.fsm !== '1') p.set('fs', String(Math.round((st.dir === 'icon-text-v' ? 5.5 : 10) * Number(st.fsm) * 100) / 100));
     const r = clampSend(st.r, 0, 12);
     if (r) p.set('r', r);
@@ -828,7 +873,7 @@ function params() {
 
 // ================================================================ 画布(预览与产出)
 // 显示尺寸(仅预览,不进 URL):方 24 系 / 长条 / 上图下文各一档
-const ZOOM = { s: { sq: 96, bar: 48, v: 60 }, m: { sq: 176, bar: 96, v: 110 }, l: { sq: 288, bar: 160, v: 180 } };
+const ZOOM = { s: { sq: 128, bar: 64, v: 80 }, m: { sq: 232, bar: 128, v: 150 }, l: { sq: 352, bar: 208, v: 230 } };
 let timer = 0;
 let histT = 0;
 let renderSeq = 0; // 丢弃在途的过期响应(如恢复历史瞬间旧 fetch 才回来)
@@ -948,6 +993,7 @@ function renderHistory() {
 }
 function restoreEntry(e) {
   S.modes[e.snap.mode] = clone(e.snap.st);
+  if (e.snap.mode === 'badge') normBadge(S.modes.badge);
   S.mode = e.snap.mode;
   limit = LIMIT0; shownList = [];
   applyUI(); renderAll();
@@ -994,7 +1040,27 @@ function seg(id, set, after) {
     update(); scheduleSave();
   });
 }
-seg('b-pos', (v) => { ms().pos = v; });
+// 角位九宫格:点角 = 选中(没有则加),再点选中角 = 删 —— 与"再点即取消"一致
+$('b-pos').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-v]');
+  if (!b) return;
+  const st = ms();
+  const v = b.dataset.v;
+  if (st.sel === v) {
+    delete st.badges[v];
+    st.sel = '';
+  } else {
+    if (!(v in st.badges)) st.badges[v] = '';
+    st.sel = v;
+  }
+  applyUI(); renderAll();
+  if (st.sel) $('b-text').focus();
+});
+$('b-text').addEventListener('input', () => {
+  const st = ms();
+  if (st.sel) st.badges[st.sel] = $('b-text').value;
+  update(); scheduleSave();
+});
 seg('b-style', (v) => { ms().style = v; });
 seg('b-scale', (v) => { ms().scale = v; });
 seg('b-fs', (v) => { ms().fsm = v; });
@@ -1006,10 +1072,11 @@ seg('i-kind', (v) => {
 });
 seg('t-dir', (v) => { ms().dir = v; });
 seg('t-fs', (v) => { ms().fsm = v; });
+seg('t-bpos', (v) => { ms().bpos = v; });
 seg('s-layout', (v) => { ms().layout = v; renderBanner(); renderSlots(); });
 
 // 颜色:开关关 = 不带参数;开 = 用色板的值
-const COLOR_KEY = { 'b-bg': 'bg', 'b-fg': 'fg', 'i-fg': 'fg', 't-bg': 'bg', 't-fg': 'fg' };
+const COLOR_KEY = { 'b-bg': 'bg', 'b-fg': 'fg', 'i-fg': 'fg', 't-bg': 'bg', 't-fg': 'fg', 't-bbg': 'bbg', 't-bfg': 'bfg' };
 function colorToggle(btnId, onKey, inputs) {
   const btn = $(btnId);
   btn.addEventListener('click', () => {
@@ -1029,8 +1096,9 @@ colorToggle('b-color', 'con', ['b-bg', 'b-fg']);
 colorToggle('i-color', 'con', ['i-fg']);
 colorToggle('t-bg-on', 'bgOn', ['t-bg']);
 colorToggle('t-fg-on', 'fgOn', ['t-fg']);
+colorToggle('t-bcon', 'bcon', ['t-bbg', 't-bfg']);
 
-for (const [id, key] of [['b-text', 'text'], ['i-text', 'text'], ['t-text', 'text'], ['b-px', 'px'], ['i-px', 'px'], ['t-r', 'r'], ['t-px', 'px'], ['s-px', 'px']])
+for (const [id, key] of [['i-text', 'text'], ['t-text', 'text'], ['t-btext', 'btext'], ['b-px', 'px'], ['i-px', 'px'], ['t-r', 'r'], ['t-px', 'px'], ['s-px', 'px']])
   $(id).addEventListener('input', () => { ms()[key] = $(id).value; update(); scheduleSave(); });
 
 $('modes').addEventListener('click', (e) => {
