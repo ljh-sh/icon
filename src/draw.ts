@@ -148,11 +148,11 @@ function pathInk(d: string, eat: (x: number, y: number) => void): boolean {
           for (let j = 0; j < arity; j++) g.push(n());
           const X = (k: number) => (rel ? cx + g[k] : g[k]);
           const Y = (k: number) => (rel ? cy + g[k] : g[k]);
-          if (K === 'M') { mx = X(0); my = Y(0); cx = mx; cy = my; eat(cx, cy); qSet = false; }
-          else if (K === 'L') { cx = X(0); cy = Y(0); eat(cx, cy); qSet = false; }
-          else if (K === 'C') { eat(X(0), Y(0)); eat(X(2), Y(2)); cx = X(4); cy = Y(4); qx = X(2); qy = Y(2); qSet = true; eat(cx, cy); }
-          else if (K === 'S') { const c0 = reflect(); eat(c0.x, c0.y); eat(X(0), Y(0)); cx = X(2); cy = Y(2); qx = X(0); qy = Y(1); qSet = true; eat(cx, cy); }
-          else if (K === 'Q') { eat(X(0), Y(0)); cx = X(2); cy = Y(3); qx = X(0); qy = Y(1); qSet = true; eat(cx, cy); }
+          if (K === 'M') { mx = X(0); my = Y(1); cx = mx; cy = my; eat(cx, cy); qSet = false; }
+          else if (K === 'L') { cx = X(0); cy = Y(1); eat(cx, cy); qSet = false; }
+          else if (K === 'C') { eat(X(0), Y(1)); eat(X(2), Y(3)); cx = X(4); cy = Y(5); qx = X(2); qy = Y(3); qSet = true; eat(cx, cy); }
+          else if (K === 'S') { const c0 = reflect(); eat(c0.x, c0.y); eat(X(0), Y(1)); cx = X(2); cy = Y(3); qx = X(0); qy = Y(1); qSet = true; eat(cx, cy); }
+          else if (K === 'Q') { eat(X(0), Y(1)); cx = X(2); cy = Y(3); qx = X(0); qy = Y(1); qSet = true; eat(cx, cy); }
           else if (K === 'T') { const c0 = reflect(); eat(c0.x, c0.y); cx = X(0); cy = Y(1); qx = c0.x; qy = c0.y; qSet = true; eat(cx, cy); }
         }
         if (i >= t.length || /[a-zA-Z]/.test(t[i])) break;
@@ -175,8 +175,10 @@ function strAttr(a: string, k: string): string | null {
   return a.match(new RegExp('\\b' + k + '\\s*=\\s*"([^"]*)"'))?.[1] ?? null;
 }
 
-/** 图标墨迹的包络盒(图标自身坐标);量不出返回 null */
-function inkOf(icon: IconSrc): Box | null {
+/** 墨迹:包络盒 + 采样点(x,y 平铺),都在图标自身坐标;量不出返回 null */
+interface Ink { box: Box; pts: number[] }
+
+function inkOf(icon: IconSrc): Ink | null {
   // 非渲染内容(defs/标题/裁剪板)先剥掉;纯样式分组(<g fill=…>)不动坐标系,照扫;
   // 带 transform 的 g、shape 上的 transform、text/image/use —— 坐标系看不懂,退回整盒
   const b = icon.body
@@ -185,9 +187,11 @@ function inkOf(icon: IconSrc): Box | null {
   if (/<(text|image|use|foreignObject)\b/i.test(b)) return null;
   if (/<g\b[^>]*\btransform\b/i.test(b)) return null;
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const pts: number[] = [];
   const eat = (x: number, y: number) => {
     if (x < x0) x0 = x; if (x > x1) x1 = x;
     if (y < y0) y0 = y; if (y > y1) y1 = y;
+    pts.push(x, y);
   };
   for (const m of b.matchAll(INK_EL)) {
     const el = m[1].toLowerCase();
@@ -209,7 +213,10 @@ function inkOf(icon: IconSrc): Box | null {
   // 出 viewBox 一点是描边/圆整的正常损耗,出太多 = 量错了,退回整盒
   const SL = 2.5;
   if (x0 < icon.vx - SL || y0 < icon.vy - SL || x1 > icon.vx + icon.w + SL || y1 > icon.vy + icon.h + SL) return null;
-  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  // 描边/弧的保守扩张可能越界,钳回 viewBox
+  const kx0 = Math.max(x0, icon.vx), ky0 = Math.max(y0, icon.vy);
+  const kx1 = Math.min(x1, icon.vx + icon.w), ky1 = Math.min(y1, icon.vy + icon.h);
+  return { box: { x: kx0, y: ky0, w: kx1 - kx0, h: ky1 - ky0 }, pts };
 }
 
 /** 墨迹放进目标盒后的纵向锚点(中线/底边);量不出退回盒本身 */
@@ -217,10 +224,29 @@ function inkY(icon: IconSrc, box: Box): { cy: number; bottom: number } {
   const f = fitOf(icon, box);
   const ink = inkOf(icon);
   if (!ink) return { cy: f.y + (icon.vy + icon.h / 2) * f.s, bottom: f.y + (icon.vy + icon.h) * f.s };
+  const b = ink.box;
   return {
-    cy: Math.min(box.y + box.h * 0.8, Math.max(box.y + box.h * 0.2, f.y + (ink.y + ink.h / 2) * f.s)),
-    bottom: Math.min(box.y + box.h, f.y + (ink.y + ink.h) * f.s),
+    cy: Math.min(box.y + box.h * 0.8, Math.max(box.y + box.h * 0.2, f.y + (b.y + b.h / 2) * f.s)),
+    bottom: Math.min(box.y + box.h, f.y + (b.y + b.h) * f.s),
   };
+}
+
+/** 象限墨迹角(输出坐标):lu = 上半带最左的点 × 左半带最顶的点。
+ * L 形墨迹的 bbox 角常落在空白上(ai:agent 左上),按象限找才贴得住图形 */
+function quadPt(icon: IconSrc, ink: Ink, box: Box, pos: string): { x: number; y: number } {
+  const f = fitOf(icon, box);
+  const b = ink.box;
+  const right = pos.includes('r'), top = pos === 'ru' || pos === 'lu';
+  const xm = b.x + b.w * (right ? 0.55 : 0.45), ym = b.y + b.h * (top ? 0.55 : 0.45);
+  let qx = NaN, qy = NaN;
+  for (let i = 0; i < ink.pts.length; i += 2) {
+    const x = ink.pts[i], y = ink.pts[i + 1];
+    if (top ? y <= ym : y >= ym) qx = Number.isNaN(qx) ? x : right ? Math.max(qx, x) : Math.min(qx, x); // 纵向半带里取横向极值
+    if (right ? x >= xm : x <= xm) qy = Number.isNaN(qy) ? y : top ? Math.min(qy, y) : Math.max(qy, y); // 横向半带里取纵向极值
+  }
+  if (Number.isNaN(qx)) qx = right ? b.x + b.w : b.x;
+  if (Number.isNaN(qy)) qy = top ? b.y : b.y + b.h;
+  return { x: f.x + qx * f.s, y: f.y + qy * f.s };
 }
 
 function textEl(x: number, y: number, fs: number, s: string, fill: string, anchor = 'middle', weight = 400): string {
@@ -269,7 +295,7 @@ async function needIcon(p: URLSearchParams, getIcon: GetIcon): Promise<{ icon: I
 
 export const KINDS = ['badge', 'in', 'icon-text', 'text-icon', 'icon-text-v', 'stack'] as const;
 
-// 角标圆心(24 系)锚在画布角上:圆心距角 scale 后的 (r + 0.6),放大不出界
+// 角点键:角标挂图标某一角;几何在 badgeOnBox 里锚「象限墨迹角」,不锚 contain 盒角
 const POS_ALIAS: Record<string, string> = {
   ru: 'ru', rl: 'rl', lu: 'lu', ll: 'll',
   'right-upper': 'ru', 'right-lower': 'rl', 'left-upper': 'lu', 'left-lower': 'll',
@@ -321,8 +347,10 @@ function badgeOpts(p: URLSearchParams, pre: string): BadgeOpts {
   };
 }
 
-/** 画一枚角标(24 系几何,锚画布角)—— badge 本尊与嵌进小图标盒共用 */
-function drawBadge(b: BadgeSpec, o: BadgeOpts): string {
+/** 画一枚角标(24 系几何)—— badge 本尊与嵌进小图标盒共用。
+ * 返回图形 + 自己的中心与半幅(含描边,不含指向内侧的尾巴),调用方好把它挪到墨迹角上 */
+interface BadgeDraw { svg: string; cx: number; cy: number; hx: number; hy: number }
+function drawBadge(b: BadgeSpec, o: BadgeOpts): BadgeDraw {
   const { pos, text } = b;
   const { bubble, bg, fg, scale, fs } = o;
   const tw = textW(text, fs);
@@ -341,39 +369,64 @@ function drawBadge(b: BadgeSpec, o: BadgeOpts): string {
     const tail = `<path d="M${r2(ex - 1.2 * scale)} ${r2(ey)}L${r2(ex + 1.2 * scale)} ${r2(ey)}L${r2(ex + dx * 1.4 * scale)} ${r2(ey + dy * 2.8 * scale)}Z" fill="${bg}"/>`;
     // 接缝:把气泡边框在尾巴根部那一段盖掉,让尾把和气泡连成一体
     const seam = `<rect x="${r2(ex - 1)}" y="${r2(top ? y + bh - 0.55 : y - 0.55)}" width="2" height="1.1" fill="${bg}"/>`;
-    return (
-      `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(bh)}" rx="${r2(2.4 * scale)}" fill="${bg}" stroke="#cbd5e1" stroke-width="${r2(Math.max(0.4, 0.5 * scale))}"/>` +
-      seam + tail + textEl(x + bw / 2, y + bh / 2, fs, text, fg, 'middle', 600)
-    );
+    return {
+      svg:
+        `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(bh)}" rx="${r2(2.4 * scale)}" fill="${bg}" stroke="#cbd5e1" stroke-width="${r2(Math.max(0.4, 0.5 * scale))}"/>` +
+        seam + tail + textEl(x + bw / 2, y + bh / 2, fs, text, fg, 'middle', 600),
+      cx: x + bw / 2, cy: y + bh / 2, hx: bw / 2 + 0.35, hy: bh / 2 + 0.35,
+    };
   }
-  // 圆标:文字放不下就自动长成胶囊(stadium);锚在画布角上,放大不出界
+  // 圆标:文字放不下就自动长成胶囊(stadium)
   const r = 4.6 * scale;
   const off = r + 0.6;
   const cx = pos.includes('r') ? 24 - off : off;
   const cy = pos === 'ru' || pos === 'lu' ? off : 24 - off;
   const stroke = r2(Math.max(0.9, 1.2 * scale));
+  const st = Math.max(0.9, 1.2 * scale) / 2;
   if (tw <= r * 2 - 2.6 * scale) {
-    return (
-      `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
-      textEl(cx, cy, fs, text, fg, 'middle', 700)
-    );
+    return {
+      svg:
+        `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
+        textEl(cx, cy, fs, text, fg, 'middle', 700),
+      cx, cy, hx: r + st, hy: r + st,
+    };
   }
   const bw = tw + 3.4 * scale;
   const x = pos.includes('r') ? 23.4 - bw : 0.6;
   const y = pos === 'ru' || pos === 'lu' ? 0.6 : 23.4 - r * 2;
-  return (
-    `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(r * 2)}" rx="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
-    textEl(x + bw / 2, y + r, fs, text, fg, 'middle', 700)
-  );
+  return {
+    svg:
+      `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(bw)}" height="${r2(r * 2)}" rx="${r2(r)}" fill="${bg}" stroke="#ffffff" stroke-width="${stroke}" paint-order="stroke"/>` +
+      textEl(x + bw / 2, y + r, fs, text, fg, 'middle', 700),
+    cx: x + bw / 2, cy: y + r, hx: bw / 2 + st, hy: r + st,
+  };
 }
 
-/** 把角标按比例缩进宿主图标盒:角标恒为图标的 ~19%,几何零重算 */
-function badgeOnBox(box: Box, b: BadgeSpec, o: BadgeOpts): string {
+/** 角标缩进宿主图标盒,锚象限墨迹角(量不出墨迹退回盒角):半重叠压住图形的角,
+ * 钳在画布内不出界。y1 = 角标最底边,宿主好给下探的底角角标让位 */
+function badgeOnBox(box: Box, b: BadgeSpec, o: BadgeOpts, icon: IconSrc | null | undefined, cw: number, ch: number): { svg: string; y1: number } {
   const side = Math.min(box.w, box.h); // contain 后的图标是盒内最大方形
-  const x = box.x + (box.w - side) / 2;
-  const y = box.y + (box.h - side) / 2;
   const s = Math.round((side / 24) * 10000) / 10000;
-  return `<g transform="translate(${r2(x)} ${r2(y)}) scale(${s})">${drawBadge(b, o)}</g>`;
+  const g = drawBadge(b, o);
+  const ink = icon ? inkOf(icon) : null;
+  const top = b.pos === 'ru' || b.pos === 'lu';
+  if (!ink) {
+    const x = box.x + (box.w - side) / 2;
+    const y = box.y + (box.h - side) / 2;
+    return { svg: `<g transform="translate(${r2(x)} ${r2(y)}) scale(${s})">${g.svg}</g>`, y1: y + 24 * s };
+  }
+  const q = quadPt(icon!, ink, box, b.pos);
+  const hxo = s * g.hx, hyo = s * g.hy;
+  // 从象限角往图形内轻压 ~30%,再按画布钳不出界
+  const inx = b.pos.includes('r') ? -1 : 1;
+  const iny = top ? 1 : -1;
+  let dx = q.x + inx * 0.3 * hxo;
+  let dy = q.y + iny * 0.3 * hyo;
+  dx = Math.min(cw - hxo - 0.25, Math.max(hxo + 0.25, dx));
+  dy = ch === Infinity ? Math.max(hyo + 0.25, dy) : Math.min(ch - hyo - 0.25, Math.max(hyo + 0.25, dy));
+  const tx = dx - s * g.cx;
+  const ty = dy - s * g.cy;
+  return { svg: `<g transform="translate(${r2(tx)} ${r2(ty)}) scale(${s})">${g.svg}</g>`, y1: dy + hyo };
 }
 
 /** badge —— 在已有图标上叠角标(计数 / 状态 / 气泡),可多角:rl=x2&lu=新 */
@@ -389,7 +442,7 @@ async function badge(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   }
   if (!badges.length) throw new DrawError('缺角标:至少一个角点键,如 /draw/badge?icon=infra:disk-array&rl=x2(多角:&rl=x2&lu=新)');
   const o = badgeOpts(p, '');
-  const layer = badges.map((b) => drawBadge(b, o)).join('');
+  const layer = badges.map((b) => badgeOnBox(FULL, b, o, icon, 24, 24).svg).join('');
   return svgDoc(24, 24, iconNode(icon, FULL) + layer, pxOf(p, null), `${id} ${badges.map((b) => b.text).join(' ')}`);
 }
 
@@ -450,7 +503,7 @@ async function bar(p: URLSearchParams, getIcon: GetIcon, textFirst: boolean): Pr
   // 角点键在这里 = 给条里的图标戴一枚角标(样式走 b. 前缀,避开宿主的 bg/fg/fs)
   const bcol = cornerBadges(p);
   if (bcol.length > 1) throw new DrawError('长条上的角标最多一枚 —— 图标小,双角挤');
-  const badgeG = bcol.length ? badgeOnBox(iconBox, bcol[0], badgeOpts(p, 'b.')) : '';
+  const badgeG = bcol.length ? badgeOnBox(iconBox, bcol[0], badgeOpts(p, 'b.'), icon, W, 24).svg : '';
   const body = bg + texts + iconNode(icon, iconBox) + badgeG;
   return svgDoc(W, 24, body, pxOf(p, 48), `${id} ${text}`);
 }
@@ -469,7 +522,11 @@ async function barV(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const lh = fs + 0.5;
   const half = 0.5 * fs + ((lines.length - 1) * lh) / 2; // 文字块半高(em 盒估)
   const bottom = Math.max(inkY(icon, iconBox).bottom, iconBox.y + iconBox.h * 0.75);
-  const C = r2(bottom + 1.2 + half); // 文字块视觉中线
+  // 角标先摆(不钳下沿),底角下探时文字让位
+  const bcol = cornerBadges(p);
+  if (bcol.length > 1) throw new DrawError('长条上的角标最多一枚 —— 图标小,双角挤');
+  const bl = bcol.length ? badgeOnBox(iconBox, bcol[0], badgeOpts(p, 'b.'), icon, 24, Infinity) : null;
+  const C = r2(Math.max(bottom + 1.2, (bl ? bl.y1 : 0) + 0.5) + half); // 文字块视觉中线
   const H = r2(Math.max(C + half + 1.6, iconBox.y + iconBox.h + 1.5));
   const bgV = p.get('bg');
   const bg = bgV ? `<rect x="0" y="0" width="24" height="${H}" rx="${num(p, 'r', 5, 0, 12)}" fill="${color(p, 'bg', '#f1f5f9')}"/>` : '';
@@ -477,10 +534,7 @@ async function barV(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   const texts = lines
     .map((s, i) => (s.trim() ? textEl(12, C + (i - (lines.length - 1) / 2) * lh, fs, s, fg, 'middle', 600) : ''))
     .join('');
-  const bcol = cornerBadges(p);
-  if (bcol.length > 1) throw new DrawError('长条上的角标最多一枚 —— 图标小,双角挤');
-  const badgeG = bcol.length ? badgeOnBox(iconBox, bcol[0], badgeOpts(p, 'b.')) : '';
-  const body = bg + iconNode(icon, iconBox) + badgeG + texts;
+  const body = bg + iconNode(icon, iconBox) + (bl ? bl.svg : '') + texts;
   return svgDoc(24, H, body, pxOf(p, 48), `${id} ${text}`);
 }
 
@@ -527,7 +581,7 @@ async function stack(p: URLSearchParams, getIcon: GetIcon): Promise<string> {
   });
   const bo = badgeOpts(p, 'b.');
   const body = icons
-    .map((ic, i) => iconNode(ic!, L.boxes[i]) + (items[i].badge ? badgeOnBox(L.boxes[i], items[i].badge!, bo) : ''))
+    .map((ic, i) => iconNode(ic!, L.boxes[i]) + (items[i].badge ? badgeOnBox(L.boxes[i], items[i].badge!, bo, ic, L.vb[0], L.vb[1]).svg : ''))
     .join('');
   return svgDoc(L.vb[0], L.vb[1], body, pxOf(p, null), items.map((x) => x.id).join(' + '));
 }
