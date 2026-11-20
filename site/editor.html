@@ -11,7 +11,7 @@
   --bg:#fbfaf8;--surface:#ffffff;--surface-2:#f4f2ee;--surface-3:#eceae4;
   --ink:#1c1917;--muted:#78716c;--faint:#a8a29e;
   --accent:#fb923c;--accent-ink:#ea580c;--accent-soft:rgba(251,146,60,.14);
-  --ok:#16a34a;--err:#dc2626;
+  --err:#dc2626;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -26,39 +26,60 @@ main{max-width:1180px;margin:0 auto;padding:12px 24px 64px;display:grid;grid-tem
 @media(max-width:900px){main{grid-template-columns:1fr}}
 .card{background:var(--surface-2);border-radius:14px;padding:14px 16px}
 .card h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 10px}
-/* 选图器 */
-#picker label,#picker select,#picker input[type=search]{font:inherit}
+/* 左:选图器 */
 #picker .row{display:flex;gap:8px;margin-bottom:10px}
-#picker select,#picker input[type=search]{border:0;background:var(--surface);border-radius:9px;padding:7px 10px;font-size:13px;color:var(--ink);outline:none;min-width:0}
+#picker select,#picker input[type=search]{font:inherit;border:0;background:var(--surface);border-radius:9px;padding:7px 10px;font-size:13px;color:var(--ink);outline:none;min-width:0}
 #picker input[type=search]{flex:1}
-#targets{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-#targets button{font:inherit;font-size:12.5px;border:0;border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--muted);cursor:pointer}
-#targets button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
-#targets .hint{font-size:12.5px;color:var(--faint);align-self:center}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:520px;overflow:auto;padding:2px}
+#p-target{margin:-4px 0 10px;font-size:12.5px;font-weight:600;color:var(--accent-ink);min-height:1.2em}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:560px;overflow:auto;padding:2px}
 #grid button{border:0;background:var(--surface);border-radius:10px;padding:6px 2px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 #grid button:hover{background:var(--accent-soft)}
 #grid button[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
 #grid img{width:32px;height:32px;object-fit:contain}
 #grid .nm{font-size:9.5px;line-height:1.2;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* 控件 */
+#picker.pulse{animation:pulse .7s}
+@keyframes pulse{0%,100%{box-shadow:none}40%{box-shadow:0 0 0 4px var(--accent)}}
+/* 右:模式 */
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .tabs button{font:inherit;font-size:13.5px;border:0;border-radius:999px;padding:7px 16px;background:var(--surface);color:var(--muted);cursor:pointer}
 .tabs button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
-fieldset{border:0;padding:0;margin:0 0 12px;display:grid;grid-template-columns:max-content 1fr;gap:8px 10px;align-items:center}
-fieldset legend{display:none}
-fieldset label{font-size:13px;color:var(--muted);white-space:nowrap}
-fieldset input[type=text],fieldset input[type=number],fieldset select{font:inherit;font-size:13.5px;border:0;background:var(--surface);border-radius:9px;padding:6px 10px;color:var(--ink);outline:none;width:100%;min-width:0}
-fieldset .seg{display:flex;gap:6px;flex-wrap:wrap}
-fieldset .seg button{font:inherit;font-size:12.5px;border:0;border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--muted);cursor:pointer}
-fieldset .seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
-fieldset .seg input[type=color]{width:34px;height:30px;border:0;border-radius:8px;background:none;padding:0;cursor:pointer}
-.note{font-size:12px;color:var(--faint);margin:-4px 0 12px}
+/* 槽位芯片 */
+.slots{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;min-height:34px;align-items:center}
+.chip{display:flex;align-items:center;gap:7px;background:var(--surface);border-radius:10px;padding:4px 8px 4px 6px;cursor:pointer;border:1.5px solid transparent;font:inherit}
+.chip:hover{border-color:var(--accent)}
+.chip.cur{border-color:var(--accent)}
+.chip img{width:22px;height:22px;object-fit:contain;flex:none}
+.chip .id{font:12px/1.3 ui-monospace,"SF Mono",Consolas,monospace;color:var(--ink)}
+.chip .ord{font-size:10.5px;font-weight:700;color:var(--accent-ink);flex:none}
+.chip .x{border:0;background:none;color:var(--faint);cursor:pointer;font-size:15px;line-height:1;padding:2px 3px}
+.chip .x:hover{color:var(--err)}
+.chip.empty{border:1.5px dashed var(--surface-3);background:none;color:var(--faint);font-size:12.5px;padding:6px 12px}
+.chip.empty.cur{border-color:var(--accent);color:var(--accent-ink)}
+.chip.ghost{border:1.5px dashed var(--surface-3);background:none;color:var(--faint);font-size:12px;cursor:default;padding:6px 10px}
+.chip.clear{border:0;background:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:6px 4px}
+/* 控件 */
+.ctl{display:grid;grid-template-columns:max-content 1fr;gap:9px 10px;align-items:center}
+.ctl label{font-size:13px;color:var(--muted);white-space:nowrap}
+.ctl input[type=text],.ctl input[type=number],.ctl select{font:inherit;font-size:13.5px;border:0;background:var(--surface);border-radius:9px;padding:6px 10px;color:var(--ink);outline:none;width:100%;min-width:0}
+.ctl input:disabled{opacity:.45}
+.seg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.seg button{font:inherit;font-size:12.5px;border:0;border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.seg input[type=color]{width:36px;height:30px;border:0;border-radius:8px;background:none;padding:0;cursor:pointer}
+.seg input[type=color]:disabled{opacity:.35;cursor:default}
+.note{font-size:12px;color:var(--faint);margin:10px 0 0}
 /* 预览与产出 */
-#pv{min-height:150px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:
-  repeating-conic-gradient(var(--surface) 0% 25%,var(--surface-3) 0% 50%) 0 0/20px 20px}
+.preview-card h2{display:flex;align-items:center;gap:10px}
+.pvbar{display:flex;gap:4px;margin-left:auto}
+.pvbar button{font:inherit;font-size:11px;border:0;border-radius:6px;padding:2px 8px;background:var(--surface);color:var(--muted);cursor:pointer}
+.pvbar button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+#dims{font-size:11px;color:var(--faint);font-weight:400}
+#pv{min-height:170px;display:flex;align-items:center;justify-content:center;border-radius:10px;padding:14px}
+#pv.bg-check{background:repeating-conic-gradient(var(--surface) 0% 25%,var(--surface-3) 0% 50%) 0 0/20px 20px}
+#pv.bg-white{background:#ffffff}
+#pv.bg-dark{background:#1e293b}
 #pv img{max-width:100%;height:auto}
-#pv .empty{color:var(--faint);font-size:13px;padding:20px}
+#pv .empty{color:var(--faint);font-size:13px;padding:16px}
 #err{color:var(--err);font-size:12.5px;margin:8px 0 0;min-height:1em;white-space:pre-wrap}
 .out{margin-top:10px}
 .out .line{display:flex;gap:8px;align-items:center;margin-top:8px}
@@ -79,110 +100,135 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);fon
 </header>
 <main>
   <!-- 左:选图 -->
-  <section id="picker" class="card">
+  <aside id="picker" class="card">
     <h2>挑图标</h2>
+    <p id="p-target">点图填入:图标</p>
     <div class="row">
-      <select id="cat"></select>
-      <input id="q" type="search" placeholder="搜 id / 概念 / 描述">
+      <select id="cat" aria-label="分类"></select>
+      <input id="q" type="search" placeholder="搜本分类 id / 概念">
     </div>
-    <div id="targets"></div>
     <div id="grid" aria-label="图标网格"></div>
-  </section>
-  <!-- 右:模式 + 参数 + 预览 -->
+  </aside>
+
+  <!-- 右:模式 + 预览 -->
   <div>
     <section class="card">
       <h2>合成方式</h2>
       <div class="tabs" id="modes">
-        <button data-mode="badge" aria-pressed="true">角标</button>
-        <button data-mode="in" aria-pressed="false">框内</button>
-        <button data-mode="bar" aria-pressed="false">图文</button>
-        <button data-mode="stack" aria-pressed="false">叠加</button>
+        <button type="button" data-mode="badge" aria-pressed="true">角标</button>
+        <button type="button" data-mode="in" aria-pressed="false">框内</button>
+        <button type="button" data-mode="bar" aria-pressed="false">图文</button>
+        <button type="button" data-mode="stack" aria-pressed="false">叠加</button>
       </div>
 
-      <form id="ctl">
-        <div data-m="badge">
-          <fieldset>
+      <div id="panels">
+        <section data-m="badge">
+          <div class="slots" data-slots></div>
+          <div class="ctl">
             <label>角标文字</label><input type="text" id="b-text" value="x2" maxlength="12">
             <label>位置</label>
             <div class="seg" id="b-pos">
-              <button data-v="rl" aria-pressed="true">右下</button>
-              <button data-v="ru" aria-pressed="false">右上</button>
-              <button data-v="lu" aria-pressed="false">左上</button>
-              <button data-v="ll" aria-pressed="false">左下</button>
+              <button type="button" data-v="rl" aria-pressed="true">右下</button>
+              <button type="button" data-v="ru" aria-pressed="false">右上</button>
+              <button type="button" data-v="lu" aria-pressed="false">左上</button>
+              <button type="button" data-v="ll" aria-pressed="false">左下</button>
             </div>
             <label>样式</label>
             <div class="seg" id="b-style">
-              <button data-v="disc" aria-pressed="true">圆标</button>
-              <button data-v="bubble" aria-pressed="false">气泡</button>
+              <button type="button" data-v="disc" aria-pressed="true">圆标</button>
+              <button type="button" data-v="bubble" aria-pressed="false">气泡</button>
             </div>
             <label>颜色</label>
-            <div class="seg" id="b-colors">
-              <input type="color" id="b-bg" value="#ea580c" title="底色"><input type="color" id="b-fg" value="#ffffff" title="文字色">
-              <button type="button" id="b-default" aria-pressed="false">自定义</button>
+            <div class="seg">
+              <button type="button" id="b-color" aria-pressed="false">自定义</button>
+              <input type="color" id="b-bg" value="#ea580c" title="底色" disabled>
+              <input type="color" id="b-fg" value="#ffffff" title="文字色" disabled>
             </div>
             <label>输出像素</label><input type="number" id="b-px" min="8" max="512" placeholder="24">
-          </fieldset>
-          <p class="note">圆标文字放不下会自动长成胶囊(如 120+)。右下角是构图规范里留给计数徽标的位置。</p>
-        </div>
+          </div>
+          <p class="note">圆标文字放不下会自动长成胶囊(如 120+);右下角是构图规范里留给计数徽标的位置。</p>
+        </section>
 
-        <div data-m="in" hidden>
-          <fieldset>
+        <section data-m="in" hidden>
+          <div class="slots" data-slots></div>
+          <div class="ctl">
             <label>内容</label>
             <div class="seg" id="i-kind">
-              <button data-v="icon" aria-pressed="true">图标</button>
-              <button data-v="text" aria-pressed="false">文字</button>
+              <button type="button" data-v="icon" aria-pressed="true">图标</button>
+              <button type="button" data-v="text" aria-pressed="false">文字</button>
             </div>
-            <label>文字</label><input type="text" id="i-text" value="x-cmd" maxlength="16" disabled>
-            <label>文字颜色</label><div class="seg"><input type="color" id="i-fg" value="#1e293b"><button type="button" id="i-default" aria-pressed="false">自定义</button></div>
+            <label>框内文字</label><input type="text" id="i-text" value="x-cmd" maxlength="16" disabled>
+            <label>文字色</label>
+            <div class="seg">
+              <button type="button" id="i-color" aria-pressed="false">自定义</button>
+              <input type="color" id="i-fg" value="#1e293b" disabled>
+            </div>
             <label>输出像素</label><input type="number" id="i-px" min="8" max="512" placeholder="24">
-          </fieldset>
-          <p class="note">框与底座自带内容区(白板中间、地图台面之上)。深色框(黑板 / 终端)自动配浅色文字,可用下面的颜色覆盖。</p>
-        </div>
+          </div>
+          <p class="note">框与底座自带内容区。深色框(黑板 / 终端)自动配浅色文字,可用上面的颜色覆盖。</p>
+        </section>
 
-        <div data-m="bar" hidden>
-          <fieldset>
+        <section data-m="bar" hidden>
+          <div class="slots" data-slots></div>
+          <div class="ctl">
             <label>摆法</label>
             <div class="seg" id="t-dir">
-              <button data-v="icon-text" aria-pressed="true">左图右文</button>
-              <button data-v="text-icon" aria-pressed="false">左文右图</button>
-              <button data-v="icon-text-v" aria-pressed="false">上图下文</button>
+              <button type="button" data-v="icon-text" aria-pressed="true">左图右文</button>
+              <button type="button" data-v="text-icon" aria-pressed="false">左文右图</button>
+              <button type="button" data-v="icon-text-v" aria-pressed="false">上图下文</button>
             </div>
             <label>文字</label><input type="text" id="t-text" value="API" maxlength="40">
-            <label>背景色</label><div class="seg"><input type="color" id="t-bg" value="#f1f5f9"><button type="button" id="t-bg-on" aria-pressed="false">铺底</button></div>
-            <label>文字色</label><div class="seg"><input type="color" id="t-fg" value="#1e293b"><button type="button" id="t-fg-on" aria-pressed="false">自定义</button></div>
+            <label>底色</label>
+            <div class="seg">
+              <button type="button" id="t-bg-on" aria-pressed="false">铺底</button>
+              <input type="color" id="t-bg" value="#f1f5f9" disabled>
+            </div>
+            <label>文字色</label>
+            <div class="seg">
+              <button type="button" id="t-fg-on" aria-pressed="false">自定义</button>
+              <input type="color" id="t-fg" value="#1e293b" disabled>
+            </div>
             <label>圆角</label><input type="number" id="t-r" min="0" max="12" placeholder="5">
             <label>输出像素高</label><input type="number" id="t-px" min="8" max="512" placeholder="48">
-          </fieldset>
+          </div>
           <p class="note">长条的宽度按文字自适应;「上图下文」是方的,文字太长自动缩字。</p>
-        </div>
+        </section>
 
-        <div data-m="stack" hidden>
-          <fieldset>
+        <section data-m="stack" hidden>
+          <div class="slots" data-slots></div>
+          <div class="ctl">
             <label>摆法</label>
             <div class="seg" id="s-layout">
-              <button data-v="h" aria-pressed="true">左右</button>
-              <button data-v="v" aria-pressed="false">上下</button>
-              <button data-v="tri" aria-pressed="false">三角</button>
-              <button data-v="tri-inv" aria-pressed="false">倒三角</button>
-              <button data-v="grid" aria-pressed="false">四格</button>
+              <button type="button" data-v="h" aria-pressed="true">左右</button>
+              <button type="button" data-v="v" aria-pressed="false">上下</button>
+              <button type="button" data-v="tri" aria-pressed="false">三角</button>
+              <button type="button" data-v="tri-inv" aria-pressed="false">倒三角</button>
+              <button type="button" data-v="grid" aria-pressed="false">四格</button>
             </div>
             <label>输出像素</label><input type="number" id="s-px" min="8" max="512" placeholder="24">
-          </fieldset>
-          <p class="note" id="s-note">左右 / 上下要 2 枚,三角 / 倒三角要 3 枚,四格要 4 枚 —— 在左边连点几枚,再按顺序排。</p>
-        </div>
-      </form>
+          </div>
+          <p class="note">左右 / 上下要 2 枚,三角 / 倒三角要 3 枚,四格要 4 枚 —— 顺序即点选顺序,点芯片上的 × 可单删。</p>
+        </section>
+      </div>
     </section>
 
-    <section class="card" style="margin-top:18px">
-      <h2>预览</h2>
-      <div id="pv"><span class="empty">先在左边挑一枚图标</span></div>
+    <section class="card preview-card" style="margin-top:18px">
+      <h2>预览
+        <span class="pvbar" id="pvbar">
+          <button type="button" data-bg="check" aria-pressed="true">棋盘</button>
+          <button type="button" data-bg="white" aria-pressed="false">白</button>
+          <button type="button" data-bg="dark" aria-pressed="false">黑</button>
+        </span>
+        <span id="dims"></span>
+      </h2>
+      <div id="pv" class="bg-check"><span class="empty">先在左边挑一枚图标</span></div>
       <p id="err"></p>
       <div class="out">
-        <div class="line"><span class="cap">URL</span><code id="o-url">-</code><button data-copy="o-url" type="button">复制</button></div>
-        <div class="line off" id="o-id-line"><span class="cap">合成 id</span><code id="o-id">-</code><button data-copy="o-id" type="button">复制</button></div>
-        <div class="line"><span class="cap">嵌入</span><code id="o-img">-</code><button data-copy="o-img" type="button">复制</button></div>
+        <div class="line"><span class="cap">URL</span><code id="o-url">-</code><button type="button" data-copy="o-url">复制</button></div>
+        <div class="line off" id="o-id-line"><span class="cap">合成 id</span><code id="o-id">-</code><button type="button" data-copy="o-id">复制</button></div>
+        <div class="line"><span class="cap">嵌入</span><code id="o-img">-</code><button type="button" data-copy="o-img">复制</button></div>
       </div>
-      <p class="note" style="margin-top:10px">「合成 id」(如 <code>infra:disk?rl=x2</code>)给 x-cmd/draw 画架构图用;长条 / 叠加暂无紧凑写法,直接用 URL。</p>
+      <p class="note">「合成 id」(如 <code>infra:disk?rl=x2</code>)给 x-cmd/draw 画架构图用;长条 / 叠加暂无紧凑写法,直接用 URL。</p>
     </section>
   </div>
 </main>
@@ -192,21 +238,23 @@ footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);fon
 // ---------------------------------------------------------------- 状态
 const S = {
   mode: 'badge',                 // badge | in | bar | stack
-  target: 'main',                // 选图填哪个槽:main(主图)/ frame(框)/ content(内容)
+  target: 'main',                // 选图填哪个槽:main / frame / content
   cat: '', q: '',
-  picked: { main: null, frame: null, content: null }, // id → 元数据
+  picked: { main: null, frame: null, content: null }, // 槽 → 元数据
   stack: [],                     // 叠加模式的多选(按点选顺序)
-  bPos: 'rl', bStyle: 'disc', bBg: '', bFg: '', bPx: '',
-  iKind: 'icon', iFg: '', iPx: '',
-  tDir: 'icon-text', tBg: '', tFg: '', tR: '', tPx: '',
-  sLayout: 'h', sPx: '',
+  badge: { pos: 'rl', style: 'disc', px: '' },
+  in:   { kind: 'icon', px: '' },
+  bar:  { dir: 'icon-text', r: '', px: '' },
+  stk:  { layout: 'h', px: '' },
 };
 const NEED = { h: 2, v: 2, tri: 3, 'tri-inv': 3, grid: 4 };
+const SLOT_LABEL = { main: '图标', frame: '① 框 / 底座', content: '② 内容' };
 const $ = (id) => document.getElementById(id);
 const CATS_BY_ID = {};
 const BUNDLES = {}; // cat → manifest 文件名(index.json 的 bundles)
 const manifests = new Map(); // manifest 文件 → { icons:[…] }
 let curIcons = [];
+let truncHint = '';
 
 // ---------------------------------------------------------------- 数据
 async function jget(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); }
@@ -235,37 +283,101 @@ function fileOf(m) {
   return 'i/' + m.cat + '/' + concept + '.svg';
 }
 
-// ---------------------------------------------------------------- 选图器
-function renderTargets() {
-  const box = $('targets');
-  box.innerHTML = '';
-  const mk = (key, label) => {
+// ---------------------------------------------------------------- 渲染
+function renderBanner() {
+  const el = $('p-target');
+  if (S.mode === 'stack') {
+    const need = NEED[S.stk.layout], n = S.stack.length;
+    el.textContent = (n > need ? '已选 ' + n + ' 枚,' + labelOf(S.stk.layout) + ' 只要 ' + need + ' 枚 —— 删掉多的'
+      : '点图添加(' + n + '/' + need + '),按点选顺序排') + truncHint;
+  } else {
+    el.textContent = '点图填入:' + SLOT_LABEL[S.target] + truncHint;
+  }
+}
+function labelOf(l) {
+  return { h: '左右', v: '上下', tri: '三角', 'tri-inv': '倒三角', grid: '四格' }[l] || l;
+}
+
+function renderSlots() {
+  for (const box of document.querySelectorAll('[data-slots]')) box.innerHTML = '';
+  const box = document.querySelector('[data-m="' + S.mode + '"] [data-slots]');
+  if (!box) return;
+
+  const chipFilled = (m, slot) => {
+    const c = document.createElement('div');
+    c.className = 'chip' + (S.target === slot ? ' cur' : '');
+    c.title = '点它 = 接着给这个槽换图';
+    const img = document.createElement('img'); img.alt = ''; img.src = fileOf(m);
+    const id = document.createElement('span'); id.className = 'id'; id.textContent = m.id;
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.title = '移除';
+    x.onclick = (e) => { e.stopPropagation(); S.picked[slot] = null; if (S.mode === 'in') S.target = 'frame'; renderAll(); };
+    c.append(img, id, x);
+    c.onclick = () => { S.target = slot; renderAll(); pulsePicker(); };
+    box.appendChild(c);
+  };
+  const chipEmpty = (slot) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.textContent = label;
-    b.setAttribute('aria-pressed', S.target === key);
-    b.onclick = () => { S.target = key; renderTargets(); };
+    b.type = 'button'; b.className = 'chip empty' + (S.target === slot ? ' cur' : '');
+    b.textContent = SLOT_LABEL[slot] + ':点左边选图';
+    b.onclick = () => { S.target = slot; renderAll(); pulsePicker(); };
     box.appendChild(b);
   };
-  if (S.mode === 'in') { mk('frame', '① 选框 / 底座'); mk('content', '② 选内容图标'); }
-  else if (S.mode === 'stack') {
-    const hint = document.createElement('span');
-    hint.className = 'hint';
-    hint.textContent = '点选添加、再点取消(按点选顺序排),已选 ' + S.stack.length + ' 枚';
-    box.appendChild(hint);
-  } else mk('main', '选一枚图标');
+
+  if (S.mode === 'stack') {
+    S.stack.forEach((m, i) => {
+      const c = document.createElement('div');
+      c.className = 'chip'; c.title = '第 ' + (i + 1) + ' 枚';
+      const ord = document.createElement('span'); ord.className = 'ord'; ord.textContent = i + 1;
+      const img = document.createElement('img'); img.alt = ''; img.src = fileOf(m);
+      const id = document.createElement('span'); id.className = 'id'; id.textContent = m.id;
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.title = '移除第 ' + (i + 1) + ' 枚';
+      x.onclick = (e) => { e.stopPropagation(); S.stack.splice(i, 1); renderAll(); };
+      c.append(ord, img, id, x);
+      box.appendChild(c);
+    });
+    const left = 4 - S.stack.length;
+    if (left > 0) {
+      const g = document.createElement('span');
+      g.className = 'chip ghost'; g.textContent = '还可加 ' + left + ' 枚';
+      box.appendChild(g);
+    }
+    if (S.stack.length) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip clear'; b.textContent = '清空';
+      b.onclick = () => { S.stack = []; renderAll(); };
+      box.appendChild(b);
+    }
+    return;
+  }
+  if (S.mode === 'in') {
+    S.picked.frame ? chipFilled(S.picked.frame, 'frame') : chipEmpty('frame');
+    if (S.in.kind === 'icon') S.picked.content ? chipFilled(S.picked.content, 'content') : chipEmpty('content');
+    return;
+  }
+  S.picked.main ? chipFilled(S.picked.main, 'main') : chipEmpty('main');
 }
 
 function renderGrid() {
   const grid = $('grid');
   grid.innerHTML = '';
   const q = S.q.toLowerCase();
-  const icons = curIcons.filter((m) => !q || (m.id + ' ' + m.concept + ' ' + (m.descEn || '')).toLowerCase().includes(q)).slice(0, 400);
+  const all = curIcons.filter((m) => !q || (m.id + ' ' + m.concept + ' ' + (m.descEn || '')).toLowerCase().includes(q));
+  const icons = all.slice(0, 400);
+  truncHint = all.length > icons.length ? '(命中 ' + all.length + ' 枚,列出前 400)' : '';
+  renderBanner();
+  let sel;
+  if (S.mode === 'stack') sel = (m) => S.stack.includes(m);
+  else {
+    let slot = S.target;
+    if (S.mode === 'in' && slot === 'content' && S.in.kind !== 'icon') slot = 'frame';
+    const cur = S.picked[slot];
+    sel = (m) => m === cur;
+  }
   for (const m of icons) {
     const b = document.createElement('button');
     b.type = 'button';
     b.title = m.id;
-    const on = S.mode === 'stack' ? S.stack.includes(m) : S.picked[S.target === 'content' && S.iKind !== 'icon' ? 'frame' : S.target] === m;
-    b.setAttribute('aria-pressed', on);
+    b.setAttribute('aria-pressed', sel(m));
     const img = document.createElement('img');
     img.loading = 'lazy'; img.alt = ''; img.src = fileOf(m);
     const nm = document.createElement('span');
@@ -276,6 +388,8 @@ function renderGrid() {
   }
 }
 
+function renderAll() { renderSlots(); renderBanner(); renderGrid(); update(); }
+
 function pick(m) {
   if (S.mode === 'stack') {
     const i = S.stack.indexOf(m);
@@ -285,85 +399,113 @@ function pick(m) {
   } else {
     S.picked[S.target] = m;
     // 框内模式:挑完框自动把目标切到内容,顺手
-    if (S.mode === 'in' && S.target === 'frame') { S.target = 'content'; renderTargets(); }
+    if (S.mode === 'in' && S.target === 'frame') S.target = 'content';
   }
-  renderGrid();
-  update();
+  renderAll();
 }
 function flash(msg) { $('err').textContent = msg; setTimeout(() => { if ($('err').textContent === msg) $('err').textContent = ''; }, 2500); }
+function pulsePicker() {
+  const p = $('picker');
+  p.classList.remove('pulse'); void p.offsetWidth; p.classList.add('pulse');
+  if (typeof p.scrollIntoView === 'function') { try { p.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+}
 
 // ---------------------------------------------------------------- URL 组装
+function clampSend(v, lo, hi) {
+  if (!/^\d+$/.test(v)) return '';
+  return String(Math.min(hi, Math.max(lo, parseInt(v, 10))));
+}
 function params() {
   const p = new URLSearchParams();
   if (S.mode === 'badge') {
     const t = $('b-text').value.trim();
-    if (!t || !S.picked.main) return null;
-    p.set('icon', S.picked.main.id); p.set('text', t); p.set('pos', S.bPos); p.set('style', S.bStyle);
-    if (S.bBg) p.set('bg', S.bBg);
-    if (S.bFg) p.set('fg', S.bFg);
-    if (S.bPx) p.set('px', S.bPx);
-    return { kind: 'badge', p, id: S.picked.main.id + '?' + S.bPos + '=' + encodeURIComponent(t) };
+    if (!S.picked.main) return { wait: '先挑一枚主图(左边点一枚)' };
+    if (!t) return { wait: '填角标文字' };
+    p.set('icon', S.picked.main.id); p.set('text', t); p.set('pos', S.badge.pos); p.set('style', S.badge.style);
+    let id = S.picked.main.id + '?' + S.badge.pos + '=' + encodeURIComponent(t);
+    if (S.badge.style !== 'disc') { p.set('style', S.badge.style); id += '&style=' + S.badge.style; }
+    if ($('b-color').getAttribute('aria-pressed') === 'true') {
+      p.set('bg', $('b-bg').value); p.set('fg', $('b-fg').value);
+      id += '&bg=' + $('b-bg').value + '&fg=' + $('b-fg').value;
+    }
+    const px = clampSend(S.badge.px, 8, 512);
+    if (px) { p.set('px', px); id += '&px=' + px; }
+    return { kind: 'badge', p, id };
   }
   if (S.mode === 'in') {
     const f = S.picked.frame;
-    if (!f) return null;
+    if (!f) return { wait: '先挑一枚框(frame:)或底座(base:)' };
     p.set('icon', f.id);
-    if (S.iKind === 'text') {
+    if (S.in.kind === 'text') {
       const t = $('i-text').value.trim();
-      if (!t) return null;
+      if (!t) return { wait: '填框内文字' };
       p.set('text', t);
-      if (S.iFg) p.set('fg', S.iFg);
-      if (S.iPx) p.set('px', S.iPx);
-      return { kind: 'in', p, id: f.id + '?text=' + encodeURIComponent(t) };
+      let id = f.id + '?text=' + encodeURIComponent(t);
+      if ($('i-color').getAttribute('aria-pressed') === 'true') { p.set('fg', $('i-fg').value); id += '&fg=' + $('i-fg').value; }
+      const px = clampSend(S.in.px, 8, 512);
+      if (px) { p.set('px', px); id += '&px=' + px; }
+      return { kind: 'in', p, id };
     }
-    if (!S.picked.content) return null;
+    if (!S.picked.content) return { wait: '再挑一枚内容图标(②)' };
     p.set('in', S.picked.content.id);
-    if (S.iFg) p.set('fg', S.iFg);
-    if (S.iPx) p.set('px', S.iPx);
-    return { kind: 'in', p, id: f.id + '?in=' + encodeURIComponent(S.picked.content.id) };
+    let id = f.id + '?in=' + encodeURIComponent(S.picked.content.id);
+    const px = clampSend(S.in.px, 8, 512);
+    if (px) { p.set('px', px); id += '&px=' + px; }
+    return { kind: 'in', p, id };
   }
   if (S.mode === 'bar') {
     const t = $('t-text').value.trim();
-    if (!t || !S.picked.main) return null;
+    if (!S.picked.main) return { wait: '先挑一枚主图(左边点一枚)' };
+    if (!t) return { wait: '填文字' };
     p.set('icon', S.picked.main.id); p.set('text', t);
-    if (S.tBg) p.set('bg', S.tBg);
-    if (S.tFg) p.set('fg', S.tFg);
-    if (S.tR) p.set('r', S.tR);
-    if (S.tPx) p.set('px', S.tPx);
-    return { kind: S.tDir, p, id: '' };
+    if ($('t-bg-on').getAttribute('aria-pressed') === 'true') p.set('bg', $('t-bg').value);
+    if ($('t-fg-on').getAttribute('aria-pressed') === 'true') p.set('fg', $('t-fg').value);
+    const r = clampSend(S.bar.r, 0, 12);
+    if (r) p.set('r', r);
+    const px = clampSend(S.bar.px, 8, 512);
+    if (px) p.set('px', px);
+    return { kind: S.bar.dir, p, id: '' };
   }
-  const need = NEED[S.sLayout];
-  if (S.stack.length !== need) return { wait: '还要挑 ' + (need - S.stack.length) + ' 枚(' + S.sLayout + ' 要 ' + need + ' 枚)' };
+  // stack
+  const need = NEED[S.stk.layout], n = S.stack.length;
+  if (n < need) return { wait: '还要挑 ' + (need - n) + ' 枚(' + labelOf(S.stk.layout) + ' 要 ' + need + ' 枚)' };
+  if (n > need) return { wait: '多挑了 ' + (n - need) + ' 枚 —— 点上方芯片的 × 删掉' };
   p.set('icons', S.stack.map((m) => m.id).join(','));
-  p.set('layout', S.sLayout);
-  if (S.sPx) p.set('px', S.sPx);
+  p.set('layout', S.stk.layout);
+  const px = clampSend(S.stk.px, 8, 512);
+  if (px) p.set('px', px);
   return { kind: 'stack', p, id: '' };
 }
 
 // ---------------------------------------------------------------- 预览与产出
 let timer = 0;
 function update() {
+  clearTimeout(timer); // 等待分支也要掐掉上一次的防抖,否则过期渲染会盖掉提示
   const r = params();
   const pv = $('pv'), err = $('err');
-  if (!r) {
-    pv.innerHTML = '<span class="empty">' + (S.mode === 'in' ? '先挑一枚框(frame:)或底座(base:)' : '先在左边挑一枚图标') + '</span>';
+  if (r.wait) {
+    pv.innerHTML = '<span class="empty">' + r.wait + '</span>';
+    $('dims').textContent = '';
     setOut(null); err.textContent = '';
     return;
   }
-  if (r.wait) { pv.innerHTML = '<span class="empty">' + r.wait + '</span>'; setOut(null); err.textContent = ''; return; }
   const url = new URL('draw/' + r.kind, document.baseURI);
   url.search = r.p.toString();
   setOut(r, url);
-  clearTimeout(timer);
   timer = setTimeout(async () => {
     try {
       const res = await fetch(url);
-      if (!res.ok) { err.textContent = await res.text(); return; }
+      const text = await res.text();
+      if (!res.ok) { err.textContent = text.trim(); return; }
       err.textContent = '';
+      const m = text.match(/<svg [^>]*width="([\d.]+)"[^>]*height="([\d.]+)"/);
+      $('dims').textContent = m ? m[1] + ' × ' + m[2] : '';
       pv.innerHTML = '';
       const img = document.createElement('img');
-      img.alt = r.kind; img.src = url.href; img.height = 128;
-      if (r.kind === 'icon-text' || r.kind === 'text-icon' || r.kind === 'icon-text-v') img.height = Number(S.tPx || 48);
+      img.alt = r.kind;
+      img.src = 'data:image/svg+xml,' + encodeURIComponent(text);
+      const isBar = r.kind === 'icon-text' || r.kind === 'text-icon' || r.kind === 'icon-text-v';
+      img.height = isBar ? Math.min(160, Math.max(24, parseInt(S.bar.px || '48', 10) || 48)) : 112;
       pv.appendChild(img);
     } catch (e) { err.textContent = String(e); }
   }, 250);
@@ -371,68 +513,79 @@ function update() {
 
 function setOut(r, url) {
   const u = $('o-url'), id = $('o-id'), idLine = $('o-id-line'), im = $('o-img');
-  if (!r) { u.textContent = id.textContent = im.textContent = '-'; idLine.classList.add('off'); return; }
+  if (!r) { u.textContent = id.textContent = im.textContent = '-'; idLine.classList.add('off'); $('dims').textContent = ''; return; }
   u.textContent = url.href;
   if (r.id) { id.textContent = r.id; idLine.classList.remove('off'); }
   else { id.textContent = '(长条 / 叠加暂无紧凑写法)'; idLine.classList.add('off'); }
-  im.textContent = '<img src="' + url.href + '" height="' + (r.kind === 'stack' || r.kind === 'badge' || r.kind === 'in' ? 24 : 48) + '" alt="">';
+  const isBar = r.kind === 'icon-text' || r.kind === 'text-icon' || r.kind === 'icon-text-v';
+  im.textContent = '<img src="' + url.href + '" height="' + (isBar ? 48 : 24) + '" alt="">';
 }
 
 // ---------------------------------------------------------------- 控件接线
-function seg(id, key, fn) {
+function seg(id, set, after) {
   const box = $(id);
   box.addEventListener('click', (e) => {
-    const b = e.target.closest('button');
-    if (!b || !b.dataset.v) return;
-    S[key] = b.dataset.v;
-    for (const x of box.querySelectorAll('button')) x.setAttribute('aria-pressed', x === b && !x.id.endsWith('-on') && !x.id.endsWith('-default'));
-    fn && fn();
+    const b = e.target.closest('button[data-v]');
+    if (!b) return;
+    set(b.dataset.v);
+    for (const x of box.querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
+    after && after();
     update();
   });
 }
-seg('b-pos', 'bPos'); seg('b-style', 'bStyle');
-seg('i-kind', 'iKind', () => { $('i-text').disabled = S.iKind !== 'text'; renderTargets(); renderGrid(); });
-seg('t-dir', 'tDir'); seg('s-layout', 'sLayout', () => update());
-
-// 颜色:「默认」按钮 = 不带参数;配色时把色值写进参数
-function colorPair(btnId, fgInput, set) {
-  $(btnId).addEventListener('click', () => {
-    const on = $(btnId).getAttribute('aria-pressed') !== 'true';
-    $(btnId).setAttribute('aria-pressed', on);
-    set(on ? $(fgInput).value : '');
-    update();
-  });
-  $(fgInput).addEventListener('input', () => { if ($(btnId).getAttribute('aria-pressed') === 'true') set($(fgInput).value); update(); });
-}
-colorPair('b-default', 'b-bg', (v) => { S.bBg = v; S.bFg = v ? '#ffffff' : ''; $('b-fg').value = S.bFg || '#ffffff'; });
-colorPair('i-default', 'i-fg', (v) => { S.iFg = v; });
-colorPair('t-fg-on', 't-fg', (v) => { S.tFg = v; });
-$('t-bg-on').addEventListener('click', () => {
-  const on = $('t-bg-on').getAttribute('aria-pressed') !== 'true';
-  $('t-bg-on').setAttribute('aria-pressed', on);
-  S.tBg = on ? $('t-bg').value : '';
-  update();
+seg('b-pos', (v) => S.badge.pos = v);
+seg('b-style', (v) => S.badge.style = v);
+seg('i-kind', (v) => {
+  S.in.kind = v;
+  $('i-text').disabled = v !== 'text';
+  if (v !== 'icon' && S.target === 'content') S.target = 'frame';
+  renderAll();
 });
-$('t-bg').addEventListener('input', () => { if ($('t-bg-on').getAttribute('aria-pressed') === 'true') S.tBg = $('t-bg').value; update(); });
-$('b-fg').addEventListener('input', () => { if ($('b-default').getAttribute('aria-pressed') === 'true') { S.bFg = $('b-fg').value; update(); } });
+seg('t-dir', (v) => S.bar.dir = v);
+seg('s-layout', (v) => { S.stk.layout = v; renderBanner(); renderSlots(); });
 
-for (const [id, key] of [['b-text', 'bText'], ['i-text', 'iText'], ['t-text', 'tText']]) $(id).addEventListener('input', update);
-for (const [id, key] of [['b-px', 'bPx'], ['i-px', 'iPx'], ['t-r', 'tR'], ['t-px', 'tPx'], ['s-px', 'sPx']])
-  $(id).addEventListener('input', () => { S[key] = $(id).value; update(); });
+// 颜色:开关关 = 不带参数;开 = 用色板的值
+function colorToggle(btnId, inputs) {
+  const btn = $(btnId);
+  btn.addEventListener('click', () => {
+    const on = btn.getAttribute('aria-pressed') !== 'true';
+    btn.setAttribute('aria-pressed', String(on));
+    for (const i of inputs) $(i).disabled = !on;
+    update();
+  });
+  for (const i of inputs) $(i).addEventListener('input', () => { if (!$(i).disabled) update(); });
+}
+colorToggle('b-color', ['b-bg', 'b-fg']);
+colorToggle('i-color', ['i-fg']);
+colorToggle('t-bg-on', ['t-bg']);
+colorToggle('t-fg-on', ['t-fg']);
+
+for (const id of ['b-text', 'i-text', 't-text']) $(id).addEventListener('input', update);
+for (const [id, o, k] of [['b-px', S.badge, 'px'], ['i-px', S.in, 'px'], ['t-r', S.bar, 'r'], ['t-px', S.bar, 'px'], ['s-px', S.stk, 'px']])
+  $(id).addEventListener('input', () => { o[k] = $(id).value; update(); });
 
 $('modes').addEventListener('click', (e) => {
-  const b = e.target.closest('button');
+  const b = e.target.closest('button[data-mode]');
   if (!b) return;
   S.mode = b.dataset.mode;
-  for (const x of $('modes').querySelectorAll('button')) x.setAttribute('aria-pressed', x === b);
-  for (const d of $('ctl').querySelectorAll('[data-m]')) d.hidden = d.dataset.m !== S.mode;
+  for (const x of $('modes').querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
+  for (const d of document.querySelectorAll('#panels [data-m]')) d.hidden = d.dataset.m !== S.mode;
   S.target = S.mode === 'in' ? 'frame' : 'main';
+  renderAll();
   // 框内模式直接把选图器切到 frame 分类,省得用户满分类找框
-  if (S.mode === 'in' && S.cat !== 'frame' && S.cat !== 'base') { $('cat').value = 'frame'; loadCat('frame'); return; }
-  renderTargets(); renderGrid(); update();
+  if (S.mode === 'in' && !S.picked.frame && S.cat !== 'frame' && S.cat !== 'base') {
+    $('cat').value = 'frame';
+    loadCat('frame');
+  }
 });
 $('cat').addEventListener('change', () => loadCat($('cat').value));
 $('q').addEventListener('input', () => { S.q = $('q').value; renderGrid(); });
+$('pvbar').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-bg]');
+  if (!b) return;
+  for (const x of $('pvbar').querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
+  $('pv').className = 'bg-' + b.dataset.bg;
+});
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-copy]');
   if (!b) return;
@@ -451,7 +604,7 @@ document.addEventListener('click', (e) => {
     sel.appendChild(o);
   }
   sel.value = 'infra';
-  renderTargets();
+  renderAll();
   await loadCat('infra');
 })();
 </script>
