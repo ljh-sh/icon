@@ -22,7 +22,7 @@
   "phy": "v0",
   "mech": "v0",
   "military": "v0",
-  "travel": "v0",
+  "travel": "v1",
   "nutrition": "v0",
   "transport": "v0",
   "weather": "v0",

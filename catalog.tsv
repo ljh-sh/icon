@@ -4021,6 +4021,32 @@ travel/v0:meadow	草原	Meadow
 travel/v0:hot-spring	温泉	Hot Spring
 travel/v0:harbor	港口	Harbor
 travel/v0:airport	机场	Airport
+travel/v1:airport	机场	Airport
+travel/v1:beach	海滩	Beach
+travel/v1:canyon	峡谷	Canyon
+travel/v1:castle	城堡	Castle
+travel/v1:currency-exchange	货币兑换	Currency Exchange
+travel/v1:forest	森林	Forest
+travel/v1:glacier	冰川	Glacier
+travel/v1:harbor	港口	Harbor
+travel/v1:hot-spring	温泉	Hot Spring
+travel/v1:hotel	酒店	Hotel
+travel/v1:itinerary	行程	Itinerary
+travel/v1:luggage	行李	Luggage
+travel/v1:meadow	草原	Meadow
+travel/v1:park	公园	Park
+travel/v1:route	路线	Route
+travel/v1:ruins	遗迹	Ruins
+travel/v1:sea	海	Sea
+travel/v1:ski	滑雪板	Ski
+travel/v1:souvenir	纪念品	Souvenir
+travel/v1:suitcase	行李箱	Suitcase
+travel/v1:surfboard	冲浪板	Surfboard
+travel/v1:temple	寺庙	Temple
+travel/v1:visa	签证	Visa
+travel/v1:volcano	火山	Volcano
+travel/v1:waterfall	瀑布	Waterfall
+travel/v1:lighthouse	灯塔	Lighthouse
 people/v0:adult	成年人	Adult
 people/v0:artist	艺术家	Artist
 people/v0:baby	婴儿	Baby

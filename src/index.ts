@@ -12,6 +12,7 @@
 //   /api/icons.json?ids=a,b → { id: data URI },给 draw 那侧内嵌用
 import { CATS, ID2FILE, LICENSE, BUILD } from './gen.js';
 import { PAGE } from './page.js';
+import { TRAVEL } from './travel.js';
 
 // 静态资源在 public/icon/** 下的那个前缀 —— 所有挂载点都从这儿取
 const ASSET_ROOT = '/icon';
@@ -101,6 +102,9 @@ export default {
       }
       return json(out, 300);
     }
+
+    // 隐藏页:travel 分类的图样评审(现在 vs 新画)—— 自包含,图标全内联
+    if (path === '/travel') return html(TRAVEL, base);
 
     // 老链接 /c/<cat> —— 分类不再是子页,重定向到首页并带上筛选条件
     const cm = path.match(/^\/c\/([a-z0-9-]+)/i);

@@ -543,7 +543,7 @@ export const CATS: CatMeta[] = ${JSON.stringify(cats, null, 2)};
 export const ID2FILE: Record<string, string> = ${JSON.stringify(id2file, null, 2)};
 
 /** 有许可结论的图标(其余是通用图形) */
-export const LICENSE: Record<string, { verdict: string; trademark: string; license: string; source: string }> = ${JSON.stringify(licMeta, null, 2)};
+export const LICENSE: Record<string, { verdict: string; trademark: string; license?: string; source?: string }> = ${JSON.stringify(licMeta, null, 2)};
 
 /** 构建号:内容一变就变 */
 export const BUILD = '${BUILD}';
@@ -800,3 +800,86 @@ writeFileSync(
   `// 生成物,别手改 —— 由 scripts/build.mjs 生成:CSS/JS 内联后的页面。\nexport const PAGE = ${JSON.stringify(page)};\n`,
 );
 console.log(`src/page.ts: ${(page.length / 1024).toFixed(0)} KB`);
+
+// ---- 隐藏页 /travel:旅行分类的版本对照(v0 → v1 → …) ----
+// 版本只涨不删:旧画留在 icons/travel/v0/,新画进 v1+,versions.json 定推荐版。
+// travel.json:要素/引喻与各版本评分(概念/工艺),随版本收录,页面数据全来自它。
+// 页面自包含:全部 SVG 内联,不拉任何静态资源,Worker 直接发。
+{
+  const META = existsSync(join(ROOT, 'travel.json')) ? JSON.parse(readFileSync(join(ROOT, 'travel.json'), 'utf8')) : {};
+  const notes = new Map(Object.entries(META.notes ?? {}));
+  const scores = META.scores ?? {};
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const vers = catVersions.get('travel') || [];
+  const svgOfId = (id) => readFileSync(join(ROOT, metaFile.get(id)), 'utf8').trim();
+  const concepts = [...new Set(metas.filter((m) => m.cat === 'travel').map((m) => m.concept))].sort();
+  const row = (concept) => {
+    const have = vers.filter((v) => found.has(`travel/${v}:${concept}`));
+    const cells = [];
+    for (const [i, v] of vers.entries()) {
+      if (i) cells.push('<td class="arr">→</td>');
+      const id = `travel/${v}:${concept}`;
+      if (found.has(id)) {
+        const keep = have.length === 1 ? ' keep' : '';
+        const sc = scores[v]?.[concept];
+        const chip = sc ? `<span class="sc" title="AI 盲评:概念 ${sc[0]} / 工艺 ${sc[1]}">${sc[0]}·${sc[1]}</span>` : '';
+        cells.push(
+          `<td class="ic${keep}">${svgOfId(id)}${chip}${keep ? '<span class="keeptag">未改</span>' : ''}</td>`,
+        );
+      } else cells.push('<td class="ic off">—</td>');
+    }
+    const anyId = [...vers].reverse().map((v) => `travel/${v}:${concept}`).find((id) => found.has(id));
+    const n = catalog.get(anyId) || { zh: concept, en: concept };
+    const note = notes.get(concept);
+    let noteRow = '';
+    if (note && (note['要素'] || note['引喻'])) {
+      noteRow =
+        `<tr class="nr"><td colspan="${vers.length * 2}">` +
+        (note['要素'] ? `<span class="tag">要素</span>${esc(note['要素'])}` : '') +
+        (note['引喻'] ? ` <span class="tag tag2">引喻</span>${esc(note['引喻'])}` : '') +
+        `</td></tr>`;
+    }
+    return `<tr${noteRow ? ' class="wn"' : ''}><td class="nm"><code>${concept}</code><em>${n.zh} · ${n.en}</em></td>${cells.join('')}</tr>${noteRow}`;
+  };
+  const changed = concepts.filter((c) => vers.filter((v) => found.has(`travel/${v}:${c}`)).length > 1);
+  const same = concepts.filter((c) => !changed.includes(c));
+  const head = `<tr><th class="vh"></th>${vers
+    .map((v, i) => `${i ? '<th class="arr"></th>' : ''}<th class="vh">${v}${v === versions.travel ? ' · 推荐' : ''}</th>`)
+    .join('')}</tr>`;
+  const table = (list) => `<table>${head}${list.map(row).join('')}</table>`;
+  const travel = `<!doctype html><html lang="zh-CN"><head><meta charset="utf8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>travel · 版本对照</title>
+<style>
+:root{color-scheme:dark;--bg:#131218;--surface:#1c1b22;--surface-2:#26242e;--ink:#f6f4f9;--muted:#a09cab;--faint:#726f7e;--accent:#fb923c;--accent-ink:#fdba74;--violet:#a78bfa;--violet-soft:rgba(167,139,250,.14)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:radial-gradient(900px 520px at 84% -14%,rgba(251,146,60,.18),transparent 64%),radial-gradient(700px 420px at 0% -6%,var(--violet-soft),transparent 62%),var(--bg);background-attachment:fixed}
+main{max-width:860px;margin:0 auto;padding:40px 24px 80px}
+a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:15px;font-weight:600;color:var(--muted);margin:44px 0 8px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 8px}
+table{width:100%;border-collapse:collapse;margin-top:6px}
+td,th{padding:10px 8px;border-bottom:1px solid #27252f;vertical-align:middle}
+th{font-size:12px;font-weight:600;color:var(--faint);text-align:left}
+th.arr{width:28px}
+tr:hover td{background:var(--surface)}
+.nm{width:34%}code{font:13px/1.4 ui-monospace,"SF Mono",Consolas,monospace;color:var(--accent-ink)}
+.nm em{display:block;font-style:normal;color:var(--muted);font-size:13px;margin-top:2px}
+.ic svg{width:56px;height:56px;display:block}.arr{color:var(--faint);text-align:center;width:28px}
+.ic{width:72px}.ic.keep{position:relative;opacity:.55}.ic.off{color:var(--faint);text-align:center}
+.sc{display:block;margin-top:3px;font-size:11px;line-height:1.4;color:var(--violet);letter-spacing:.5px}
+.keeptag{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:11px;color:var(--violet);white-space:nowrap}
+tr.wn td{border-bottom:none}
+.nr td{border-bottom:1px solid #27252f;padding:0 8px 10px;color:var(--muted);font-size:13px;line-height:1.7}
+.tag{display:inline-block;font-size:11px;line-height:1.6;color:var(--accent-ink);border:1px solid rgba(251,146,60,.45);border-radius:4px;padding:0 6px;margin-right:5px}
+.tag2{color:var(--violet);border-color:rgba(167,139,250,.45)}
+</style></head><body><main>
+<h1>travel · 版本对照</h1>
+<p class="sub">旧版不删,版本只涨:现在推荐 ${versions.travel},${same.length} 个未改的留在 v0。图标下是 AI 盲评分(概念·工艺,1-10),行下是最新画稿的要素与引喻。<a href="./">← 返回图标库</a></p>
+<h2>改版(${changed.length})</h2>${table(changed)}
+<h2>未改(${same.length})</h2>${table(same)}
+</main></body></html>`;
+  writeFileSync(
+    join(ROOT, 'src/travel.ts'),
+    `// 生成物,别手改 —— 由 scripts/build.mjs 生成:/travel 版本对照页(全部版本内联)。\nexport const TRAVEL = ${JSON.stringify(travel)};\n`,
+  );
+  console.log(`src/travel.ts: /travel 版本对照页(${changed.length} 改版 + ${same.length} 未改,版本 ${vers.join(' → ')})`);
+}
