@@ -177,15 +177,22 @@ function strAttr(a: string, k: string): string | null {
 
 /** 图标墨迹的包络盒(图标自身坐标);量不出返回 null */
 function inkOf(icon: IconSrc): Box | null {
-  if (/<(g|text|image|use|foreignObject)\b/i.test(icon.body)) return null;
+  // 非渲染内容(defs/标题/裁剪板)先剥掉;纯样式分组(<g fill=…>)不动坐标系,照扫;
+  // 带 transform 的 g、shape 上的 transform、text/image/use —— 坐标系看不懂,退回整盒
+  const b = icon.body
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<(defs|title|desc|clipPath|mask|pattern|marker)\b[\s\S]*?<\/\1>/gi, '');
+  if (/<(text|image|use|foreignObject)\b/i.test(b)) return null;
+  if (/<g\b[^>]*\btransform\b/i.test(b)) return null;
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   const eat = (x: number, y: number) => {
     if (x < x0) x0 = x; if (x > x1) x1 = x;
     if (y < y0) y0 = y; if (y > y1) y1 = y;
   };
-  for (const m of icon.body.matchAll(INK_EL)) {
+  for (const m of b.matchAll(INK_EL)) {
     const el = m[1].toLowerCase();
     const a = m[2];
+    if (/\btransform\b/.test(a)) return null;
     if (el === 'rect') { const x = numAttr(a, 'x'), y = numAttr(a, 'y'); eat(x, y); eat(x + numAttr(a, 'width'), y + numAttr(a, 'height')); }
     else if (el === 'circle') { const r = numAttr(a, 'r'); eat(numAttr(a, 'cx') - r, numAttr(a, 'cy') - r); eat(numAttr(a, 'cx') + r, numAttr(a, 'cy') + r); }
     else if (el === 'ellipse') { const rx = numAttr(a, 'rx'), ry = numAttr(a, 'ry'); eat(numAttr(a, 'cx') - rx, numAttr(a, 'cy') - ry); eat(numAttr(a, 'cx') + rx, numAttr(a, 'cy') + ry); }
