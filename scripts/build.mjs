@@ -738,6 +738,32 @@ writeFileSync(
 );
 console.log(`public/icon/: ${metas.length} 个文件 + ${Object.keys(bundles).length} 个包`);
 
+// ---- 守门:产出变了,构建号必须变 ----
+// 片/清单是 immutable 一年:构建号没跟上内容的话,老用户浏览器里的旧文件会一直
+// 顶在新清单前面,而且永不自愈(见 docs/loading-and-cache.md 坑 7)。
+// 构建号由输入推导,但输入列表是手工维护的 —— 这里对**实际写出来的文件**再校验一遍,
+// 谁把哈希输入改漏了,构建当场报错,不用等线上用户中毒。
+{
+  const SIG = join(ROOT, '.assetsig.json');
+  const h = createHash('sha1');
+  for (const f of readdirSync(PUBLIC, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    if (!f.isFile()) continue; // i/** 原文件只缓存一天,会自愈;守的是 immutable 那批
+    h.update(f.name).update(readFileSync(join(PUBLIC, f.name)));
+  }
+  const digest = h.digest('hex');
+  if (existsSync(SIG)) {
+    const prev = JSON.parse(readFileSync(SIG, 'utf8'));
+    if (prev.digest !== digest && prev.build === BUILD) {
+      console.error(`assetsig: 产出变了,构建号还是 ${BUILD} —— immutable 缓存会拿旧内容顶新清单,会把哈希输入改漏了,必须修`);
+      process.exit(1);
+    }
+    if (prev.digest === digest && prev.build !== BUILD) {
+      console.warn(`assetsig: 产出没变,构建号 ${prev.build} → ${BUILD}(白换了 URL,无害)`);
+    }
+  }
+  writeFileSync(SIG, JSON.stringify({ build: BUILD, digest }, null, 1));
+}
+
 // ---- dist/:本地预览用的静态站 ----
 const DIST = join(ROOT, 'dist');
 rmSync(DIST, { recursive: true, force: true });
